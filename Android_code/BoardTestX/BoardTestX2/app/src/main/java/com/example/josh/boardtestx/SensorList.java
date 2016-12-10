@@ -1,0 +1,16 @@
+package com.example.josh.boardtestx;
+
+/**
+ * Created by Josh on 11/28/2016.
+ */
+
+public final class SensorList {
+    public static final int SENSOR_1 = 1;
+    public static final int SENSOR_2 = 2;
+    public static final int SENSOR_3 = 3;
+    public static final int SENSOR_4 = 4;
+    public static final int INVALID_SENSOR = 0;
+    public static final int TEMP_MCP9808 = 1;
+    public static final int IMU_MPU6050 = 2;
+
+}
