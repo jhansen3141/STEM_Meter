@@ -67,7 +67,6 @@ static void Sensor1TaskInit() {
 
 static void UART0Read(UART_Handle handle, void *buffer, size_t size) {
 	enqueueBLEWritetTaskMsg(SENSOR_1_UPDATE_CONFIG_MSG,buffer,20);
-	enqueueWifiWritetTaskMsg(buffer,20);
 	UART_read(UART0Handle,uartBufferRX,20);
 }
 
