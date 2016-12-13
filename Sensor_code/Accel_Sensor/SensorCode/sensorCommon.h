@@ -9,7 +9,7 @@
 #ifndef SENSORLIST_H_
 #define SENSORLIST_H_
 
-#define DATA_SIZE 19
+#define DATA_SIZE 15
 
 #define TIMER_OFF_NUM 0
 #define TIMER_ONE_HZ_NUM 7812
@@ -19,8 +19,16 @@
 #define IMU_MPU6050 2
 #define TEMP_MCP9808 1
 
+#define RATE_INVALID 0
+#define RATE_ONE_HZ 1
+#define RATE_FIVE_HZ 2
+#define RATE_TEN_HZ 3
+#define RATE_ONE_HOUR 4
+
+
 typedef struct sensorData {
 	uint8_t sensorData[DATA_SIZE];
+	uint8_t sensorRate;
 }sensorData_t;
 
 typedef enum {

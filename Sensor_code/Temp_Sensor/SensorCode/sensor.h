@@ -8,9 +8,11 @@
 
 #ifndef SENSOR_H_
 #define SENSOR_H_
-#include "sensorList.h"
+#include "sensorCommon.h"
 
 #define SENSOR_NUMBER TEMP_MCP9808
+#define SENSOR_DEFAULT_RATE RATE_TEN_HZ
+
 #define TEMP_SENESOR_ADDRESS 0x18
 #define TEMP_SENSEOR_TEMPATURE_REG_ADDR 0x05
 

@@ -6,7 +6,7 @@
 #include <avr/interrupt.h>
 #include <stdlib.h>
 #include "sensor.h"
-#include "sensorList.h"
+#include "sensorCommon.h"
 #include "uart.h"
 #include "cmd.h"
 

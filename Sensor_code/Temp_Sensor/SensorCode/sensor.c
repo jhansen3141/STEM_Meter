@@ -4,9 +4,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include "sensor.h"
-#include "sensorList.h"
+#include "sensorCommon.h"
 #include "i2c.h"
 #include "uart.h"
+
+static uint8_t sensorRate = SENSOR_DEFAULT_RATE;
 
 
 void initBoard(void) {
@@ -27,18 +29,10 @@ void initSensor(void) {
 
 void readSensor(sensorData_t *data) {
 	memset(data->sensorData,0,DATA_SIZE);
-
+	// read the data directly into the sensor struct (only two bytes)
 	I2CReadMult(TEMP_SENESOR_ADDRESS,TEMP_SENSEOR_TEMPATURE_REG_ADDR,data->sensorData,2);
-	/*
-	combinedData = ((uint16_t)tempData[0] << 8) | tempData[1];
-
-	temperature = combinedData & 0x0FFF;
-	temperature /=  16.0f;
-	if (combinedData & 0x1000) {
-		temperature -= 256;
-	}
-	temperature = temperature * 100.0f;
-	*/
+	// set the sensor frequency
+	data->sensorRate = sensorRate;
 	
 }
 

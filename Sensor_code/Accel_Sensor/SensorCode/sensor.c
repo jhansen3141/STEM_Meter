@@ -8,6 +8,8 @@
 #include "i2c.h"
 #include "uart.h"
 
+
+static uint8_t sensorRate = SENSOR_DEFAULT_RATE;
 static void MPU6050_Write(uint8_t reg, uint8_t data);
 
 
@@ -16,7 +18,7 @@ void initBoard(void) {
 	
 	I2CInit();
 	UARTInit();
-	OCR1A = TIMER_FIVE_HZ_NUM;
+	OCR1A = TIMER_TEN_HZ_NUM;
 	TCCR1B|=(1<<WGM12); // Timer1 in CTC mode
 	TIMSK1|=(1<<OCIE1A); // Enable Timer1, CTC Compare A interrupt
 	TCCR1B|=(1<<CS10) | (1<<CS12); // Enable Timer1 with prescaler of F_CPU/1024 (128uS / tick)
@@ -51,6 +53,7 @@ void readSensor(sensorData_t *data) {
 	I2CReadMult(MPU6050_ADDRESS,ACCEL_XOUT_H,IMUData,14);
 	memcpy(data->sensorData,IMUData,6);
 	memcpy(data->sensorData+6,IMUData+8,6);
+	data->sensorRate = sensorRate;
 }
 
 void moduleLED(ledState_t state) {
