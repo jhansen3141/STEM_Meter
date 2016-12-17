@@ -19,12 +19,12 @@ public class IMU_MPU6050 extends Sensor{
     @Override
     String[] calcSensorData() {
         String[] dataStr = new String[6];
-        short xAccel = (short)((data[1]<<8)   | (data[2] & 0xFF));
-        short yAccel = (short)((data[3]<<8)   | (data[4] & 0xFF));
-        short zAccel = (short)((data[5]<<8)   | (data[6] & 0xFF));
-        short xGyro  = (short)((data[7]<<8)   | (data[8] & 0xFF));
-        short yGyro  = (short)((data[9]<<8)   | (data[10] & 0xFF));
-        short zGyro  = (short)((data[11]<<8)  | (data[12] & 0xFF));
+        short xAccel = (short)((data[5]<<8)   | (data[6] & 0xFF));
+        short yAccel = (short)((data[7]<<8)   | (data[8] & 0xFF));
+        short zAccel = (short)((data[9]<<8)   | (data[10] & 0xFF));
+        short xGyro  = (short)((data[11]<<8)   | (data[12] & 0xFF));
+        short yGyro  = (short)((data[13]<<8)   | (data[14] & 0xFF));
+        short zGyro  = (short)((data[15]<<8)  | (data[16] & 0xFF));
 
         xAccelF = xAccel / ACCEL_SENSE;
         yAccelF = yAccel / ACCEL_SENSE;
@@ -83,4 +83,5 @@ public class IMU_MPU6050 extends Sensor{
     public float getzGyroF() {
         return zGyroF;
     }
+
 }

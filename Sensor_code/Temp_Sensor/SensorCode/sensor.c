@@ -13,6 +13,7 @@ static uint8_t sensorRate = SENSOR_DEFAULT_RATE;
 
 void initBoard(void) {
 	DDRB |= (1<<0); // LED as output
+	DDRD &= ~(1<<2); // UART Re-send line as input
 	
 	I2CInit();
 	UARTInit();

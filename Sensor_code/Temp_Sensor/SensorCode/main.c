@@ -21,16 +21,15 @@ ISR(TIMER1_COMPA_vect) {
 	writeBaseUnitData(&data);	
 }
 
-
 int main(void) {
-	
+	_delay_ms(100);
 	initBoard();
+	_delay_ms(100);
 	initSensor();
 	cmdInit();
-
-	
+	_delay_ms(1000);
+	// enable global interrupts
 	sei();
-	
 	
     while(1);
 }

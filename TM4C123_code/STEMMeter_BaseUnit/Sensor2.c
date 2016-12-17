@@ -32,11 +32,10 @@
 static Task_Struct task2Struct;
 static Char task2Stack[TASKSTACKSIZE];
 
-static uint8_t uartBufferTX[25];
+//static uint8_t uartBufferTX[25];
 static uint8_t uartBufferRX[25];
-
+volatile bool uart1Reset = FALSE;
 static UART_Handle      UART1Handle;
-
 
 // Struct for task messages
 typedef struct {
@@ -46,8 +45,6 @@ typedef struct {
 
 static void Sensor2TaskFxn(UArg arg0, UArg arg1);
 static void Sensor2TaskInit();
-static void UART1Read(UART_Handle handle, void *buffer, size_t size);
-
 
 void Sensor2_createTask(void) {
     Task_Params taskParams;
@@ -65,29 +62,42 @@ static void Sensor2TaskInit() {
 	UART_Params_init(&UART1params);
 	UART1params.baudRate  = SENSOR_BAUD_RATE;
 	UART1params.writeDataMode = UART_DATA_TEXT;
-	UART1params.readDataMode = UART_DATA_TEXT;
-	UART1params.readReturnMode = UART_RETURN_NEWLINE;
-	UART1params.readMode = UART_MODE_CALLBACK;
+	UART1params.readDataMode = UART_DATA_BINARY;
+	UART1params.readReturnMode = UART_RETURN_FULL;
+	UART1params.readMode = UART_MODE_BLOCKING;
 	UART1params.readEcho = UART_ECHO_OFF;
-	UART1params.readCallback = UART1Read;
 	UART1Handle = UART_open(Board_UART1, &UART1params);
 	if (!UART1Handle) {
 		System_printf("UART1 did not open");
 	}
 
-}
+//    // Install callback for S1 input interrupt
+//    GPIO_setCallback(Board_SENSOR_2_INPUT, S2InputInterrupt);
+//
+//    // Enable interrupt
+//    GPIO_enableInt(Board_SENSOR_2_INPUT);
 
-static void UART1Read(UART_Handle handle, void *buffer, size_t size) {
-	enqueueBLEWritetTaskMsg(SENSOR_2_UPDATE_CONFIG_MSG,buffer,20);
-	UART_read(UART1Handle,uartBufferRX,20);
 }
 
 static void Sensor2TaskFxn(UArg arg0, UArg arg1) {
 
 	Sensor2TaskInit();
-	UART_read(UART1Handle,uartBufferRX,20);
+
 	while(1) {
-		Task_sleep(50);
+		// block until 20 bytes have been recieved
+		UART_read(UART1Handle,uartBufferRX,SENSOR_FRAME_LENGTH);
+
+		// make sure frame sync bytes are correct
+		if(uartBufferRX[0] == FRAME_BYTE_0 &&
+			uartBufferRX[1] == FRAME_BYTE_1 &&
+			uartBufferRX[2] == FRAME_BYTE_2)
+		{
+			// write the bytes to the CC2640
+			enqueueBLEWritetTaskMsg(SENSOR_2_UPDATE_CONFIG_MSG,uartBufferRX+FRAME_BYTES_OFFSET,SENSOR_DATA_LENGTH);
+		}
+		else {
+			// TODO Reset sensor module
+		}
 	}
 
 }

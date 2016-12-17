@@ -106,10 +106,6 @@ public class MainActivity extends AppCompatActivity
             finish();
         }
 
-        Toast.makeText(this,"Josh Hansen\n " +
-                            " CEEN 4360 \n " +
-                            "   Phase II",Toast.LENGTH_LONG).show();
-
         ConnectFragment connectFragment = new ConnectFragment();
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.fragment_container, connectFragment, CONNECT_FRAG_TAG).commit();
@@ -325,6 +321,7 @@ public class MainActivity extends AppCompatActivity
         if (sensor1Data[0] == SensorList.INVALID_SENSOR) {
             return;
         } else {
+            // check to see which sensor is connected
             switch (sensor1Data[0]) {
                 case SensorList.IMU_MPU6050:
                     sensorData = getSensorData(1, SensorList.IMU_MPU6050, sensor1Data);
@@ -334,7 +331,6 @@ public class MainActivity extends AppCompatActivity
                     break;
                 default:
                     return;
-
             }
         }
         postSensorData(sensorData);

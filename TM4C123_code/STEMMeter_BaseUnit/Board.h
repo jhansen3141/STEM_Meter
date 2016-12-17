@@ -51,14 +51,6 @@ extern "C" {
 #define Board_initWatchdog          EK_TM4C123GXL_initWatchdog
 #define Board_initWiFi              EK_TM4C123GXL_initWiFi
 
-#define Board_LED_ON                EK_TM4C123GXL_LED_ON
-#define Board_LED_OFF               EK_TM4C123GXL_LED_OFF
-#define Board_LED0                  EK_TM4C123GXL_LED_BLUE
-#define Board_LED1                  EK_TM4C123GXL_LED_GREEN
-#define Board_LED2                  EK_TM4C123GXL_LED_RED
-#define Board_BUTTON0               EK_TM4C123GXL_SW1
-#define Board_BUTTON1               EK_TM4C123GXL_SW2
-
 #define Board_I2C0                  EK_TM4C123GXL_I2C0
 #define Board_I2C1                  EK_TM4C123GXL_I2C3
 #define Board_I2C_TMP               EK_TM4C123GXL_I2C3
@@ -83,6 +75,27 @@ extern "C" {
 
 #define Board_WATCHDOG0             EK_TM4C123GXL_WATCHDOG0
 
+#define Board_SENSOR_1_INPUT		SENSOR_1_INPUT
+#define Board_SENSOR_2_INPUT		SENSOR_2_INPUT
+#define Board_SENSOR_3_INPUT		SENSOR_3_INPUT
+#define Board_SENSOR_4_INPUT		SENSOR_4_INPUT
+
+#define Board_SENSOR_1_OUTPUT		SENSOR_1_OUTPUT
+#define Board_SENSOR_2_OUTPUT		SENSOR_2_OUTPUT
+#define Board_SENSOR_3_OUTPUT		SENSOR_3_OUTPUT
+#define Board_SENSOR_4_OUTPUT		SENSOR_4_OUTPUT
+
+#define Board_SENSOR_1_LED			SENSOR_1_LED
+#define Board_SENSOR_2_LED			SENSOR_2_LED
+#define Board_SENSOR_3_LED			SENSOR_3_LED
+#define Board_SENSOR_4_LED			SENSOR_4_LED
+
+#define Board_LED_ON				(0)
+#define Board_LED_OFF				(1)
+
+#define Board_GPIO_HIGH				(1)
+#define Board_GPIO_LOW				(0)
+
 #define SENSOR_1_LED_PIN			GPIO_PIN_4
 #define SENSOR_2_LED_PIN			GPIO_PIN_5
 #define SENSOR_3_LED_PIN			GPIO_PIN_3
@@ -92,6 +105,24 @@ extern "C" {
 #define SENSOR_2_LED_PORT			GPIO_PORTD_BASE
 #define SENSOR_3_LED_PORT			GPIO_PORTF_BASE
 #define SENSOR_4_LED_PORT			GPIO_PORTF_BASE
+
+#define SENSOR_1_CNTL_PORT			GPIO_PORTE_BASE
+#define SENSOR_2_CNTL_PORT			GPIO_PORTF_BASE
+#define SENSOR_3_CNTL_PORT			GPIO_PORTE_BASE
+#define SENSOR_4_CNTL_PORT			GPIO_PORTB_BASE
+
+#define SENSOR_1_IN_PIN				GPIO_PIN_0
+#define SENSOR_1_OUT_PIN			GPIO_PIN_1
+
+#define SENSOR_2_IN_PIN				GPIO_PIN_1
+#define SENSOR_2_OUT_PIN			GPIO_PIN_2
+
+#define SENSOR_3_IN_PIN				GPIO_PIN_4
+#define SENSOR_3_OUT_PIN			GPIO_PIN_5
+
+#define SENSOR_4_IN_PIN				GPIO_PIN_2
+#define SENSOR_4_OUT_PIN			GPIO_PIN_3
+
 
 
 /* Board specific I2C addresses */

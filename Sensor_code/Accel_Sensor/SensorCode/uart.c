@@ -4,6 +4,10 @@
 #include <util/delay.h>
 #include "sensor.h"
 
+#define FRAME_BYTE_0 0x55
+#define FRAME_BYTE_1 0xAA
+#define FRAME_BYTE_2 0xA5
+
 // Used to keep readings in sync. Incremented after every reading
 // Using 24-bits will overflow around 466 hours (19.4 days) at max interval of 10Hz
 static uint32_t syncCount = 0; 
@@ -34,6 +38,10 @@ void UARTWriteString(char *string) {
 void writeBaseUnitData(sensorData_t *data) {
 	uint8_t i;
 	
+	// Write the three frame sync bytes
+	UARTWrite(FRAME_BYTE_0);
+	UARTWrite(FRAME_BYTE_1);
+	UARTWrite(FRAME_BYTE_2);
 	// write the sensor number so app knows what sensor this is
 	UARTWrite(SENSOR_NUMBER); 
 	// write the rate readings are being taken

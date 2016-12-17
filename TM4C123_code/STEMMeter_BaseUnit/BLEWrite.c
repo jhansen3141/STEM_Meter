@@ -1,3 +1,7 @@
+// Josh Hansen
+// CEEN 4360 - Fall 2016
+// Phase 2
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -51,6 +55,9 @@ static SPI_Transaction spiTransaction;
 static Queue_Struct bleWriteMsgQ;
 static Queue_Handle hBleWritesMsgQ;
 
+static Semaphore_Struct semBLEWriteStruct;
+static Semaphore_Handle semBLEWriteHandle;
+
 static uint8_t txBuffer[21];
 static uint8_t rxBuffer[21];
 
@@ -61,12 +68,11 @@ typedef struct {
   uint8_t pdu[];
 } bleWrite_msg_t;
 
-
-
 static void BLEWriteFxn(UArg arg0, UArg arg1);
 static void BLEWrite_Init();
 static void SPISendUpdate();
 static void user_processBLEWriteMessage(bleWrite_msg_t *pMsg);
+static void startUpLEDRoutine();
 
 
 void BLEWrite_createTask(void) {
@@ -80,6 +86,14 @@ void BLEWrite_createTask(void) {
 }
 
 static void BLEWrite_Init() {
+	Semaphore_Params semParams;
+
+    /* Construct a Semaphore object to be used as a resource lock, inital count 0 */
+    Semaphore_Params_init(&semParams);
+    Semaphore_construct(&semBLEWriteStruct, 0, &semParams);
+
+    /* Obtain instance handle */
+    semBLEWriteHandle = Semaphore_handle(&semBLEWriteStruct);
 
 	Queue_construct(&bleWriteMsgQ, NULL);
 	hBleWritesMsgQ = Queue_handle(&bleWriteMsgQ);
@@ -94,9 +108,6 @@ static void BLEWrite_Init() {
 	       System_printf("SPI did not open");
 	 }
 
-	GPIOPinWrite(SENSOR_1_LED_PORT,SENSOR_1_LED_PIN,SENSOR_1_LED_PIN);
-	GPIOPinWrite(SENSOR_2_LED_PORT,SENSOR_2_LED_PIN,SENSOR_2_LED_PIN);
-
 }
 
 static void SPISendUpdate() {
@@ -109,34 +120,40 @@ static void SPISendUpdate() {
 	if (!ret) {
 
 	}
-	if(rxBuffer[0] == '1') {
-		GPIOPinWrite(SENSOR_1_LED_PORT,SENSOR_1_LED_PIN,0);
-		GPIOPinWrite(SENSOR_2_LED_PORT,SENSOR_2_LED_PIN,0);
+//	if(rxBuffer[0] == '1') {
+//		GPIOPinWrite(SENSOR_1_LED_PORT,SENSOR_1_LED_PIN,0);
+//		GPIOPinWrite(SENSOR_2_LED_PORT,SENSOR_2_LED_PIN,0);
+//
+//	}
+//	else if(rxBuffer[0] == '0') {
+//		GPIOPinWrite(SENSOR_1_LED_PORT,SENSOR_1_LED_PIN,SENSOR_1_LED_PIN);
+//		GPIOPinWrite(SENSOR_2_LED_PORT,SENSOR_2_LED_PIN,SENSOR_2_LED_PIN);
+//
+//	}
 
-	}
-	else if(rxBuffer[0] == '0') {
-		GPIOPinWrite(SENSOR_1_LED_PORT,SENSOR_1_LED_PIN,SENSOR_1_LED_PIN);
-		GPIOPinWrite(SENSOR_2_LED_PORT,SENSOR_2_LED_PIN,SENSOR_2_LED_PIN);
-
-	}
-
-	if(txBuffer[0] != 0) {
-		txBuffer[0] = NO_SENSOR_ID; // set sensor ID to none b/c tx complete
-	}
+//	if(txBuffer[0] != 0) {
+//		txBuffer[0] = NO_SENSOR_ID; // set sensor ID to none b/c tx complete
+//	}
 }
 
 static void BLEWriteFxn(UArg arg0, UArg arg1) {
 
 	BLEWrite_Init();
-	while(1) {
 
-		SPISendUpdate();
+	startUpLEDRoutine();
+	startUpLEDRoutine();
+
+
+	while(1) {
+		/* wait for swis to be posted from Clock function */
+		Semaphore_pend(semBLEWriteHandle, BIOS_WAIT_FOREVER);
+		//SPISendUpdate();
 		while (!Queue_empty(hBleWritesMsgQ)) {
 			bleWrite_msg_t *pMsg = Queue_dequeue(hBleWritesMsgQ); // dequeue the message
 			user_processBLEWriteMessage(pMsg); // process the message
 			free(pMsg); // free mem
 		}
-		Task_sleep(50);
+		//Task_sleep(50);
 	}
 
 }
@@ -165,7 +182,7 @@ static void user_processBLEWriteMessage(bleWrite_msg_t *pMsg) {
 	}
 
 	memcpy(txBuffer+1,pMsg->pdu,20); // copy sensor data into txBuffer
-	//SPISendUpdate(); // send the updated data
+	SPISendUpdate(); // send the updated data
 }
 
 void enqueueBLEWritetTaskMsg(bleWrite_msg_types_t msgType, uint8_t *buffer, uint16_t len) {
@@ -174,8 +191,25 @@ void enqueueBLEWritetTaskMsg(bleWrite_msg_types_t msgType, uint8_t *buffer, uint
 		pMsg->type = msgType;
 		memcpy(pMsg->pdu,buffer,len); // copy the data into the message
 		Queue_enqueue(hBleWritesMsgQ, &pMsg->_elem); // enqueue the message
+		Semaphore_post(semBLEWriteHandle);
 	}
 }
 
+static void startUpLEDRoutine() {
+	 GPIO_write(Board_SENSOR_1_LED, Board_LED_ON);
+	 Task_sleep(100);
+	 GPIO_write(Board_SENSOR_3_LED, Board_LED_ON);
+	 Task_sleep(100);
+	 GPIO_write(Board_SENSOR_4_LED, Board_LED_ON);
+	 Task_sleep(100);
+	 GPIO_write(Board_SENSOR_2_LED, Board_LED_ON);
+	 Task_sleep(100);
 
-
+	 GPIO_write(Board_SENSOR_1_LED, Board_LED_OFF);
+	 Task_sleep(100);
+	 GPIO_write(Board_SENSOR_3_LED, Board_LED_OFF);
+	 Task_sleep(100);
+	 GPIO_write(Board_SENSOR_4_LED, Board_LED_OFF);
+	 Task_sleep(100);
+	 GPIO_write(Board_SENSOR_2_LED, Board_LED_OFF);
+}

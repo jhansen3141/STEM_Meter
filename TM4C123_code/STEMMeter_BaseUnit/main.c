@@ -1,3 +1,7 @@
+// Josh Hansen
+// CEEN 4360 - Fall 2016
+// Phase 2
+
 /* BIOS Header files */
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/knl/Clock.h>
@@ -11,11 +15,8 @@
 #include "SystemTime.h"
 #include "main.h"
 
-/*
- *  ======== main ========
- */
-int main(void) {
 
+int main(void) {
 
     /* Call board init functions */
     Board_initGeneral();
@@ -23,8 +24,6 @@ int main(void) {
     Board_initSDSPI();
     Board_initSPI();
     Board_initUART();
-
-
 
     //SDCard_createTask();
 

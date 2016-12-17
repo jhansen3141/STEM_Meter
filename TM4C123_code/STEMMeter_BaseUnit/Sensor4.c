@@ -28,14 +28,13 @@
 static Task_Struct sensor4TaskStruct;
 static Char sensor4TaskStack[TASKSTACKSIZE];
 
-static uint8_t uartBufferTX[25];
+//static uint8_t uartBufferTX[25];
 static uint8_t uartBufferRX[25];
 
 static UART_Handle      UART3Handle;
 
 static void Sensor4TaskFxn(UArg arg0, UArg arg1);
 static void Sensor4TaskInit();
-static void UART3Read(UART_Handle handle, void *buffer, size_t size);
 
 void Sensor4_createTask(void) {
     Task_Params taskParams;
@@ -55,27 +54,34 @@ static void Sensor4TaskInit() {
 	UART3params.writeDataMode = UART_DATA_TEXT;
 	UART3params.readDataMode = UART_DATA_BINARY;
 	UART3params.readReturnMode = UART_RETURN_FULL;
-	UART3params.readMode = UART_MODE_CALLBACK;
+	UART3params.readMode = UART_MODE_BLOCKING;
 	UART3params.readEcho = UART_ECHO_OFF;
-	UART3params.readCallback = UART3Read;
 	UART3Handle = UART_open(Board_UART3, &UART3params);
 	if (!UART3Handle) {
 		System_printf("UART3 did not open");
 	}
 }
 
-static void UART3Read(UART_Handle handle, void *buffer, size_t size) {
-	enqueueBLEWritetTaskMsg(SENSOR_4_UPDATE_CONFIG_MSG,buffer,20);
-	UART_read(UART3Handle,uartBufferRX,20);
-}
-
-
 static void Sensor4TaskFxn(UArg arg0, UArg arg1) {
 
 	Sensor4TaskInit();
-	UART_read(UART3Handle,uartBufferRX,20);
+
 	while(1) {
-		Task_sleep(50);
+		// block until 20 bytes have been recieved
+		UART_read(UART3Handle,uartBufferRX,SENSOR_FRAME_LENGTH);
+		enqueueBLEWritetTaskMsg(SENSOR_4_UPDATE_CONFIG_MSG,uartBufferRX+FRAME_BYTES_OFFSET,SENSOR_DATA_LENGTH);
+
+		// make sure frame sync bytes are correct
+		if(uartBufferRX[0] == FRAME_BYTE_0 &&
+			uartBufferRX[1] == FRAME_BYTE_1 &&
+			uartBufferRX[2] == FRAME_BYTE_2)
+		{
+			// write the bytes to the CC2640
+			enqueueBLEWritetTaskMsg(SENSOR_4_UPDATE_CONFIG_MSG,uartBufferRX+FRAME_BYTES_OFFSET,SENSOR_DATA_LENGTH);
+		}
+		else {
+			// TODO Reset sensor module
+		}
 	}
 
 }

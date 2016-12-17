@@ -1,8 +1,7 @@
-/******************************************************************************************
- * Filename:       SPICommands.c
- * Author:		   Josh Hansen
- * Description:    Task that handles commands from TM4C123 over SPI
- ******************************************************************************************/
+// Josh Hansen
+// CEEN 4360 - Fall 2016
+// Phase II
+
 #include <ti/drivers/PIN.h>
 #include <xdc/runtime/Diags.h>
 #include <ti/sysbios/knl/Task.h>
@@ -39,8 +38,6 @@ static SPI_Transaction SPITransaction;
 
 
  // Enum of message types
-
-
 typedef enum {
 	SENSOR_1_CHAR = 1,
 	SENSOR_2_CHAR,
@@ -66,14 +63,12 @@ typedef enum {
 static uint8_t SPIBufRX[SPI_BUFFER_SIZE];                  // SPI Receive and transmit buffer
 static uint8_t SPIBufTX[SPI_BUFFER_SIZE];                  // SPI Receive and transmit buffer
 
-
 /*--------- Function Prototypes for this task--------------*/
 static void SPICommands_taskFxn(UArg a0, UArg a1);
 static void SPICommands_init();
 static void user_processSPICommandsMessage(spiCommands_msg_t *pMsg);
 static void enqueueSPICommandsTaskMsg(spiCommands_msg_types_t msgType);
 static void transferCallback(SPI_Handle handle, SPI_Transaction *transaction);
-
 
 // Input - None
 // Output - None
@@ -142,8 +137,6 @@ static void transferCallback(SPI_Handle handle, SPI_Transaction *transaction) {
 	// start a new SPI transfer to wait for the next data
 	SPI_transfer(handle, transaction);
 }
-
-
 
 // Input - Task arguments
 // Output - None

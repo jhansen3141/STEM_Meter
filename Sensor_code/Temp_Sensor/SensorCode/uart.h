@@ -9,6 +9,7 @@
 #ifndef UART_H_
 #define UART_H_
 
+
 void UARTInit(void);
 void UARTWriteString(char *string);
 void UARTWrite(uint8_t data);

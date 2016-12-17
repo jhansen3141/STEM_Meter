@@ -16,19 +16,23 @@ ISR(USART_RX_vect) {
 }
 
 ISR(TIMER1_COMPA_vect) {
+	
 	sensorData_t data;
 	readSensor(&data);
 	writeBaseUnitData(&data);	
+
 }
 
 
 int main(void) {
-	
+	_delay_ms(100);
 	initBoard();
+	_delay_ms(100);
 	initSensor();
 	cmdInit();
-
-	
+	_delay_ms(1000);
+	initSensor();
+	// enable global interrupts
 	sei();
 	
 	

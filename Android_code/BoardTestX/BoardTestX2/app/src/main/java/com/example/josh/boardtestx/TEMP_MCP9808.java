@@ -17,7 +17,7 @@ public class TEMP_MCP9808 extends Sensor {
     String[] calcSensorData() {
         double temperature = 0;
         String[] dataStr = new String[2];
-        short tempRaw = (short)((data[1]<<8)   | (data[2] & 0xFF));
+        short tempRaw = (short)((data[5]<<8)   | (data[6] & 0xFF));
 
         temperature = tempRaw & 0x0FFF;
         temperature /=  16.0f;
@@ -46,4 +46,5 @@ public class TEMP_MCP9808 extends Sensor {
     public float getTempC() {
         return tempC;
     }
+
 }
