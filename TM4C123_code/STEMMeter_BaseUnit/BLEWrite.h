@@ -10,10 +10,11 @@
 
 
 typedef enum {
-  SENSOR_1_UPDATE_CONFIG_MSG = 0,
-  SENSOR_2_UPDATE_CONFIG_MSG,
-  SENSOR_3_UPDATE_CONFIG_MSG,
-  SENSOR_4_UPDATE_CONFIG_MSG
+  SENSOR_1_UPDATE_DATA_MSG = 0,
+  SENSOR_2_UPDATE_DATA_MSG,
+  SENSOR_3_UPDATE_DATA_MSG,
+  SENSOR_4_UPDATE_DATA_MSG,
+  UPDATE_SENSOR_CONFIG_MSG
 } bleWrite_msg_types_t;
 
 void enqueueBLEWritetTaskMsg(bleWrite_msg_types_t msgType, uint8_t *buffer, uint16_t len);

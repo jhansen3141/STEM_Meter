@@ -44,20 +44,20 @@ ISR(TIMER1_COMPA_vect) {
 		break;
 		
 		case RATE_TEN_MIN:
-		if(((minuteCounter % 10) == 0) && (minuteCounter != 0)) {
+		if(((minuteCounter % 10) == 0) && (secondCounter == 0)) {
 			UARTWriteString("MOD10\n");
 			shouldRead = TRUE;
 		}
 		break;
 		
 		case RATE_THRITY_MIN:
-		if(((minuteCounter % 30) == 0) && (minuteCounter != 0)) {
+		if(((minuteCounter % 30) == 0) && (secondCounter == 0)) {
 			shouldRead = TRUE;
 		}
 		break;
 		
 		case RATE_ONE_HOUR:
-		if(((minuteCounter % 60) == 0) && (minuteCounter != 0)) {
+		if(((minuteCounter % 60) == 0) && (secondCounter == 0)) {
 			shouldRead = TRUE;
 		}
 		break;

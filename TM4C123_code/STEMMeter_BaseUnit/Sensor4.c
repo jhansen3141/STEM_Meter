@@ -52,6 +52,7 @@ static void Sensor4TaskInit() {
 	UART_Params_init(&UART3params);
 	UART3params.baudRate  = SENSOR_BAUD_RATE;
 	UART3params.writeDataMode = UART_DATA_TEXT;
+	UART3params.writeMode = UART_MODE_CALLBACK;
 	UART3params.readDataMode = UART_DATA_BINARY;
 	UART3params.readReturnMode = UART_RETURN_FULL;
 	UART3params.readMode = UART_MODE_BLOCKING;
@@ -62,6 +63,12 @@ static void Sensor4TaskInit() {
 	}
 }
 
+void Sensor4WriteConfig(uint8_t freq) {
+	char txBuffer[10];
+	sprintf(txBuffer,"SF %d\n",freq);
+	UART_write(UART3Handle,txBuffer,5);
+}
+
 static void Sensor4TaskFxn(UArg arg0, UArg arg1) {
 
 	Sensor4TaskInit();
@@ -69,7 +76,7 @@ static void Sensor4TaskFxn(UArg arg0, UArg arg1) {
 	while(1) {
 		// block until 20 bytes have been recieved
 		UART_read(UART3Handle,uartBufferRX,SENSOR_FRAME_LENGTH);
-		enqueueBLEWritetTaskMsg(SENSOR_4_UPDATE_CONFIG_MSG,uartBufferRX+FRAME_BYTES_OFFSET,SENSOR_DATA_LENGTH);
+		enqueueBLEWritetTaskMsg(SENSOR_4_UPDATE_DATA_MSG,uartBufferRX+FRAME_BYTES_OFFSET,SENSOR_DATA_LENGTH);
 
 		// make sure frame sync bytes are correct
 		if(uartBufferRX[0] == FRAME_BYTE_0 &&
@@ -77,7 +84,7 @@ static void Sensor4TaskFxn(UArg arg0, UArg arg1) {
 			uartBufferRX[2] == FRAME_BYTE_2)
 		{
 			// write the bytes to the CC2640
-			enqueueBLEWritetTaskMsg(SENSOR_4_UPDATE_CONFIG_MSG,uartBufferRX+FRAME_BYTES_OFFSET,SENSOR_DATA_LENGTH);
+			enqueueBLEWritetTaskMsg(SENSOR_4_UPDATE_DATA_MSG,uartBufferRX+FRAME_BYTES_OFFSET,SENSOR_DATA_LENGTH);
 		}
 		else {
 			// TODO Reset sensor module

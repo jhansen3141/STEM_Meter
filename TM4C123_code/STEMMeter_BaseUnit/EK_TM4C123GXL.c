@@ -160,6 +160,8 @@ GPIO_PinConfig gpioPinConfigs[] = {
     GPIOTiva_PE_5 | GPIO_CFG_IN_PU | GPIO_CFG_IN_INT_RISING,
 	// Sensor 4 Input
     GPIOTiva_PB_3 | GPIO_CFG_IN_PU | GPIO_CFG_IN_INT_RISING,
+	// CC2640 Interrupt
+	GPIOTiva_PD_3 | GPIO_CFG_IN_PU | GPIO_CFG_IN_INT_RISING,
 
     /* Output pins */
 	// Sensor 1 Output

@@ -31,6 +31,8 @@
 #include "BLEWrite.h"
 #include "SystemTime.h"
 
+#include "Sensor.h"
+
 
 #define TASKSTACKSIZE       768
 #define TASK_PRIORITY 		1
@@ -72,7 +74,10 @@ static void BLEWriteFxn(UArg arg0, UArg arg1);
 static void BLEWrite_Init();
 static void SPISendUpdate();
 static void user_processBLEWriteMessage(bleWrite_msg_t *pMsg);
-static void startUpLEDRoutine();
+static void startUpLEDRoutine(uint8_t rotations);
+static void SPISlaveInterrupt();
+static void enqueueSelfMsg(bleWrite_msg_types_t msgType);
+static void updateSensorConfig();
 
 
 void BLEWrite_createTask(void) {
@@ -103,11 +108,22 @@ static void BLEWrite_Init() {
 	 SPIParams.bitRate  = 1000000;
 	 SPIParams.frameFormat = SPI_POL0_PHA0;
 	 SPIParams.mode = SPI_MASTER;
+	 SPIParams.transferMode = SPI_MODE_BLOCKING;
 	 SPIHandle = SPI_open(Board_SPI2, &SPIParams);
 	 if (!SPIHandle) {
 	       System_printf("SPI did not open");
 	 }
 
+	// install SPI Slave Interrupt callback
+	GPIO_setCallback(Board_SPI_SLAVE_INT, SPISlaveInterrupt);
+
+	// Enable interrupt
+	GPIO_enableInt(Board_SPI_SLAVE_INT);
+
+}
+
+static void SPISlaveInterrupt() {
+	enqueueSelfMsg(UPDATE_SENSOR_CONFIG_MSG);
 }
 
 static void SPISendUpdate() {
@@ -118,44 +134,26 @@ static void SPISendUpdate() {
 
 	ret = SPI_transfer(SPIHandle, &spiTransaction);
 	if (!ret) {
-
+		// TODO do something if SPI transfer error
 	}
-//	if(rxBuffer[0] == '1') {
-//		GPIOPinWrite(SENSOR_1_LED_PORT,SENSOR_1_LED_PIN,0);
-//		GPIOPinWrite(SENSOR_2_LED_PORT,SENSOR_2_LED_PIN,0);
-//
-//	}
-//	else if(rxBuffer[0] == '0') {
-//		GPIOPinWrite(SENSOR_1_LED_PORT,SENSOR_1_LED_PIN,SENSOR_1_LED_PIN);
-//		GPIOPinWrite(SENSOR_2_LED_PORT,SENSOR_2_LED_PIN,SENSOR_2_LED_PIN);
-//
-//	}
-
-//	if(txBuffer[0] != 0) {
-//		txBuffer[0] = NO_SENSOR_ID; // set sensor ID to none b/c tx complete
-//	}
 }
 
 static void BLEWriteFxn(UArg arg0, UArg arg1) {
 
 	BLEWrite_Init();
 
-	startUpLEDRoutine();
-	startUpLEDRoutine();
-
+	startUpLEDRoutine(3);
 
 	while(1) {
-		/* wait for swis to be posted from Clock function */
+		// block until work to do
 		Semaphore_pend(semBLEWriteHandle, BIOS_WAIT_FOREVER);
-		//SPISendUpdate();
+
 		while (!Queue_empty(hBleWritesMsgQ)) {
 			bleWrite_msg_t *pMsg = Queue_dequeue(hBleWritesMsgQ); // dequeue the message
 			user_processBLEWriteMessage(pMsg); // process the message
 			free(pMsg); // free mem
 		}
-		//Task_sleep(50);
 	}
-
 }
 
 // Input - Device Task Message Struct
@@ -163,26 +161,60 @@ static void BLEWriteFxn(UArg arg0, UArg arg1) {
 // Description - Called from device task context when message dequeued
 static void user_processBLEWriteMessage(bleWrite_msg_t *pMsg) {
 	switch (pMsg->type) {
-		// Set sensor ID
-		case SENSOR_1_UPDATE_CONFIG_MSG:
+		// Set sensor ID to be transmitted
+		case SENSOR_1_UPDATE_DATA_MSG:
 			txBuffer[0] = SENSOR_1_ID;
 			break;
 
-		case SENSOR_2_UPDATE_CONFIG_MSG:
+		case SENSOR_2_UPDATE_DATA_MSG:
 			txBuffer[0] = SENSOR_2_ID;
 			break;
 
-		case SENSOR_3_UPDATE_CONFIG_MSG:
+		case SENSOR_3_UPDATE_DATA_MSG:
 			txBuffer[0] = SENSOR_3_ID;
 			break;
 
-		case SENSOR_4_UPDATE_CONFIG_MSG:
+		case SENSOR_4_UPDATE_DATA_MSG:
 			txBuffer[0] = SENSOR_4_ID;
+			break;
+		// message to update a sensor config
+		case UPDATE_SENSOR_CONFIG_MSG:
+			updateSensorConfig();
 			break;
 	}
 
 	memcpy(txBuffer+1,pMsg->pdu,20); // copy sensor data into txBuffer
 	SPISendUpdate(); // send the updated data
+}
+
+static void updateSensorConfig() {
+	bool ret;
+	uint8_t dummyTXBuffer[21] = {0};
+	spiTransaction.count = 21;
+	spiTransaction.txBuf = dummyTXBuffer;
+	spiTransaction.rxBuf = rxBuffer;
+
+	ret = SPI_transfer(SPIHandle, &spiTransaction);
+	// Byte 0 = Sensor Position Number
+	// Byte 1 = Sensor Freq
+	// Byte 2 = Sensor SD Log
+
+	if (ret) {
+		switch(rxBuffer[0]) {
+		case SENSOR_1_ID:
+			Sensor1WriteConfig(rxBuffer[1]);
+			break;
+		case SENSOR_2_ID:
+			Sensor2WriteConfig(rxBuffer[1]);
+			break;
+		case SENSOR_3_ID:
+			Sensor3WriteConfig(rxBuffer[1]);
+			break;
+		case SENSOR_4_ID:
+			Sensor4WriteConfig(rxBuffer[1]);
+			break;
+		}
+	}
 }
 
 void enqueueBLEWritetTaskMsg(bleWrite_msg_types_t msgType, uint8_t *buffer, uint16_t len) {
@@ -195,21 +227,34 @@ void enqueueBLEWritetTaskMsg(bleWrite_msg_types_t msgType, uint8_t *buffer, uint
 	}
 }
 
-static void startUpLEDRoutine() {
-	 GPIO_write(Board_SENSOR_1_LED, Board_LED_ON);
-	 Task_sleep(100);
-	 GPIO_write(Board_SENSOR_3_LED, Board_LED_ON);
-	 Task_sleep(100);
-	 GPIO_write(Board_SENSOR_4_LED, Board_LED_ON);
-	 Task_sleep(100);
-	 GPIO_write(Board_SENSOR_2_LED, Board_LED_ON);
-	 Task_sleep(100);
+static void enqueueSelfMsg(bleWrite_msg_types_t msgType) {
+	bleWrite_msg_t *pMsg = malloc(sizeof(bleWrite_msg_t));
+	if (pMsg != NULL) {
+		pMsg->type = msgType;
+		Queue_enqueue(hBleWritesMsgQ, &pMsg->_elem); // enqueue the message
+		Semaphore_post(semBLEWriteHandle);
+	}
+}
 
-	 GPIO_write(Board_SENSOR_1_LED, Board_LED_OFF);
-	 Task_sleep(100);
-	 GPIO_write(Board_SENSOR_3_LED, Board_LED_OFF);
-	 Task_sleep(100);
-	 GPIO_write(Board_SENSOR_4_LED, Board_LED_OFF);
-	 Task_sleep(100);
-	 GPIO_write(Board_SENSOR_2_LED, Board_LED_OFF);
+static void startUpLEDRoutine(uint8_t rotations) {
+	uint8_t i;
+	for(i=0;i<rotations;i++) {
+		GPIO_write(Board_SENSOR_1_LED, Board_LED_ON);
+		Task_sleep(100);
+		GPIO_write(Board_SENSOR_3_LED, Board_LED_ON);
+		Task_sleep(100);
+		GPIO_write(Board_SENSOR_4_LED, Board_LED_ON);
+		Task_sleep(100);
+		GPIO_write(Board_SENSOR_2_LED, Board_LED_ON);
+		Task_sleep(100);
+
+		GPIO_write(Board_SENSOR_1_LED, Board_LED_OFF);
+		Task_sleep(100);
+		GPIO_write(Board_SENSOR_3_LED, Board_LED_OFF);
+		Task_sleep(100);
+		GPIO_write(Board_SENSOR_4_LED, Board_LED_OFF);
+		Task_sleep(100);
+		GPIO_write(Board_SENSOR_2_LED, Board_LED_OFF);
+		Task_sleep(100);
+	}
 }

@@ -53,6 +53,7 @@ static void Sensor3TaskInit() {
 	UART_Params_init(&UART2params);
 	UART2params.baudRate  = SENSOR_BAUD_RATE;
 	UART2params.writeDataMode = UART_DATA_TEXT;
+	UART2params.writeMode = UART_MODE_CALLBACK;
 	UART2params.readDataMode = UART_DATA_BINARY;
 	UART2params.readReturnMode = UART_RETURN_FULL;
 	UART2params.readMode = UART_MODE_BLOCKING;
@@ -61,6 +62,12 @@ static void Sensor3TaskInit() {
 	if (!UART2Handle) {
 		System_printf("UART2 did not open");
 	}
+}
+
+void Sensor3WriteConfig(uint8_t freq) {
+	char txBuffer[10];
+	sprintf(txBuffer,"SF %d\n",freq);
+	UART_write(UART2Handle,txBuffer,5);
 }
 
 static void Sensor3TaskFxn(UArg arg0, UArg arg1) {
@@ -76,7 +83,7 @@ static void Sensor3TaskFxn(UArg arg0, UArg arg1) {
 			uart2BufferRX[2] == FRAME_BYTE_2)
 		{
 			// write the bytes to the CC2640
-			enqueueBLEWritetTaskMsg(SENSOR_3_UPDATE_CONFIG_MSG,uart2BufferRX+FRAME_BYTES_OFFSET,SENSOR_DATA_LENGTH);
+			enqueueBLEWritetTaskMsg(SENSOR_3_UPDATE_DATA_MSG,uart2BufferRX+FRAME_BYTES_OFFSET,SENSOR_DATA_LENGTH);
 		}
 		else {
 			// TODO Reset sensor module

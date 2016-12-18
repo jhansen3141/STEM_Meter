@@ -32,7 +32,6 @@
 static Task_Struct sensor1TaskStruct;
 static Char sensor1TaskStack[TASKSTACKSIZE];
 
-//static uint8_t uartBufferTX[25];
 static uint8_t uartBufferRX[25];
 
 static UART_Handle      UART0Handle;
@@ -57,6 +56,7 @@ static void Sensor1TaskInit() {
 	UART_Params_init(&UART0params);
 	UART0params.baudRate  = SENSOR_BAUD_RATE;
 	UART0params.writeDataMode = UART_DATA_TEXT;
+	UART0params.writeMode = UART_MODE_CALLBACK;
 	UART0params.readDataMode = UART_DATA_BINARY;
 	UART0params.readReturnMode = UART_RETURN_FULL;
 	UART0params.readMode = UART_MODE_BLOCKING;
@@ -65,14 +65,13 @@ static void Sensor1TaskInit() {
 	if (!UART0Handle) {
 		System_printf("UART0 did not open");
 	}
-
-//    // Install callback for S1 input interrupt
-//    GPIO_setCallback(Board_SENSOR_1_INPUT, S1InputInterrupt);
-//
-//    // Enable interrupt
-//    GPIO_enableInt(Board_SENSOR_1_INPUT);
 }
 
+void Sensor1WriteConfig(uint8_t freq) {
+	char txBuffer[10];
+	sprintf(txBuffer,"SF %d\n",freq);
+	UART_write(UART0Handle,txBuffer,5);
+}
 
 static void Sensor1TaskFxn(UArg arg0, UArg arg1) {
 
@@ -88,7 +87,7 @@ static void Sensor1TaskFxn(UArg arg0, UArg arg1) {
 			uartBufferRX[2] == FRAME_BYTE_2)
 		{
 			// write the bytes to the CC2640
-			enqueueBLEWritetTaskMsg(SENSOR_1_UPDATE_CONFIG_MSG,uartBufferRX+FRAME_BYTES_OFFSET,SENSOR_DATA_LENGTH);
+			enqueueBLEWritetTaskMsg(SENSOR_1_UPDATE_DATA_MSG,uartBufferRX+FRAME_BYTES_OFFSET,SENSOR_DATA_LENGTH);
 		}
 		else {
 			// TODO Reset sensor module
