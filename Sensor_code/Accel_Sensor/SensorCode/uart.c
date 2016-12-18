@@ -3,6 +3,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include "sensor.h"
+#include "sensorCommon.h"
 
 #define FRAME_BYTE_0 0x55
 #define FRAME_BYTE_1 0xAA
@@ -34,7 +35,6 @@ void UARTWriteString(char *string) {
 	}
 }
 
-
 void writeBaseUnitData(sensorData_t *data) {
 	uint8_t i;
 	
@@ -45,7 +45,7 @@ void writeBaseUnitData(sensorData_t *data) {
 	// write the sensor number so app knows what sensor this is
 	UARTWrite(SENSOR_NUMBER); 
 	// write the rate readings are being taken
-	UARTWrite(data->sensorRate);
+	UARTWrite(sensorRate);
 	// write the sync number upper byte
 	UARTWrite((syncCount>>16) & 0xFF);
 	// write the sync number middle byte

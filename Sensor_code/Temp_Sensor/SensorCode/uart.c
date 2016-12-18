@@ -46,7 +46,7 @@ void writeBaseUnitData(sensorData_t *data) {
 	// write the sensor number so app knows what sensor this is
 	UARTWrite(SENSOR_NUMBER);
 	// write the rate readings are being taken
-	UARTWrite(data->sensorRate);
+	UARTWrite(sensorRate);
 	// write the sync number upper byte
 	UARTWrite((syncCount>>16) & 0xFF);
 	// write the sync number middle byte

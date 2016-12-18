@@ -1,5 +1,5 @@
 /*
- * sensorList.h
+ * sensorCommon.h
  *
  * Created: 11/25/2016 1:53:24 PM
  *  Author: Josh

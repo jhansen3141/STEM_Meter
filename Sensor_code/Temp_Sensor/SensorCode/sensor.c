@@ -8,8 +8,6 @@
 #include "i2c.h"
 #include "uart.h"
 
-static uint8_t sensorRate = SENSOR_DEFAULT_RATE;
-
 
 void initBoard(void) {
 	DDRB |= (1<<0); // LED as output
@@ -31,10 +29,7 @@ void initSensor(void) {
 void readSensor(sensorData_t *data) {
 	memset(data->sensorData,0,DATA_SIZE);
 	// read the data directly into the sensor struct (only two bytes)
-	I2CReadMult(TEMP_SENESOR_ADDRESS,TEMP_SENSEOR_TEMPATURE_REG_ADDR,data->sensorData,2);
-	// set the sensor frequency
-	data->sensorRate = sensorRate;
-	
+	I2CReadMult(TEMP_SENESOR_ADDRESS,TEMP_SENSEOR_TEMPATURE_REG_ADDR,data->sensorData,2);	
 }
 
 void moduleLED(ledState_t state) {
