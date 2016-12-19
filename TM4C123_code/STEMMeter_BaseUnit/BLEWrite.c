@@ -33,7 +33,6 @@
 
 #include "Sensor.h"
 
-
 #define TASKSTACKSIZE       768
 #define TASK_PRIORITY 		1
 
@@ -190,6 +189,7 @@ static void user_processBLEWriteMessage(bleWrite_msg_t *pMsg) {
 static void updateSensorConfig() {
 	bool ret;
 	uint8_t dummyTXBuffer[21] = {0};
+	memset(dummyTXBuffer,0,21);
 	spiTransaction.count = 21;
 	spiTransaction.txBuf = dummyTXBuffer;
 	spiTransaction.rxBuf = rxBuffer;

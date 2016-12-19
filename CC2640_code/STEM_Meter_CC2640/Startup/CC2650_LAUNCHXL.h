@@ -98,37 +98,9 @@ extern const PIN_Config BoardGpioInitTable[];
 #define Board_I2C0_SCL0             IOID_12
 #define Board_I2C0_SDA0             IOID_13
 
-/* SPI */
-//#define Board_SPI_FLASH_CS          IOID_20
-//#define Board_FLASH_CS_ON           0
-//#define Board_FLASH_CS_OFF          1
 
-/* Booster pack generic */
-#define Board_DIO0                  IOID_0
-#define Board_DIO1_RFSW             IOID_1
-#define Board_DIO12                 IOID_12
-#define Board_DIO15                 IOID_15
-#define Board_DIO16_TDO             IOID_16
-#define Board_DIO17_TDI             IOID_17
-#define Board_DIO21                 IOID_21
-#define Board_DIO22                 IOID_22
+#define Board_SPI_INT				IOID_2
 
-#define Board_DIO23_ANALOG          IOID_23
-#define Board_DIO24_ANALOG          IOID_24
-#define Board_DIO25_ANALOG          IOID_25
-#define Board_DIO26_ANALOG          IOID_26
-#define Board_DIO27_ANALOG          IOID_27
-#define Board_DIO28_ANALOG          IOID_28
-#define Board_DIO29_ANALOG          IOID_29
-#define Board_DIO30_ANALOG          IOID_30
-
-/* Booster pack LCD (430BOOST - Sharp96 Rev 1.1) */
-#define Board_LCD_CS                IOID_24 // SPI chip select
-#define Board_LCD_EXTCOMIN          IOID_12 // External COM inversion
-#define Board_LCD_ENABLE            IOID_22 // LCD enable
-#define Board_LCD_POWER             IOID_23 // LCD power control
-#define Board_LCD_CS_ON             1
-#define Board_LCD_CS_OFF            0
 
 /** ============================================================================
  *  Instance identifiers

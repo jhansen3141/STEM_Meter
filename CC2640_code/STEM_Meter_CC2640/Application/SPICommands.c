@@ -21,6 +21,7 @@
 #define SPICOMMANDS_TASK_STACK_SIZE	    800 // spiCommands task size in bytes
 #define SPICOMMANDS_TASK_PRIORITY 		1 // spiCommands Priority
 #define SPI_BUFFER_SIZE 				21
+#define MASTER_SEND_ID 					0
 
 Task_Struct spiCommandsTask;
 Char spiCommandsTaskStack[SPICOMMANDS_TASK_STACK_SIZE]; // mem allocation for spiCommands task stack
@@ -35,6 +36,9 @@ static Queue_Handle hSpiCommandsMsgQ;
 static SPI_Handle SPIHandle;
 static SPI_Params SPIParams;
 static SPI_Transaction SPITransaction;
+
+static PIN_Handle spiPinHandle;
+static PIN_State spiPinState;
 
 
  // Enum of message types
@@ -59,6 +63,12 @@ typedef enum {
 	SENSOR_3_CONFIG,
 	SENSOR_4_CONFIG
 }sensorConfig_t;
+
+PIN_Config SPIIntPinTable[] = {
+	// set SPI interrupt pin as output and init to low
+	Board_SPIINT | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL | PIN_DRVSTR_MAX,
+	PIN_TERMINATE
+};
 
 static uint8_t SPIBufRX[SPI_BUFFER_SIZE];                  // SPI Receive and transmit buffer
 static uint8_t SPIBufTX[SPI_BUFFER_SIZE];                  // SPI Receive and transmit buffer
@@ -93,6 +103,9 @@ static void SPICommands_init() {
 	Queue_construct(&spiCommandsMsgQ, NULL);
 	hSpiCommandsMsgQ = Queue_handle(&spiCommandsMsgQ);
 
+	// get handle for SPI interrupt pin
+	spiPinHandle = PIN_open(&spiPinState, SPIIntPinTable);
+
 	SPI_init();
 
 	// Init SPI and specify non-default parameters
@@ -114,25 +127,28 @@ static void SPICommands_init() {
 }
 
 static void transferCallback(SPI_Handle handle, SPI_Transaction *transaction) {
-	// Start another transfer
 	uint8_t sensorCharNum = SPIBufRX[0]; // sensor number is held in first byte
 	uint8_t sensorData[20] = {0};
-	memcpy(sensorData,SPIBufRX+1,20); // copy the sensor data into array
+	// check to see if this callback is due to needing to send data to master
+	// if it is then the data we received was dummy data so don't do anything with it
+	if(sensorCharNum != MASTER_SEND_ID) {
+		memcpy(sensorData,SPIBufRX+1,20); // copy the sensor data into array
 
-	switch(sensorCharNum) {
-	// enqueue an update for the sensor char with the new data
-	case SENSOR_1_CHAR:
-		enqueueSensorCharUpdate(STEMMETER_SERVICE_SENSOR1DATA_UUID,sensorData);
-		break;
-	case SENSOR_2_CHAR:
-		enqueueSensorCharUpdate(STEMMETER_SERVICE_SENSOR2DATA_UUID,sensorData);
-		break;
-	case SENSOR_3_CHAR:
-		enqueueSensorCharUpdate(STEMMETER_SERVICE_SENSOR3DATA_UUID,sensorData);
-		break;
-	case SENSOR_4_CHAR:
-		enqueueSensorCharUpdate(STEMMETER_SERVICE_SENSOR4DATA_UUID,sensorData);
-		break;
+		switch(sensorCharNum) {
+		// enqueue an update for the sensor char with the new data
+		case SENSOR_1_CHAR:
+			enqueueSensorCharUpdate(STEMMETER_SERVICE_SENSOR1DATA_UUID,sensorData);
+			break;
+		case SENSOR_2_CHAR:
+			enqueueSensorCharUpdate(STEMMETER_SERVICE_SENSOR2DATA_UUID,sensorData);
+			break;
+		case SENSOR_3_CHAR:
+			enqueueSensorCharUpdate(STEMMETER_SERVICE_SENSOR3DATA_UUID,sensorData);
+			break;
+		case SENSOR_4_CHAR:
+			enqueueSensorCharUpdate(STEMMETER_SERVICE_SENSOR4DATA_UUID,sensorData);
+			break;
+		}
 	}
 	// start a new SPI transfer to wait for the next data
 	SPI_transfer(handle, transaction);
@@ -163,22 +179,19 @@ static void user_processSPICommandsMessage(spiCommands_msg_t *pMsg) {
 		case UPDATE_BAT_VALUES_MSG:
 
 			break;
-		case SENSOR_1_UPDATE_CONFIG_MSG:
+		// message from BLE task to update sensor config
+		case SENSOR_UPDATE_CONFIG_MSG:
+			// only using 20 bytes so set last to 0
 			SPIBufTX[20] = 0;
+			// copy the incoming config data to TX buffer
 			memcpy(SPIBufTX,pMsg->pdu,20);
-			break;
-
-		case SENSOR_2_UPDATE_CONFIG_MSG:
-			break;
-
-		case SENSOR_3_UPDATE_CONFIG_MSG:
-			break;
-
-		case SENSOR_4_UPDATE_CONFIG_MSG:
+			// Toggle interrupt line to let master know data is ready to be recieved
+			// Master will then perform SPI transfer to get config data from TX buffer
+			PIN_setOutputValue(spiPinHandle, Board_SPIINT, 1);
+			PIN_setOutputValue(spiPinHandle, Board_SPIINT, 0);
 			break;
 	}
 }
-
 
 // Input - Task message type, messge data, message length
 // Output - None

@@ -229,8 +229,7 @@ static void SDCardFxn(UArg arg0, UArg arg1) {
     /* Stopping the SDCard */
     SDSPI_close(sdspiHandle);
     System_printf("Drive %u unmounted\n", DRIVE_NUM);
-
-    BIOS_exit(0);
+    Task_exit();
 }
 
 

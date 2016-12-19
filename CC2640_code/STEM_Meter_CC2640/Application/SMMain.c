@@ -465,46 +465,45 @@ static void ProjectZero_taskFxn(UArg a0, UArg a1)
 }
 
 void user_STEMMeter_Service_ValueChangeDispatchHandler(server_char_write_t *pWrite) {
-  switch (pWrite->paramID) {
-        case STEMMETER_SERVICE_SENSOR1DATA:
-      // Do something useful with pWrite->data here
-      // -------------------------
-      break;
+	switch (pWrite->paramID) {
+		case STEMMETER_SERVICE_SENSOR1DATA:
+			// Do something useful with pWrite->data here
+			// -------------------------
+			break;
         case STEMMETER_SERVICE_SENSOR2DATA:
-      // Do something useful with pWrite->data here
-      // -------------------------
-      break;
+			// Do something useful with pWrite->data here
+			// -------------------------
+			break;
         case STEMMETER_SERVICE_SENSOR3DATA:
-      // Do something useful with pWrite->data here
-      // -------------------------
-      break;
+			// Do something useful with pWrite->data here
+			// -------------------------
+			break;
         case STEMMETER_SERVICE_SENSOR4DATA:
-      // Do something useful with pWrite->data here
-      // -------------------------
-      break;
+			// Do something useful with pWrite->data here
+			// -------------------------
+			break;
         case STEMMETER_SERVICE_SENSOR1CONFIG:
-        	user_enqueueRawSPICommandsMsg(SENSOR_1_UPDATE_CONFIG_MSG,pWrite->data,20);
-      break;
+        	// Equeue the incomming Sensor config data to SPI
+        	// task so it can be sent to TM4C123
+			user_enqueueRawSPICommandsMsg(SENSOR_UPDATE_CONFIG_MSG,pWrite->data,20);
+			break;
         case STEMMETER_SERVICE_SENSOR2CONFIG:
-      // Do something useful with pWrite->data here
-      // -------------------------
-      break;
+        	// TODO Only actually need one char for all 4 sensors config data
+        	break;
         case STEMMETER_SERVICE_SENSOR3CONFIG:
-      // Do something useful with pWrite->data here
-      // -------------------------
-      break;
+        	// TODO Only actually need one char for all 4 sensors config data
+			break;
         case STEMMETER_SERVICE_SENSOR4CONFIG:
-      // Do something useful with pWrite->data here
-      // -------------------------
-      break;
+        	// TODO Only actually need one char for all 4 sensors config data
+        	break;
         case STEMMETER_SERVICE_BATTERYDATA:
-      // Do something useful with pWrite->data here
-      // -------------------------
-      break;
+			// Do something useful with pWrite->data here
+			// -------------------------
+			break;
         case STEMMETER_SERVICE_GENERALCONFIG:
-      // Do something useful with pWrite->data here
-      // -------------------------
-      break;
+			// Do something useful with pWrite->data here
+			// -------------------------
+			break;
       }
 
 }
