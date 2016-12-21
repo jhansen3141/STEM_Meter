@@ -45,6 +45,7 @@ typedef struct {
 
 static void Sensor2TaskFxn(UArg arg0, UArg arg1);
 static void Sensor2TaskInit();
+static void UART1WriteCallback(UART_Handle handle, void *buffer, size_t size);
 
 void Sensor2_createTask(void) {
     Task_Params taskParams;
@@ -63,6 +64,7 @@ static void Sensor2TaskInit() {
 	UART1params.baudRate  = SENSOR_BAUD_RATE;
 	UART1params.writeDataMode = UART_DATA_TEXT;
 	UART1params.writeMode = UART_MODE_CALLBACK;
+	UART1params.writeCallback = UART1WriteCallback;
 	UART1params.readDataMode = UART_DATA_BINARY;
 	UART1params.readReturnMode = UART_RETURN_FULL;
 	UART1params.readMode = UART_MODE_BLOCKING;
@@ -77,6 +79,10 @@ void Sensor2WriteConfig(uint8_t freq) {
 	char txBuffer[10];
 	sprintf(txBuffer,"SF %d\n",freq);
 	UART_write(UART1Handle,txBuffer,5);
+}
+
+static void UART1WriteCallback(UART_Handle handle, void *buffer, size_t size) {
+	// TODO Ack write complete
 }
 
 static void Sensor2TaskFxn(UArg arg0, UArg arg1) {

@@ -35,6 +35,7 @@ static UART_Handle      UART2Handle;
 
 static void Sensor3TaskFxn(UArg arg0, UArg arg1);
 static void Sensor3TaskInit();
+static void UART2WriteCallback(UART_Handle handle, void *buffer, size_t size);
 
 
 void Sensor3_createTask(void) {
@@ -54,6 +55,7 @@ static void Sensor3TaskInit() {
 	UART2params.baudRate  = SENSOR_BAUD_RATE;
 	UART2params.writeDataMode = UART_DATA_TEXT;
 	UART2params.writeMode = UART_MODE_CALLBACK;
+	UART2params.writeCallback = UART2WriteCallback;
 	UART2params.readDataMode = UART_DATA_BINARY;
 	UART2params.readReturnMode = UART_RETURN_FULL;
 	UART2params.readMode = UART_MODE_BLOCKING;
@@ -68,6 +70,10 @@ void Sensor3WriteConfig(uint8_t freq) {
 	char txBuffer[10];
 	sprintf(txBuffer,"SF %d\n",freq);
 	UART_write(UART2Handle,txBuffer,5);
+}
+
+static void UART2WriteCallback(UART_Handle handle, void *buffer, size_t size) {
+	// TODO Ack write complete
 }
 
 static void Sensor3TaskFxn(UArg arg0, UArg arg1) {

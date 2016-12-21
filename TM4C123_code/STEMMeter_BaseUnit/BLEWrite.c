@@ -33,7 +33,7 @@
 
 #include "Sensor.h"
 
-#define TASKSTACKSIZE       768
+#define TASKSTACKSIZE       1024
 #define TASK_PRIORITY 		1
 
 typedef enum {
@@ -59,7 +59,7 @@ static Queue_Handle hBleWritesMsgQ;
 static Semaphore_Struct semBLEWriteStruct;
 static Semaphore_Handle semBLEWriteHandle;
 
-static uint8_t txBuffer[21];
+//static uint8_t txBuffer[21];
 static uint8_t rxBuffer[21];
 
 // Struct for task messages
@@ -71,7 +71,7 @@ typedef struct {
 
 static void BLEWriteFxn(UArg arg0, UArg arg1);
 static void BLEWrite_Init();
-static void SPISendUpdate();
+static bool SPISendUpdate(uint8_t *txBuffer);
 static void user_processBLEWriteMessage(bleWrite_msg_t *pMsg);
 static void startUpLEDRoutine(uint8_t rotations);
 static void SPISlaveInterrupt();
@@ -125,16 +125,14 @@ static void SPISlaveInterrupt() {
 	enqueueSelfMsg(UPDATE_SENSOR_CONFIG_MSG);
 }
 
-static void SPISendUpdate() {
-	bool ret;
+static bool SPISendUpdate(uint8_t *txBuffer) {
+
 	spiTransaction.count = 21;
 	spiTransaction.txBuf = txBuffer;
 	spiTransaction.rxBuf = rxBuffer;
 
-	ret = SPI_transfer(SPIHandle, &spiTransaction);
-	if (!ret) {
-		// TODO do something if SPI transfer error
-	}
+	return SPI_transfer(SPIHandle, &spiTransaction);
+
 }
 
 static void BLEWriteFxn(UArg arg0, UArg arg1) {
@@ -159,42 +157,48 @@ static void BLEWriteFxn(UArg arg0, UArg arg1) {
 // Output - None
 // Description - Called from device task context when message dequeued
 static void user_processBLEWriteMessage(bleWrite_msg_t *pMsg) {
+	bool shouldSendUpdate = true;
+	uint8_t txBufferUpdate[21];
+	;
 	switch (pMsg->type) {
 		// Set sensor ID to be transmitted
 		case SENSOR_1_UPDATE_DATA_MSG:
-			txBuffer[0] = SENSOR_1_ID;
+			txBufferUpdate[0] = SENSOR_1_ID;
 			break;
 
 		case SENSOR_2_UPDATE_DATA_MSG:
-			txBuffer[0] = SENSOR_2_ID;
+			txBufferUpdate[0] = SENSOR_2_ID;
 			break;
 
 		case SENSOR_3_UPDATE_DATA_MSG:
-			txBuffer[0] = SENSOR_3_ID;
+			txBufferUpdate[0] = SENSOR_3_ID;
 			break;
 
 		case SENSOR_4_UPDATE_DATA_MSG:
-			txBuffer[0] = SENSOR_4_ID;
+			txBufferUpdate[0] = SENSOR_4_ID;
 			break;
 		// message to update a sensor config
 		case UPDATE_SENSOR_CONFIG_MSG:
+			// Doing config update, not sensor data
+			shouldSendUpdate = false;
 			updateSensorConfig();
 			break;
 	}
 
-	memcpy(txBuffer+1,pMsg->pdu,20); // copy sensor data into txBuffer
-	SPISendUpdate(); // send the updated data
+	if(shouldSendUpdate) {
+		// copy sensor data into txBuffer
+		memcpy(txBufferUpdate+1,pMsg->pdu,20);
+		// send the updated data
+		SPISendUpdate(txBufferUpdate);
+	}
 }
 
 static void updateSensorConfig() {
 	bool ret;
-	uint8_t dummyTXBuffer[21] = {0};
-	memset(dummyTXBuffer,0,21);
-	spiTransaction.count = 21;
-	spiTransaction.txBuf = dummyTXBuffer;
-	spiTransaction.rxBuf = rxBuffer;
 
-	ret = SPI_transfer(SPIHandle, &spiTransaction);
+	uint8_t dummyTXBuffer[21];;
+	memset(dummyTXBuffer,0,21);
+	ret = SPISendUpdate(dummyTXBuffer);
 	// Byte 0 = Sensor Position Number
 	// Byte 1 = Sensor Freq
 	// Byte 2 = Sensor SD Log
