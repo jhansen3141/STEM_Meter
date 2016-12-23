@@ -67,7 +67,7 @@
 /* Drive number used for FatFs */
 #define DRIVE_NUM           0
 
-#define TASKSTACKSIZE       768
+#define TASKSTACKSIZE       2048
 
 const char  inputfile[] = "fat:"STR(DRIVE_NUM)":input.txt";
 const char outputfile[] = "fat:"STR(DRIVE_NUM)":output.txt";
@@ -84,8 +84,8 @@ const char textarray[] = \
 
 unsigned char cpy_buff[CPY_BUFF_SIZE + 1];
 
-Task_Struct task0Struct;
-Char task0Stack[TASKSTACKSIZE];
+Task_Struct SDCardTaskStruct;
+Char SDCardTaskStack[TASKSTACKSIZE];
 
 static void SDCardFxn(UArg arg0, UArg arg1);
 
@@ -94,8 +94,8 @@ void SDCard_createTask(void) {
     /* Construct file copy Task thread */
     Task_Params_init(&taskParams);
     taskParams.stackSize = TASKSTACKSIZE;
-    taskParams.stack = &task0Stack;
-    Task_construct(&task0Struct, (Task_FuncPtr)SDCardFxn, &taskParams, NULL);
+    taskParams.stack = &SDCardTaskStack;
+    Task_construct(&SDCardTaskStruct, (Task_FuncPtr)SDCardFxn, &taskParams, NULL);
 }
 
 /*
@@ -110,6 +110,16 @@ void SDCard_createTask(void) {
  *
  *  Task for this function is created statically. See the project's .cfg file.
  */
+
+uint32_t fatTimeHook() {
+	return    ((2007UL-1980) << 25)    // Year = 2007
+			| (6UL << 21)            // Month = June
+			| (5UL << 16)            // Day = 5
+			| (11U << 11)            // Hour = 11
+			| (38U << 5)            // Min = 38
+			| (0U >> 1)                // Sec = 0
+			;
+}
 static void SDCardFxn(UArg arg0, UArg arg1) {
     SDSPI_Handle sdspiHandle;
     SDSPI_Params sdspiParams;
@@ -127,7 +137,8 @@ static void SDCardFxn(UArg arg0, UArg arg1) {
     SDSPI_Params_init(&sdspiParams);
     sdspiHandle = SDSPI_open(Board_SDSPI0, DRIVE_NUM, &sdspiParams);
     if (sdspiHandle == NULL) {
-        System_abort("Error starting the SD card\n");
+    	// Can't open file so exit
+		Task_exit();
     }
     else {
         System_printf("Drive %u is mounted\n", DRIVE_NUM);
@@ -141,11 +152,8 @@ static void SDCardFxn(UArg arg0, UArg arg1) {
         /* Open file for both reading and writing */
         src = fopen(inputfile, "w+");
         if (!src) {
-            System_printf("Error: \"%s\" could not be created.\n"
-                          "Please check the Getting Started Guide "
-                          "if additional jumpers are necessary.\n",
-                          inputfile);
-            System_abort("Aborting...\n");
+            // Can't open file so exit
+            Task_exit();
         }
 
         fwrite(textarray, 1, strlen(textarray), src);
@@ -163,8 +171,8 @@ static void SDCardFxn(UArg arg0, UArg arg1) {
     /* Create a new file object for the file copy */
     dst = fopen(outputfile, "w");
     if (!dst) {
-        System_printf("Error opening \"%s\"\n", outputfile);
-        System_abort("Aborting...\n");
+    	// Can't open file so exit
+		Task_exit();
     }
     else {
         System_printf("Starting file copy\n");
@@ -206,8 +214,8 @@ static void SDCardFxn(UArg arg0, UArg arg1) {
     /* Now output the outputfile[] contents onto the console */
     dst = fopen(outputfile, "r");
     if (!dst) {
-        System_printf("Error opening \"%s\"\n", outputfile);
-        System_abort("Aborting...\n");
+    	// Can't open file so exit
+		Task_exit();
     }
 
     /* Print file contents */

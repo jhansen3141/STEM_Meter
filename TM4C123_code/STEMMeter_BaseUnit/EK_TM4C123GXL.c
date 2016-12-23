@@ -378,16 +378,16 @@ SDSPITiva_Object sdspiTivaObjects[EK_TM4C123GXL_SDSPICOUNT];
 
 const SDSPITiva_HWAttrs sdspiTivaHWattrs[EK_TM4C123GXL_SDSPICOUNT] = {
     {
-        .baseAddr = SSI2_BASE,
+        .baseAddr = SSI0_BASE,
 
-        .portSCK = GPIO_PORTB_BASE,
-        .pinSCK = GPIO_PIN_4,
-        .portMISO = GPIO_PORTB_BASE,
-        .pinMISO = GPIO_PIN_6,
-        .portMOSI = GPIO_PORTB_BASE,
-        .pinMOSI = GPIO_PIN_7,
+        .portSCK = GPIO_PORTA_BASE,
+        .pinSCK = GPIO_PIN_2,
+        .portMISO = GPIO_PORTA_BASE,
+        .pinMISO = GPIO_PIN_4,
+        .portMOSI = GPIO_PORTA_BASE,
+        .pinMOSI = GPIO_PIN_5,
         .portCS = GPIO_PORTA_BASE,
-        .pinCS = GPIO_PIN_5,
+        .pinCS = GPIO_PIN_3,
     }
 };
 
@@ -404,6 +404,7 @@ const SDSPI_Config SDSPI_config[] = {
  *  ======== EK_TM4C123GXL_initSDSPI ========
  */
 void EK_TM4C123GXL_initSDSPI(void) {
+
     /* Enable the peripherals used by the SD Card */
     SysCtlPeripheralEnable(SYSCTL_PERIPH_SSI0);
 
@@ -423,13 +424,7 @@ void EK_TM4C123GXL_initSDSPI(void) {
     GPIOPinConfigure(GPIO_PA4_SSI0RX);
     GPIOPinConfigure(GPIO_PA5_SSI0TX);
     GPIOPinConfigure(GPIO_PA2_SSI0CLK);
-
-    /*
-     * These GPIOs are connected to PB6 and PB7 and need to be brought into a
-     * GPIO input state so they don't interfere with SPI communications.
-     */
-    GPIOPinTypeGPIOInput(GPIO_PORTD_BASE, GPIO_PIN_0);
-    GPIOPinTypeGPIOInput(GPIO_PORTD_BASE, GPIO_PIN_1);
+    //GPIOPinConfigure(GPIO_PA3_SSI0FSS);
 
     SDSPI_init();
 }
@@ -519,17 +514,6 @@ const SPI_Config SPI_config[] = {
  *  ======== EK_TM4C123GXL_initSPI ========
  */
 void EK_TM4C123GXL_initSPI(void) {
-//    /* SPI0 */
-//    SysCtlPeripheralEnable(SYSCTL_PERIPH_SSI0);
-//
-//    /* Need to unlock PF0 */
-//    GPIOPinConfigure(GPIO_PA2_SSI0CLK);
-//    GPIOPinConfigure(GPIO_PA3_SSI0FSS);
-//    GPIOPinConfigure(GPIO_PA4_SSI0RX);
-//    GPIOPinConfigure(GPIO_PA5_SSI0TX);
-//
-//    GPIOPinTypeSSI(GPIO_PORTA_BASE, GPIO_PIN_2 | GPIO_PIN_3 |
-//                                    GPIO_PIN_4 | GPIO_PIN_5);
 
     /* SSI2 */
     SysCtlPeripheralEnable(SYSCTL_PERIPH_SSI2);
@@ -541,23 +525,6 @@ void EK_TM4C123GXL_initSPI(void) {
 
     GPIOPinTypeSSI(GPIO_PORTB_BASE, GPIO_PIN_4 | GPIO_PIN_5 |
                                     GPIO_PIN_6 | GPIO_PIN_7);
-
-    /* SSI3 */
-    /*
-     * NOTE: TI-RTOS examples configure pins PD0 & PD1 for SSI3 or I2C3.  Thus,
-     * a conflict occurs when the I2C & SPI drivers are used simultaneously in
-     * an application.  Modify the pin mux settings in this file and resolve the
-     * conflict before running your the application.
-     */
-//    SysCtlPeripheralEnable(SYSCTL_PERIPH_SSI3);
-//
-//    GPIOPinConfigure(GPIO_PD0_SSI3CLK);
-//    GPIOPinConfigure(GPIO_PD1_SSI3FSS);
-//    GPIOPinConfigure(GPIO_PD2_SSI3RX);
-//    GPIOPinConfigure(GPIO_PD3_SSI3TX);
-//
-//    GPIOPinTypeSSI(GPIO_PORTD_BASE, GPIO_PIN_0 | GPIO_PIN_1 |
-//                                    GPIO_PIN_2 | GPIO_PIN_3);
 
     EK_TM4C123GXL_initDMA();
     SPI_init();

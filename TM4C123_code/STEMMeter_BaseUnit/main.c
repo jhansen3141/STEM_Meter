@@ -25,7 +25,7 @@ int main(void) {
     Board_initSPI();
     Board_initUART();
 
-    //SDCard_createTask();
+    SDCard_createTask();
 
     BLEWrite_createTask();
 
