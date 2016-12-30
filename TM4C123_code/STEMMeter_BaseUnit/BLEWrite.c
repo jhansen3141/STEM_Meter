@@ -126,13 +126,12 @@ static void SPISlaveInterrupt() {
 }
 
 static bool SPISendUpdate(uint8_t *txBuffer) {
-
+	memset(rxBuffer,0,21); // clear the RX buffer first
 	spiTransaction.count = 21;
 	spiTransaction.txBuf = txBuffer;
 	spiTransaction.rxBuf = rxBuffer;
-
+	// do the SPI transfer
 	return SPI_transfer(SPIHandle, &spiTransaction);
-
 }
 
 static void BLEWriteFxn(UArg arg0, UArg arg1) {
@@ -195,7 +194,9 @@ static void user_processBLEWriteMessage(bleWrite_msg_t *pMsg) {
 
 static void updateSensorConfig() {
 	bool ret;
-
+	uint8_t sensorNumber;
+	uint8_t sensorFreq;
+	uint8_t sdCardWrite;
 	uint8_t dummyTXBuffer[21];;
 	memset(dummyTXBuffer,0,21);
 	ret = SPISendUpdate(dummyTXBuffer);
@@ -204,18 +205,23 @@ static void updateSensorConfig() {
 	// Byte 2 = Sensor SD Log
 
 	if (ret) {
-		switch(rxBuffer[0]) {
+		// convert ASCII to int (Note: Only works for numbers 0-9)
+		// Only 4 sensors and less than 10 freq and SD card states
+		sensorNumber = rxBuffer[0] & 0x0F;
+		sensorFreq = rxBuffer[1] & 0x0F;
+		sdCardWrite = rxBuffer[2] & 0x0F;
+		switch(sensorNumber) {
 		case SENSOR_1_ID:
-			Sensor1WriteConfig(rxBuffer[1]);
+			Sensor1WriteConfig(sensorFreq);
 			break;
 		case SENSOR_2_ID:
-			Sensor2WriteConfig(rxBuffer[1]);
+			Sensor2WriteConfig(sensorFreq);
 			break;
 		case SENSOR_3_ID:
-			Sensor3WriteConfig(rxBuffer[1]);
+			Sensor3WriteConfig(sensorFreq);
 			break;
 		case SENSOR_4_ID:
-			Sensor4WriteConfig(rxBuffer[1]);
+			Sensor4WriteConfig(sensorFreq);
 			break;
 		}
 	}

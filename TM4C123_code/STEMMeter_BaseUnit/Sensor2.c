@@ -88,7 +88,7 @@ static void UART1WriteCallback(UART_Handle handle, void *buffer, size_t size) {
 static void Sensor2TaskFxn(UArg arg0, UArg arg1) {
 
 	Sensor2TaskInit();
-
+	UART_write(UART1Handle,"U2",2);
 	while(1) {
 		// block until 20 bytes have been recieved
 		UART_read(UART1Handle,uartBufferRX,SENSOR_FRAME_LENGTH);

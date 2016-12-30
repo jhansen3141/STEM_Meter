@@ -241,6 +241,7 @@ public class MainActivity extends AppCompatActivity
                         serviceDiscovered = true;
                         printConnectionStat("Connected");
 
+                        // TODO This doesnt work now that fragment is list fragment
                         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                         SensorsFragment sensorsFragment = new SensorsFragment();
                         transaction.replace(R.id.fragment_container, sensorsFragment, SENSOR_FRAG_TAG);
@@ -395,7 +396,6 @@ public class MainActivity extends AppCompatActivity
             }
         }
         postSensorData(sensorData);
-
     }
 
     public void postSensorData(SensorData sensorData) {
@@ -439,9 +439,7 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            Toast.makeText(this,"Josh Hansen\n " +
-                    " CEEN 4360 \n " +
-                    "    Phase II",Toast.LENGTH_LONG).show();
+            // TODO Do something when user clicks settings button
             return true;
         }
 
@@ -477,12 +475,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void ledToggle(boolean ledON) {
-        if (ledON) {
-            writeCharacteristic(BoardSensor1ConfigChar, "0");
-        } else {
-            writeCharacteristic(BoardSensor1ConfigChar, "1");
-        }
+    public void sensorConfigWrite(int sensorNumber, int sensorRate) {
+            // Byte 0 = Sensor Position Number
+            // Byte 1 = Sensor Freq
+            // Byte 2 = Sensor SD Log
+            String configString = Integer.toString(sensorNumber) + Integer.toString(sensorRate) + "0";
+            writeCharacteristic(BoardSensor1ConfigChar, configString);
     }
 
     public int writeCharacteristic(BluetoothGattCharacteristic characteristic, String data) {

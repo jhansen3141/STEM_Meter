@@ -62,7 +62,6 @@ public class ConnectFragment extends Fragment {
         connectTextView.post(
                 new Runnable() {
                     public void run() {
-
                         connectTextView.setText(string);
                     }
                 });

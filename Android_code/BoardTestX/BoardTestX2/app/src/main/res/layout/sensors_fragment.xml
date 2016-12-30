@@ -3,56 +3,9 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <View style="@style/Divider"/>
-    <TextView
-        android:id="@+id/sensor1TextView"
+
+    <ListView
+        android:id="@android:id/list"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:layout_marginTop="10dp"
-        android:textSize="20dp"
-        android:text="Sensor 1 Disconnected"
-        android:textColor="@android:color/black" />
-
-    <View style="@style/Divider"/>
-
-    <TextView
-        android:id="@+id/sensor2TextView"
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:layout_marginTop="8dp"
-        android:textSize="20dp"
-        android:text="Sensor 2 Disconnected"
-        android:textColor="@android:color/black" />
-
-    <View style="@style/Divider"/>
-
-    <TextView
-        android:id="@+id/sensor3TextView"
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:layout_marginTop="8dp"
-        android:textSize="20dp"
-        android:text="Sensor 3 Disconnected"
-        android:textColor="@android:color/black" />
-
-    <View style="@style/Divider"/>
-
-    <TextView
-        android:id="@+id/sensor4TextView"
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:layout_marginTop="8dp"
-        android:textSize="20dp"
-        android:text="Sensor 4 Disconnected"
-        android:textColor="@android:color/black" />
-    <View style="@style/Divider"/>
-
-    <Button
-        android:id="@+id/ledButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="LED ON" />
-
-
+        android:layout_height="match_parent" />
 </LinearLayout>
