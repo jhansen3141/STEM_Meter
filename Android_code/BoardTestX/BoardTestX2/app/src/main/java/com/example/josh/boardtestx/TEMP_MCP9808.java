@@ -9,8 +9,8 @@ public class TEMP_MCP9808 extends Sensor {
     private String[] sensorStringArray;
     private float tempF, tempC;
 
-    public TEMP_MCP9808(byte[] data) {
-        super(data);
+    public TEMP_MCP9808(byte[] data, int sensorPosition) {
+        super(data, sensorPosition);
     }
 
     @Override
@@ -32,6 +32,11 @@ public class TEMP_MCP9808 extends Sensor {
 
         sensorStringArray = dataStr;
         return dataStr;
+    }
+
+    @Override
+    float getGraphData() {
+        return tempF;
     }
 
     @Override

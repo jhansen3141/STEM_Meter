@@ -12,8 +12,8 @@ public class IMU_MPU6050 extends Sensor{
     private float xAccelF,yAccelF,zAccelF,xGyroF,yGyroF,zGyroF;
 
 
-    public IMU_MPU6050(byte[] data) {
-        super(data);
+    public IMU_MPU6050(byte[] data, int sensorPosition) {
+        super(data, sensorPosition);
     }
 
     @Override
@@ -45,6 +45,11 @@ public class IMU_MPU6050 extends Sensor{
         sensorStringArray = dataStr;
 
         return dataStr;
+    }
+
+    @Override
+    float getGraphData() {
+        return xAccelF;
     }
 
     @Override

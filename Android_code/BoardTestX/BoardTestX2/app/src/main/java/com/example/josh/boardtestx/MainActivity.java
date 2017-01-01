@@ -81,6 +81,11 @@ public class MainActivity extends AppCompatActivity
     private final String GRAPH_FRAG_TAG = "GraphFragTag";
     private final String SENSOR_FRAG_TAG = "SensorFragTag";
 
+    private Sensor sensor1;
+    private Sensor sensor2;
+    private Sensor sensor3;
+    private Sensor sensor4;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -242,11 +247,11 @@ public class MainActivity extends AppCompatActivity
                         printConnectionStat("Connected");
 
                         // TODO This doesnt work now that fragment is list fragment
-                        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                        SensorsFragment sensorsFragment = new SensorsFragment();
-                        transaction.replace(R.id.fragment_container, sensorsFragment, SENSOR_FRAG_TAG);
-                        // transaction.addToBackStack(null);
-                        transaction.commit();
+//                        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+//                        SensorsFragment sensorsFragment = new SensorsFragment();
+//                        transaction.replace(R.id.fragment_container, sensorsFragment, SENSOR_FRAG_TAG);
+//                        // transaction.addToBackStack(null);
+//                        transaction.commit();
                     } else {
                         Log.w(TAG, "onServicesDiscovered received: " + status);
                     }
@@ -256,7 +261,7 @@ public class MainActivity extends AppCompatActivity
                 // Result of a characteristic read operation
                 public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
                     if (status == BluetoothGatt.GATT_SUCCESS) {
-
+                        // Not currently reading characteristics. Using notify on change.
                     }
                 }
 
@@ -297,118 +302,148 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    SensorData getSensorData(int sensorNum, int sensorType, byte sensorData[]) {
-        String finalString = "";
-        float graphData = 0;
-        switch (sensorType) {
-            case SensorList.IMU_MPU6050:
-                IMU_MPU6050 imuSensor = new IMU_MPU6050(sensorData);
-                imuSensor.calcSensorData(); // calc data
-                finalString = imuSensor.toString();
-                graphData = imuSensor.getxAccelF();
-                break;
-            case SensorList.TEMP_MCP9808:
-                TEMP_MCP9808 tempSensor = new TEMP_MCP9808(sensorData);
-                tempSensor.calcSensorData();
-                finalString = tempSensor.toString();
-                graphData = tempSensor.getTempF();
-                break;
-        }
-        return new SensorData(sensorNum, finalString, graphData);
-    }
-
     void handleSensor1Data(byte sensor1Data[]) {
-        SensorData sensorData;
+        Log.i(TAG,"HANDLE S1");
         if (sensor1Data[0] == SensorList.INVALID_SENSOR) {
             return;
         } else {
             // check to see which sensor is connected
             switch (sensor1Data[0]) {
                 case SensorList.IMU_MPU6050:
-                    sensorData = getSensorData(1, SensorList.IMU_MPU6050, sensor1Data);
+                    // check to see if sensor is already "installed"
+                    if(sensor1 == null || !(sensor1 instanceof IMU_MPU6050)) {
+                        sensor1 = new IMU_MPU6050(sensor1Data, 1);
+                    }
                     break;
                 case SensorList.TEMP_MCP9808:
-                    sensorData = getSensorData(1, SensorList.TEMP_MCP9808, sensor1Data);
+                    // check to see if sensor is already "installed"
+                    if(sensor1 == null || !(sensor1 instanceof TEMP_MCP9808)) {
+                        sensor1 = new TEMP_MCP9808(sensor1Data, 1);
+                    }
                     break;
                 default:
+                    // if invalid sensor type then return
                     return;
             }
         }
-        postSensorData(sensorData);
+        // update the sensor data
+        sensor1.updateData(sensor1Data);
+        // perform calculations on data
+        sensor1.calcSensorData();
+        // post the data to the screen
+        postSensorData(sensor1);
     }
 
     void handleSensor2Data(byte sensor2Data[]) {
-        SensorData sensorData;
+        Log.i(TAG,"HANDLE S2");
         if (sensor2Data[0] == SensorList.INVALID_SENSOR) {
             return;
         } else {
+            // check to see which sensor is connected
             switch (sensor2Data[0]) {
                 case SensorList.IMU_MPU6050:
-                    sensorData = getSensorData(2, SensorList.IMU_MPU6050, sensor2Data);
+                    // check to see if sensor is already "installed"
+                    if(sensor2 == null || !(sensor2 instanceof IMU_MPU6050)) {
+                        sensor2 = new IMU_MPU6050(sensor2Data, 2);
+                    }
                     break;
                 case SensorList.TEMP_MCP9808:
-                    sensorData = getSensorData(2, SensorList.TEMP_MCP9808, sensor2Data);
+                    // check to see if sensor is already "installed"
+                    if(sensor2 == null || !(sensor2 instanceof TEMP_MCP9808)) {
+                        sensor2 = new TEMP_MCP9808(sensor2Data, 1);
+                    }
                     break;
                 default:
+                    // if invalid sensor type then return
                     return;
             }
         }
-        postSensorData(sensorData);
+        // update the sensor data
+        sensor2.updateData(sensor2Data);
+        // perform calculations on data
+        sensor2.calcSensorData();
+        // post the data to the screen
+        postSensorData(sensor2);
 
     }
 
     void handleSensor3Data(byte sensor3Data[]) {
-        SensorData sensorData;
+        Log.i(TAG,"HANDLE S3");
         if (sensor3Data[0] == SensorList.INVALID_SENSOR) {
             return;
         } else {
+            // check to see which sensor is connected
             switch (sensor3Data[0]) {
                 case SensorList.IMU_MPU6050:
-                    sensorData = getSensorData(3, SensorList.IMU_MPU6050, sensor3Data);
+                    // check to see if sensor is already "installed"
+                    if(sensor3 == null || !(sensor3 instanceof IMU_MPU6050)) {
+                        sensor3 = new IMU_MPU6050(sensor3Data, 3);
+                    }
                     break;
                 case SensorList.TEMP_MCP9808:
-                    sensorData = getSensorData(3, SensorList.TEMP_MCP9808, sensor3Data);
+                    // check to see if sensor is already "installed"
+                    if(sensor3 == null || !(sensor3 instanceof TEMP_MCP9808)) {
+                        sensor3 = new TEMP_MCP9808(sensor3Data, 3);
+                    }
                     break;
                 default:
+                    // if invalid sensor type then return
                     return;
-
             }
         }
-        postSensorData(sensorData);
-
+        // update the sensor data
+        sensor3.updateData(sensor3Data);
+        // perform calculations on data
+        sensor3.calcSensorData();
+        // post the data to the screen
+        postSensorData(sensor3);
     }
 
     void handleSensor4Data(byte sensor4Data[]) {
-        SensorData sensorData;
+        Log.i(TAG,"HANDLE S4");
         if (sensor4Data[0] == SensorList.INVALID_SENSOR) {
             return;
         } else {
+            // check to see which sensor is connected
             switch (sensor4Data[0]) {
                 case SensorList.IMU_MPU6050:
-                    sensorData = getSensorData(4, SensorList.IMU_MPU6050, sensor4Data);
+                    // check to see if sensor is already "installed"
+                    if(sensor4 == null || !(sensor4 instanceof IMU_MPU6050)) {
+                        sensor4 = new IMU_MPU6050(sensor4Data, 4);
+                    }
                     break;
                 case SensorList.TEMP_MCP9808:
-                    sensorData = getSensorData(4, SensorList.TEMP_MCP9808, sensor4Data);
+                    // check to see if sensor is already "installed"
+                    if(sensor4 == null || !(sensor4 instanceof TEMP_MCP9808)) {
+                        sensor4 = new TEMP_MCP9808(sensor4Data, 4);
+                    }
                     break;
                 default:
+                    // if invalid sensor type then return
                     return;
-
             }
         }
-        postSensorData(sensorData);
+        // update the sensor data
+        sensor4.updateData(sensor4Data);
+        // perform calculations on data
+        sensor4.calcSensorData();
+        // post the data to the screen
+        postSensorData(sensor4);
     }
 
-    public void postSensorData(SensorData sensorData) {
+    public void postSensorData(Sensor sensor) {
         SensorsFragment sensorsFragment = (SensorsFragment)
                 getSupportFragmentManager().findFragmentByTag(SENSOR_FRAG_TAG);
-
+        // if the sensor fragment is showing print the data there
         if (sensorsFragment != null && sensorsFragment.isVisible()) {
-            sensorsFragment.printSensorData(sensorData.getSensorNum(), sensorData.getStrData());
-        } else if(sensorData.getSensorNum() == 4) {
+            sensorsFragment.printSensorData(sensor.getSensorNumber(), sensor.toString());
+        }
+        // TODO this is just to test the graphing feature. Only graphs sensor 4
+        else if(sensor.getSensorNumber() == 4) {
             GraphFragment graphFragment = (GraphFragment)
                     getSupportFragmentManager().findFragmentByTag(GRAPH_FRAG_TAG);
             if (graphFragment != null && graphFragment.isVisible()) {
-                addToGraph(sensorData.getGraphData());
+                addToGraph(sensor.getGraphData());
             }
         }
     }
@@ -476,11 +511,43 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void sensorConfigWrite(int sensorNumber, int sensorRate) {
-            // Byte 0 = Sensor Position Number
-            // Byte 1 = Sensor Freq
-            // Byte 2 = Sensor SD Log
-            String configString = Integer.toString(sensorNumber) + Integer.toString(sensorRate) + "0";
-            writeCharacteristic(BoardSensor1ConfigChar, configString);
+        // Byte 0 = Sensor Position Number
+        // Byte 1 = Sensor Freq
+        // Byte 2 = Sensor SD Log
+        byte[] configData = new byte[3];
+        configData[0] = (byte)sensorNumber;
+        configData[1] = (byte)sensorRate;
+        configData[2] = (byte)0;
+
+        writeCharacteristic(BoardSensor1ConfigChar, configData);
+        // write the config twice to solve bug on embedded side
+        writeCharacteristic(BoardSensor1ConfigChar, configData);
+    }
+
+    public int writeCharacteristic(BluetoothGattCharacteristic characteristic, byte[] data) {
+        byte[] dataToSend = new byte[20];
+
+        if (mBluetoothAdapter == null || mBluetoothGatt == null) {
+            Log.w(TAG, "BluetoothAdapter not initialized");
+            return FAILURE;
+        }
+
+        for(int i=0;i<20;i++) {
+            dataToSend[i] = 0;
+        }
+
+        for(int i=0;i<data.length;i++) {
+            dataToSend[i] = data[i];
+        }
+
+        try {
+            Log.i(TAG, "Sending: " + dataToSend[0] + " " + dataToSend[1] + " " + dataToSend[2]);
+            characteristic.setValue(dataToSend);
+            mBluetoothGatt.writeCharacteristic(characteristic);
+        } catch (NullPointerException npe) {
+            return FAILURE;
+        }
+        return waitForWrite();
     }
 
     public int writeCharacteristic(BluetoothGattCharacteristic characteristic, String data) {
@@ -526,28 +593,5 @@ public class MainActivity extends AppCompatActivity
         Log.i(TAG, "Write complete");
 
         return SUCCESS;
-    }
-}
-
-class SensorData {
-    private String strData;
-    private float graphData;
-    private int sensorNum;
-    public SensorData(int sensorNum, String strData, float graphData) {
-        this.strData = strData;
-        this.graphData = graphData;
-        this.sensorNum = sensorNum;
-    }
-
-    public String getStrData() {
-        return strData;
-    }
-
-    public float getGraphData() {
-        return graphData;
-    }
-
-    public int getSensorNum() {
-        return sensorNum;
     }
 }
