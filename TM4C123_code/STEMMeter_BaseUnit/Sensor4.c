@@ -68,7 +68,7 @@ static void Sensor4TaskInit() {
 void Sensor4WriteConfig(uint8_t freq) {
 	char txBuffer[10];
 	sprintf(txBuffer,"SF %d\n",freq);
-	UART_write(UART3Handle,txBuffer,5);
+	UART_writePolling(UART3Handle,txBuffer,5);
 }
 
 static void UART3WriteCallback(UART_Handle handle, void *buffer, size_t size) {

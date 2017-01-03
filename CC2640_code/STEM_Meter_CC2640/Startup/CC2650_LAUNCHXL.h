@@ -88,7 +88,7 @@ extern const PIN_Config BoardGpioInitTable[];
 #define Board_SPI0_MISO             IOID_9          /* RF1.20 */
 #define Board_SPI0_MOSI             IOID_8          /* RF1.18 */
 #define Board_SPI0_CLK              IOID_10         /* RF1.16 */
-#define Board_SPI0_CSN              IOID_11
+#define Board_SPI0_CSN              IOID_11			// IOID_11
 #define Board_SPI1_MISO             PIN_UNASSIGNED
 #define Board_SPI1_MOSI             PIN_UNASSIGNED
 #define Board_SPI1_CLK              PIN_UNASSIGNED
@@ -99,7 +99,8 @@ extern const PIN_Config BoardGpioInitTable[];
 #define Board_I2C0_SDA0             IOID_13
 
 
-#define Board_SPI_INT				IOID_2
+#define Board_SPI_INT				IOID_0 // update with new board
+#define Board_SPI_CS_Pin			IOID_2 // update with new board
 
 
 /** ============================================================================

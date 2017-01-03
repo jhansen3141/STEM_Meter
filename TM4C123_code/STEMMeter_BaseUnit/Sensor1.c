@@ -72,7 +72,7 @@ static void Sensor1TaskInit() {
 void Sensor1WriteConfig(uint8_t freq) {
 	char txBuffer[10];
 	sprintf(txBuffer,"SF %d\n",freq);
-	UART_write(UART0Handle,txBuffer,5);
+	UART_writePolling(UART0Handle,txBuffer,5);
 }
 
 static void UART0WriteCallback(UART_Handle handle, void *buffer, size_t size) {
@@ -82,7 +82,7 @@ static void UART0WriteCallback(UART_Handle handle, void *buffer, size_t size) {
 static void Sensor1TaskFxn(UArg arg0, UArg arg1) {
 
 	Sensor1TaskInit();
-	UART_write(UART0Handle,"U1",2);
+
 	while(1) {
 		// block until 20 bytes have been recieved
 		UART_read(UART0Handle,uartBufferRX,SENSOR_FRAME_LENGTH);

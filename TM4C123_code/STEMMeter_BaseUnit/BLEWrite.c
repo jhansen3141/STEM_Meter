@@ -1,6 +1,7 @@
 // Josh Hansen
-// CEEN 4360 - Fall 2016
-// Phase 2
+// STEM-Meter
+// Team 3
+// Spring 2017
 
 #include <stdio.h>
 #include <string.h>
@@ -35,6 +36,9 @@
 
 #define TASKSTACKSIZE       1024
 #define TASK_PRIORITY 		1
+#define SPI_BIT_RATE 		5000000
+#define SPI_CONFIG_DATA_MARKER			0xA5
+#define CONFIG_RECIEVED_MARKER 			0x55
 
 typedef enum {
 	NO_SENSOR_ID = 0,
@@ -49,8 +53,6 @@ Char task0Stack[TASKSTACKSIZE];
 
 static SPI_Handle      SPIHandle;
 static SPI_Params      SPIParams;
-static SPI_Transaction spiTransaction;
-
 
 // Queue for task messages
 static Queue_Struct bleWriteMsgQ;
@@ -60,7 +62,7 @@ static Semaphore_Struct semBLEWriteStruct;
 static Semaphore_Handle semBLEWriteHandle;
 
 //static uint8_t txBuffer[21];
-static uint8_t rxBuffer[21];
+//static uint8_t rxBuffer[21];
 
 // Struct for task messages
 typedef struct {
@@ -71,7 +73,7 @@ typedef struct {
 
 static void BLEWriteFxn(UArg arg0, UArg arg1);
 static void BLEWrite_Init();
-static bool SPISendUpdate(uint8_t *txBuffer);
+static bool SPISendUpdate(uint8_t *txBuffer, uint8_t *rxBuffer);
 static void user_processBLEWriteMessage(bleWrite_msg_t *pMsg);
 static void startUpLEDRoutine(uint8_t rotations);
 static void SPISlaveInterrupt();
@@ -81,7 +83,7 @@ static void updateSensorConfig();
 
 void BLEWrite_createTask(void) {
     Task_Params taskParams;
-    /* Construct file copy Task thread */
+    // Construct task thread
     Task_Params_init(&taskParams);
     taskParams.stackSize = TASKSTACKSIZE;
     taskParams.stack = &task0Stack;
@@ -92,7 +94,7 @@ void BLEWrite_createTask(void) {
 static void BLEWrite_Init() {
 	Semaphore_Params semParams;
 
-    /* Construct a Semaphore object to be used as a resource lock, inital count 0 */
+    // Construct a Semaphore object to be used as a resource lock, inital count 0
     Semaphore_Params_init(&semParams);
     Semaphore_construct(&semBLEWriteStruct, 0, &semParams);
 
@@ -104,7 +106,7 @@ static void BLEWrite_Init() {
 
 	 SPI_init();
 	 SPI_Params_init(&SPIParams);
-	 SPIParams.bitRate  = 1000000;
+	 SPIParams.bitRate  = SPI_BIT_RATE;
 	 SPIParams.frameFormat = SPI_POL0_PHA0;
 	 SPIParams.mode = SPI_MASTER;
 	 SPIParams.transferMode = SPI_MODE_BLOCKING;
@@ -117,21 +119,28 @@ static void BLEWrite_Init() {
 	GPIO_setCallback(Board_SPI_SLAVE_INT, SPISlaveInterrupt);
 
 	// Enable interrupt
-	GPIO_enableInt(Board_SPI_SLAVE_INT);
+	//GPIO_enableInt(Board_SPI_SLAVE_INT);
 
 }
 
 static void SPISlaveInterrupt() {
 	enqueueSelfMsg(UPDATE_SENSOR_CONFIG_MSG);
+	// disable the interrupt until finished
+	GPIO_disableInt(Board_SPI_SLAVE_INT);
 }
 
-static bool SPISendUpdate(uint8_t *txBuffer) {
-	memset(rxBuffer,0,21); // clear the RX buffer first
+static bool SPISendUpdate(uint8_t *txBuffer, uint8_t *rxBuffer) {
+	bool returnStatus;
+	GPIO_write(Board_SPI_CS_INT, Board_CS_ACTIVE);
+	//memset(rxBuffer,0,21); // clear the RX buffer first
+	SPI_Transaction spiTransaction;
 	spiTransaction.count = 21;
 	spiTransaction.txBuf = txBuffer;
 	spiTransaction.rxBuf = rxBuffer;
 	// do the SPI transfer
-	return SPI_transfer(SPIHandle, &spiTransaction);
+	returnStatus = SPI_transfer(SPIHandle, &spiTransaction);
+	GPIO_write(Board_SPI_CS_INT, Board_CS_DEACTIVE);
+	return returnStatus;
 }
 
 static void BLEWriteFxn(UArg arg0, UArg arg1) {
@@ -158,7 +167,7 @@ static void BLEWriteFxn(UArg arg0, UArg arg1) {
 static void user_processBLEWriteMessage(bleWrite_msg_t *pMsg) {
 	bool shouldSendUpdate = true;
 	uint8_t txBufferUpdate[21];
-	;
+	uint8_t rxBuffer[21];
 	switch (pMsg->type) {
 		// Set sensor ID to be transmitted
 		case SENSOR_1_UPDATE_DATA_MSG:
@@ -188,7 +197,7 @@ static void user_processBLEWriteMessage(bleWrite_msg_t *pMsg) {
 		// copy sensor data into txBuffer
 		memcpy(txBufferUpdate+1,pMsg->pdu,20);
 		// send the updated data
-		SPISendUpdate(txBufferUpdate);
+		SPISendUpdate(txBufferUpdate,rxBuffer);
 	}
 }
 
@@ -198,18 +207,19 @@ static void updateSensorConfig() {
 	uint8_t sensorFreq;
 	uint8_t sdCardWrite;
 	uint8_t dummyTXBuffer[21];;
+	uint8_t localRXBuffer[21];
+
 	memset(dummyTXBuffer,0,21);
-	ret = SPISendUpdate(dummyTXBuffer);
-	// Byte 0 = Sensor Position Number
-	// Byte 1 = Sensor Freq
-	// Byte 2 = Sensor SD Log
+
+	ret = SPISendUpdate(dummyTXBuffer,localRXBuffer);
 
 	if (ret) {
-		// convert ASCII to int (Note: Only works for numbers 0-9)
-		// Only 4 sensors and less than 10 freq and SD card states
-		sensorNumber = rxBuffer[0] & 0x0F;
-		sensorFreq = rxBuffer[1] & 0x0F;
-		sdCardWrite = rxBuffer[2] & 0x0F;
+		// Byte 0 = Sensor Position Number
+		// Byte 1 = Sensor Freq
+		// Byte 2 = Sensor SD Log
+		sensorNumber = localRXBuffer[0];
+		sensorFreq = localRXBuffer[1];
+		sdCardWrite = localRXBuffer[2];
 		switch(sensorNumber) {
 		case SENSOR_1_ID:
 			Sensor1WriteConfig(sensorFreq);
@@ -225,6 +235,11 @@ static void updateSensorConfig() {
 			break;
 		}
 	}
+	else {
+		// TODO handle config set error
+	}
+	// Re-Enable interrupt
+	GPIO_enableInt(Board_SPI_SLAVE_INT);
 }
 
 void enqueueBLEWritetTaskMsg(bleWrite_msg_types_t msgType, uint8_t *buffer, uint16_t len) {

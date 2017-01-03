@@ -160,8 +160,8 @@ GPIO_PinConfig gpioPinConfigs[] = {
     GPIOTiva_PE_5 | GPIO_CFG_IN_PU | GPIO_CFG_IN_INT_RISING,
 	// Sensor 4 Input
     GPIOTiva_PB_3 | GPIO_CFG_IN_PU | GPIO_CFG_IN_INT_RISING,
-	// CC2640 Interrupt
-	GPIOTiva_PD_3 | GPIO_CFG_IN_PD | GPIO_CFG_IN_INT_RISING,
+	// CC2640 SPI Interrupt
+	GPIOTiva_PD_0 | GPIO_CFG_IN_PD | GPIO_CFG_IN_INT_RISING,
 
     /* Output pins */
 	// Sensor 1 Output
@@ -172,6 +172,9 @@ GPIO_PinConfig gpioPinConfigs[] = {
     GPIOTiva_PE_4 | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_STR_MED | GPIO_CFG_OUT_HIGH,
 	// Sensor 4 Output
 	GPIOTiva_PB_2 | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_STR_MED | GPIO_CFG_OUT_HIGH,
+
+	// CC2640 SPI CS
+	GPIOTiva_PD_3 | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_STR_MED | GPIO_CFG_OUT_HIGH,
 
 	// S1 LED
 	GPIOTiva_PD_4 | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_STR_HIGH| GPIO_CFG_OUT_HIGH,
@@ -746,68 +749,3 @@ void EK_TM4C123GXL_initWatchdog(void)
     Watchdog_init();
 }
 
-/*
- *  =============================== WiFi ===============================
- */
-/* Place into subsections to allow the TI linker to remove items properly */
-#if defined(__TI_COMPILER_VERSION__)
-#pragma DATA_SECTION(WiFi_config, ".const:WiFi_config")
-#pragma DATA_SECTION(wiFiCC3100HWAttrs, ".const:wiFiCC3100HWAttrs")
-#endif
-
-#include <ti/drivers/WiFi.h>
-#include <ti/drivers/wifi/WiFiCC3100.h>
-
-WiFiCC3100_Object wiFiCC3100Objects[EK_TM4C123GXL_WIFICOUNT];
-
-const WiFiCC3100_HWAttrs wiFiCC3100HWAttrs[EK_TM4C123GXL_WIFICOUNT] = {
-    {
-        .irqPort = GPIO_PORTB_BASE,
-        .irqPin = GPIO_PIN_2,
-        .irqIntNum = INT_GPIOB,
-
-        .csPort = GPIO_PORTE_BASE,
-        .csPin = GPIO_PIN_0,
-
-        .enPort = GPIO_PORTE_BASE,
-        .enPin = GPIO_PIN_4
-    }
-};
-
-const WiFi_Config WiFi_config[] = {
-    {
-        .fxnTablePtr = &WiFiCC3100_fxnTable,
-        .object = &wiFiCC3100Objects[0],
-        .hwAttrs = &wiFiCC3100HWAttrs[0]
-    },
-    {NULL,NULL, NULL},
-};
-
-/*
- *  ======== EK_TM4C123GXL_initWiFi ========
- */
-void EK_TM4C123GXL_initWiFi(void)
-{
-    /* Configure EN & CS pins to disable CC3100 */
-    GPIOPinTypeGPIOOutput(GPIO_PORTE_BASE, GPIO_PIN_0 | GPIO_PIN_4);
-    GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_0, GPIO_PIN_0);
-    GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_4, 0);
-
-    /* Configure SSI2 for CC3100 */
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_SSI2);
-    GPIOPinConfigure(GPIO_PB4_SSI2CLK);
-    GPIOPinConfigure(GPIO_PB6_SSI2RX);
-    GPIOPinConfigure(GPIO_PB7_SSI2TX);
-    GPIOPinTypeSSI(GPIO_PORTB_BASE, GPIO_PIN_4 | GPIO_PIN_6 | GPIO_PIN_7);
-
-    /* Configure IRQ pin */
-    GPIOPinTypeGPIOInput(GPIO_PORTB_BASE, GPIO_PIN_2);
-    GPIOPadConfigSet(GPIO_PORTB_BASE, GPIO_PIN_2, GPIO_STRENGTH_2MA,
-                     GPIO_PIN_TYPE_STD_WPD);
-    GPIOIntTypeSet(GPIO_PORTB_BASE, GPIO_PIN_2, GPIO_RISING_EDGE);
-
-    SPI_init();
-    EK_TM4C123GXL_initDMA();
-
-    WiFi_init();
-}

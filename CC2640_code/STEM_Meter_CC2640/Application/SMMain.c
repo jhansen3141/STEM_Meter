@@ -110,7 +110,7 @@ typedef struct
 static ICall_EntityID selfEntity;
 
 // Semaphore globally used to post events to the application thread
-static ICall_Semaphore sem;
+static ICall_Semaphore BLESem;
 
 // Queue object used for application messages.
 static Queue_Struct applicationMsgQ;
@@ -180,11 +180,6 @@ static void user_gapBondMgr_passcodeCB(uint8_t *deviceAddr, uint16_t connHandle,
 static void user_gapBondMgr_pairStateCB(uint16_t connHandle, uint8_t state,
                                         uint8_t status);
 
-// Generic callback handlers for value changes in services.
-static void user_service_ValueChangeCB( uint16_t connHandle, uint16_t svcUuid, uint8_t paramID, uint8_t *pValue, uint16_t len );
-static void user_service_CfgChangeCB( uint16_t connHandle, uint16_t svcUuid, uint8_t paramID, uint8_t *pValue, uint16_t len );
-
-
 // Declaration of service callback handlers
 static void user_STEMMeter_ServiceValueChangeCB(uint8_t paramID); // Callback from the service.
 static void user_STEMMeter_Service_ValueChangeDispatchHandler(server_char_write_t *pWrite); // Local handler called from the Task context of this task.
@@ -193,13 +188,6 @@ static void user_updateCharVal(char_data_t *pCharData);
 
 // Utility functions
 static void user_enqueueRawAppMsg(app_msg_types_t appMsgType, uint8_t *pData, uint16_t len );
-static void user_enqueueCharDataMsg(app_msg_types_t appMsgType, uint16_t connHandle,
-                                    uint16_t serviceUUID, uint8_t paramID,
-                                    uint8_t *pValue, uint16_t len);
-
-static char *Util_convertArrayToHexString(uint8_t const *src, uint8_t src_len,
-                                          uint8_t *dst, uint8_t dst_len);
-static char *Util_getLocalNameStr(const uint8_t *data);
 void enqueueBatteryCharUpdate(uint8_t *pValue);
 
 /*********************************************************************
@@ -259,7 +247,7 @@ static void ProjectZero_init(void) {
   // ******************************************************************
   // Register the current thread as an ICall dispatcher application
   // so that the application can send and receive messages via ICall to Stack.
-  ICall_registerApp(&selfEntity, &sem);
+  ICall_registerApp(&selfEntity, &BLESem);
 
   // Initialize queue for application messages.
   // Note: Used to transfer control to application thread from e.g. interrupts.
@@ -387,81 +375,71 @@ static void ProjectZero_init(void) {
  *
  * @return  None.
  */
-static void ProjectZero_taskFxn(UArg a0, UArg a1)
-{
-  // Initialize application
-  ProjectZero_init();
+static void ProjectZero_taskFxn(UArg a0, UArg a1) {
+	// Initialize application
+	ProjectZero_init();
 
-  // Application main loop
-  for (;;) {
+	// Application main loop
+	while(1) {
+		ICall_Errno errno = ICall_wait(ICALL_TIMEOUT_FOREVER);
 
-    ICall_Errno errno = ICall_wait(ICALL_TIMEOUT_FOREVER);
-	while (!Queue_empty(hServiceMsgQ)) {
-		server_char_write_t *pWrite = Queue_dequeue(hServiceMsgQ);
+		while (!Queue_empty(hServiceMsgQ)) {
+			server_char_write_t *pWrite = Queue_dequeue(hServiceMsgQ);
 
-		switch(pWrite->svcUUID) {
-			case STEMMETER_SERVICE_SERV_UUID:
-				user_STEMMeter_Service_ValueChangeDispatchHandler(pWrite);
-				break;
+			switch(pWrite->svcUUID) {
+				case STEMMETER_SERVICE_SERV_UUID:
+					user_STEMMeter_Service_ValueChangeDispatchHandler(pWrite);
+					break;
 		}
-
 		// Free the message received from the service callback.
 		ICall_free(pWrite);
+		}
+
+		if (errno == ICALL_ERRNO_SUCCESS) {
+			ICall_EntityID dest;
+			ICall_ServiceEnum src;
+			ICall_HciExtEvt *pMsg = NULL;
+
+			// Check if we got a signal because of a stack message
+			if (ICall_fetchServiceMsg(&src, &dest,
+								(void **)&pMsg) == ICALL_ERRNO_SUCCESS) {
+				uint8 safeToDealloc = TRUE;
+
+				if ((src == ICALL_SERVICE_CLASS_BLE) && (dest == selfEntity)) {
+					ICall_Event *pEvt = (ICall_Event *)pMsg;
+
+					// Check for event flags received (event signature 0xffff)
+					if (pEvt->signature == 0xffff) {
+						// Event received when a connection event is completed
+						if (pEvt->event_flag & PRZ_CONN_EVT_END_EVT) {
+							  // Try to retransmit pending ATT Response (if any)
+							  ProjectZero_sendAttRsp();
+						}
+					}
+					// It's a message from the stack and not an event.
+					else {
+						// Process inter-task message
+						safeToDealloc = ProjectZero_processStackMsg((ICall_Hdr *)pMsg);
+					}
+				}
+
+				if (pMsg && safeToDealloc) {
+					ICall_freeMsg(pMsg);
+				}
+			}
+
+			// Process messages sent from another task or another context.
+			while (!Queue_empty(hApplicationMsgQ)) {
+				app_msg_t *pMsg = Queue_dequeue(hApplicationMsgQ);
+
+				// Process application-layer message probably sent from ourselves.
+				user_processApplicationMessage(pMsg);
+
+				// Free the received message.
+				ICall_free(pMsg);
+			}
+		}
 	}
-
-    if (errno == ICALL_ERRNO_SUCCESS)
-    {
-      ICall_EntityID dest;
-      ICall_ServiceEnum src;
-      ICall_HciExtEvt *pMsg = NULL;
-
-      // Check if we got a signal because of a stack message
-      if (ICall_fetchServiceMsg(&src, &dest,
-                                (void **)&pMsg) == ICALL_ERRNO_SUCCESS)
-      {
-        uint8 safeToDealloc = TRUE;
-
-        if ((src == ICALL_SERVICE_CLASS_BLE) && (dest == selfEntity))
-        {
-          ICall_Event *pEvt = (ICall_Event *)pMsg;
-
-          // Check for event flags received (event signature 0xffff)
-          if (pEvt->signature == 0xffff)
-          {
-            // Event received when a connection event is completed
-            if (pEvt->event_flag & PRZ_CONN_EVT_END_EVT)
-            {
-              // Try to retransmit pending ATT Response (if any)
-              ProjectZero_sendAttRsp();
-            }
-          }
-          else // It's a message from the stack and not an event.
-          {
-            // Process inter-task message
-            safeToDealloc = ProjectZero_processStackMsg((ICall_Hdr *)pMsg);
-          }
-        }
-
-        if (pMsg && safeToDealloc)
-        {
-          ICall_freeMsg(pMsg);
-        }
-      }
-
-      // Process messages sent from another task or another context.
-      while (!Queue_empty(hApplicationMsgQ))
-      {
-        app_msg_t *pMsg = Queue_dequeue(hApplicationMsgQ);
-
-        // Process application-layer message probably sent from ourselves.
-        user_processApplicationMessage(pMsg);
-
-        // Free the received message.
-        ICall_free(pMsg);
-      }
-
-    }
-  }
 }
 
 void user_STEMMeter_Service_ValueChangeDispatchHandler(server_char_write_t *pWrite) {
@@ -568,7 +546,7 @@ static void user_STEMMeter_ServiceValueChangeCB(uint8_t paramID) {
     // Enqueue the message using pointer to queue node element.
     Queue_enqueue(hServiceMsgQ, &pWrite->_elem);
     // Let application know there's a message
-    Semaphore_post(sem);
+    Semaphore_post(BLESem);
   }
 }
 
@@ -965,71 +943,6 @@ static void user_gapBondMgr_pairStateCB(uint16_t connHandle, uint8_t state,
   }
 }
 
-
-/******************************************************************************
- *****************************************************************************
- *
- *  Utility functions
- *
- ****************************************************************************
- *****************************************************************************/
-
-/*
- * @brief  Generic message constructor for characteristic data.
- *
- *         Sends a message to the application for handling in Task context where
- *         the message payload is a char_data_t struct.
- *
- *         From service callbacks the appMsgType is APP_MSG_SERVICE_WRITE or
- *         APP_MSG_SERVICE_CFG, and functions running in another context than
- *         the Task itself, can set the type to APP_MSG_UPDATE_CHARVAL to
- *         make the user Task loop invoke user_updateCharVal function for them.
- *
- * @param  appMsgType    Enumerated type of message being sent.
- * @param  connHandle    GAP Connection handle of the relevant connection
- * @param  serviceUUID   16-bit part of the relevant service UUID
- * @param  paramID       Index of the characteristic in the service
- * @oaram  *pValue       Pointer to characteristic value
- * @param  len           Length of characteristic data
- */
-static void user_enqueueCharDataMsg( app_msg_types_t appMsgType,
-                                     uint16_t connHandle,
-                                     uint16_t serviceUUID, uint8_t paramID,
-                                     uint8_t *pValue, uint16_t len )
-{
-  // Called in Stack's Task context, so can't do processing here.
-  // Send message to application message queue about received data.
-  uint16_t readLen = len; // How much data was written to the attribute
-
-  // Allocate memory for the message.
-  // Note: The pCharData message doesn't have to contain the data itself, as
-  //       that's stored in a variable in the service implementation.
-  //
-  //       However, to prevent data loss if a new value is received before the
-  //       service's container is read out via the GetParameter API is called,
-  //       we copy the characteristic's data now.
-  app_msg_t *pMsg = ICall_malloc( sizeof(app_msg_t) + sizeof(char_data_t) +
-                                  readLen );
-
-  if (pMsg != NULL)
-  {
-    pMsg->type = appMsgType;
-
-    char_data_t *pCharData = (char_data_t *)pMsg->pdu;
-    pCharData->svcUUID = serviceUUID; // Use 16-bit part of UUID.
-    pCharData->paramID = paramID;
-    // Copy data from service now.
-    memcpy(pCharData->data, pValue, readLen);
-    // Update pCharData with how much data we received.
-    pCharData->dataLen = readLen;
-    // Enqueue the message using pointer to queue node element.
-    Queue_enqueue(hApplicationMsgQ, &pMsg->_elem);
-    // Let application know there's a message.
-    Semaphore_post(sem);
-  }
-}
-
-
 /*
  * @brief  Generic message constructor for application messages.
  *
@@ -1055,7 +968,7 @@ static void user_enqueueRawAppMsg(app_msg_types_t appMsgType, uint8_t *pData,
     // Enqueue the message using pointer to queue node element.
     Queue_enqueue(hApplicationMsgQ, &pMsg->_elem);
     // Let application know there's a message.
-    Semaphore_post(sem);
+    Semaphore_post(BLESem);
   }
 }
 
@@ -1093,70 +1006,6 @@ static void user_updateCharVal(char_data_t *pCharData) {
   }
 }
 
-/*
- * @brief   Convert {0x01, 0x02} to "01:02"
- *
- * @param   src - source byte-array
- * @param   src_len - length of array
- * @param   dst - destination string-array
- * @param   dst_len - length of array
- *
- * @return  array as string
- */
-static char *Util_convertArrayToHexString(uint8_t const *src, uint8_t src_len,
-                                          uint8_t *dst, uint8_t dst_len)
-{
-  char        hex[] = "0123456789ABCDEF";
-  uint8_t     *pStr = dst;
-  uint8_t     avail = dst_len-1;
-
-  memset(dst, 0, avail);
-
-  while (src_len && avail > 3)
-  {
-    if (avail < dst_len-1) { *pStr++ = ':'; avail -= 1; };
-    *pStr++ = hex[*src >> 4];
-    *pStr++ = hex[*src++ & 0x0F];
-    avail -= 2;
-    src_len--;
-  }
-
-  if (src_len && avail)
-    *pStr++ = ':'; // Indicate not all data fit on line.
-
-  return (char *)dst;
-}
-
-/*
- * @brief   Extract the LOCALNAME from Scan/AdvData
- *
- * @param   data - Pointer to the advertisement or scan response data
- *
- * @return  Pointer to null-terminated string with the adv local name.
- */
-static char *Util_getLocalNameStr(const uint8_t *data) {
-  uint8_t nuggetLen = 0;
-  uint8_t nuggetType = 0;
-  uint8_t advIdx = 0;
-
-  static char localNameStr[32] = { 0 };
-  memset(localNameStr, 0, sizeof(localNameStr));
-
-  for (advIdx = 0; advIdx < 32;) {
-    nuggetLen = data[advIdx++];
-    nuggetType = data[advIdx];
-    if ( (nuggetType == GAP_ADTYPE_LOCAL_NAME_COMPLETE ||
-          nuggetType == GAP_ADTYPE_LOCAL_NAME_SHORT) && nuggetLen < 31) {
-      memcpy(localNameStr, &data[advIdx + 1], nuggetLen - 1);
-      break;
-    } else {
-      advIdx += nuggetLen;
-    }
-  }
-
-  return localNameStr;
-}
-
 void enqueueBatteryCharUpdate(uint8_t *pValue) {
 	app_msg_t *pMsg = ICall_malloc( sizeof(app_msg_t) + sizeof(char_data_t) + STEMMETER_SERVICE_BATTERYDATA_LEN);
 	if (pMsg != NULL) {
@@ -1167,7 +1016,7 @@ void enqueueBatteryCharUpdate(uint8_t *pValue) {
 		pCharData->dataLen = STEMMETER_SERVICE_BATTERYDATA_LEN;
 
 		Queue_enqueue(hApplicationMsgQ, &pMsg->_elem);
-		Semaphore_post(sem);
+		Semaphore_post(BLESem);
 	}
 }
 
@@ -1181,7 +1030,7 @@ void enqueueSensorCharUpdate(uint16_t charUUID, uint8_t *pValue) {
 		pCharData->dataLen = 20;
 
 		Queue_enqueue(hApplicationMsgQ, &pMsg->_elem);
-		Semaphore_post(sem);
+		Semaphore_post(BLESem);
 	}
 }
 

@@ -43,6 +43,7 @@ extern "C" {
 
 /* These #defines allow us to reuse TI-RTOS across other device families */
 #define 	Board_SPIINT			Board_SPI_INT
+#define 	Board_SPI_CS			Board_SPI_CS_Pin
 
 #define     Board_BUTTON0           Board_BTN1
 #define     Board_BUTTON1           Board_BTN2

@@ -86,6 +86,7 @@ extern "C" {
 #define Board_SENSOR_4_OUTPUT		SENSOR_4_OUTPUT
 
 #define Board_SPI_SLAVE_INT			BLE_INT_INPUT
+#define Board_SPI_CS_INT			SPI_CS_OUTPUT
 
 #define Board_SENSOR_1_LED			SENSOR_1_LED
 #define Board_SENSOR_2_LED			SENSOR_2_LED
@@ -97,6 +98,9 @@ extern "C" {
 
 #define Board_GPIO_HIGH				(1)
 #define Board_GPIO_LOW				(0)
+
+#define Board_CS_ACTIVE				(0)
+#define Board_CS_DEACTIVE			(1)
 
 #define SENSOR_1_LED_PIN			GPIO_PIN_4
 #define SENSOR_2_LED_PIN			GPIO_PIN_5
