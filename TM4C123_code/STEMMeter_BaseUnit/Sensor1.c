@@ -1,6 +1,7 @@
 // Josh Hansen
-// CEEN 4360 - Fall 2016
-// Phase 2
+// STEM-Meter
+// Team 3
+// Spring 2017
 
 #include <stdio.h>
 #include <string.h>

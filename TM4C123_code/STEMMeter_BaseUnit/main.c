@@ -1,6 +1,7 @@
 // Josh Hansen
-// CEEN 4360 - Fall 2016
-// Phase 2
+// STEM-Meter
+// Team 3
+// Spring 2017
 
 /* BIOS Header files */
 #include <ti/sysbios/BIOS.h>
@@ -12,7 +13,6 @@
 
 /* Example/Board Header files */
 #include "Board.h"
-#include "SystemTime.h"
 #include "main.h"
 
 

@@ -30,7 +30,6 @@
 /* Example/Board Header files */
 #include "Board.h"
 #include "BLEWrite.h"
-#include "SystemTime.h"
 
 #include "Sensor.h"
 
