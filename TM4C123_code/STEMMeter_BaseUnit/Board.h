@@ -86,6 +86,7 @@ extern "C" {
 #define Board_SENSOR_4_OUTPUT		SENSOR_4_OUTPUT
 
 #define Board_SPI_SLAVE_INT			BLE_INT_INPUT
+#define Board_SD_CARD_INT			SD_CARD_INT_INPUT
 #define Board_SPI_CS_INT			SPI_CS_OUTPUT
 
 #define Board_SENSOR_1_LED			SENSOR_1_LED

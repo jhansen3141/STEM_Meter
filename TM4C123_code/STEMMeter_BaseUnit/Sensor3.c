@@ -25,6 +25,7 @@
 #include "Board.h"
 #include "Sensor.h"
 #include "BLEWrite.h"
+#include "FatSD.h"
 
 
 #define TASKSTACKSIZE       768
@@ -33,9 +34,8 @@
 static Task_Struct sensor3TaskStruct;
 static Char sensor3TaskStack[TASKSTACKSIZE];
 
-//static uint8_t uartBufferTX[25];
-static uint8_t uart2BufferRX[25];
-
+static uint8_t uartBufferRX[25];
+bool Sensor3SDWriteEnabled = true;
 static UART_Handle      UART2Handle;
 
 static void Sensor3TaskFxn(UArg arg0, UArg arg1);
@@ -86,15 +86,19 @@ static void Sensor3TaskFxn(UArg arg0, UArg arg1) {
 	Sensor3TaskInit();
 	while(1) {
 		// block until 20 bytes have been recieved
-		UART_read(UART2Handle,uart2BufferRX,SENSOR_FRAME_LENGTH);
+		UART_read(UART2Handle,uartBufferRX,SENSOR_FRAME_LENGTH);
 
 		// make sure frame sync bytes are correct
-		if(uart2BufferRX[0] == FRAME_BYTE_0 &&
-			uart2BufferRX[1] == FRAME_BYTE_1 &&
-			uart2BufferRX[2] == FRAME_BYTE_2)
+		if(uartBufferRX[0] == FRAME_BYTE_0 &&
+			uartBufferRX[1] == FRAME_BYTE_1 &&
+			uartBufferRX[2] == FRAME_BYTE_2)
 		{
 			// write the bytes to the CC2640
-			enqueueBLEWritetTaskMsg(SENSOR_3_UPDATE_DATA_MSG,uart2BufferRX+FRAME_BYTES_OFFSET,SENSOR_DATA_LENGTH);
+			enqueueBLEWritetTaskMsg(SENSOR_3_UPDATE_DATA_MSG,uartBufferRX+FRAME_BYTES_OFFSET,SENSOR_DATA_LENGTH);
+			// if SD write is enabled for this sensor then write the reading to the SD card
+			if(Sensor3SDWriteEnabled) {
+				enqueueSDTaskMsg(WRITE_TO_SD_MSG,uartBufferRX+FRAME_BYTES_OFFSET,SENSOR_DATA_LENGTH);
+			}
 		}
 		else {
 			// TODO Reset sensor module

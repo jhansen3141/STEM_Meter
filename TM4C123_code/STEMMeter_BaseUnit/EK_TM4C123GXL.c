@@ -162,6 +162,8 @@ GPIO_PinConfig gpioPinConfigs[] = {
     GPIOTiva_PB_3 | GPIO_CFG_IN_PU | GPIO_CFG_IN_INT_RISING,
 	// CC2640 SPI Interrupt
 	GPIOTiva_PD_0 | GPIO_CFG_IN_PD | GPIO_CFG_IN_INT_RISING,
+	// SD Card Detect
+	GPIOTiva_PD_3 | GPIO_CFG_IN_NOPULL | GPIO_CFG_IN_INT_BOTH_EDGES,
 
     /* Output pins */
 	// Sensor 1 Output

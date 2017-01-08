@@ -26,6 +26,7 @@
 /* Example/Board Header files */
 #include "Board.h"
 #include "time_clock.h"
+#include "FatSD.h"
 
 /* Buffer size used for the file copy process */
 #ifndef CPY_BUFF_SIZE
@@ -52,14 +53,26 @@ static Queue_Handle hSDMsgQ;
 static Semaphore_Struct semSDStruct;
 static Semaphore_Handle semSDHandle;
 
-const char outputfile[] = "fat:"STR(DRIVE_NUM)":data.bin";
+const char outputfile[] = "fat:"STR(DRIVE_NUM)":SM_Data.bin";
+bool SDCardInserted = false;
+bool SDMasterWriteEnabled = true;
+static FILE *dataFile;
 static SDSPI_Handle sdspiHandle;
 static SDSPI_Params sdspiParams;
+
+typedef struct {
+  Queue_Elem _elem;
+  SD_msg_types_t type;
+  uint16_t length;
+  uint8_t pdu[];
+} SD_msg_t;
 
 
 /* Function Prototypes */
 static void SDCardFxn(UArg arg0, UArg arg1);
 static void SDCard_Init();
+static void user_processSDMessage(SD_msg_t *pMsg);
+static void SDCardDetectInterrupt(unsigned int index);
 
 
 void SDCard_createTask(void) {
@@ -70,7 +83,6 @@ void SDCard_createTask(void) {
     taskParams.stack = &SDCardTaskStack;
     Task_construct(&SDCardTaskStruct, (Task_FuncPtr)SDCardFxn, &taskParams, NULL);
 }
-
 
 
 // function to return the current date for file writes
@@ -88,16 +100,32 @@ uint32_t fatTimeHook() {
 			;
 }
 
+static void SDCardDetectInterrupt(unsigned int index) {
+	// disable the interrupt until finished
+	GPIO_disableInt(Board_SD_CARD_INT);
+
+	// if pin is high then card was removed
+	if(GPIO_read(Board_SD_CARD_INT)) {
+		SDCardInserted = false;
+	}
+	// otherwise it was inserted
+	else {
+		SDCardInserted = true;
+	}
+
+	GPIO_enableInt(Board_SD_CARD_INT);
+}
+
 static void SDCard_Init() {
 	Time_clockInit(); // init the RTC
 
 	UTCTimeStruct initTime;
-	initTime.day = 23;
-	initTime.dow = 5;
-	initTime.month = 8;
-	initTime.year = 2016;
+	initTime.day = 1;
+	initTime.dow = 1;
+	initTime.month = 1;
+	initTime.year = 2017;
 	initTime.hour = 8;
-	initTime.minutes = 30;
+	initTime.minutes = 0;
 	initTime.seconds = 0;
 	Time_clockSetTimeStruct(initTime); // set an intial time
 
@@ -121,39 +149,102 @@ static void SDCard_Init() {
 	Queue_construct(&SDMsgQ, NULL);
 	hSDMsgQ = Queue_handle(&SDMsgQ);
 
+	// setup SD Card Detect Interrupt callback
+	GPIO_setCallback(Board_SD_CARD_INT, SDCardDetectInterrupt);
+
+	// Enable interrupt
+	// Not working now due to issue with PCB layout
+	// Using software to detect card insert
+	//GPIO_enableInt(Board_SD_CARD_INT);
+
 }
-static void SDCardFxn(UArg arg0, UArg arg1) {
-	FILE *dataFile;
-	char timeStr[6] = {0};
-	uint32_t bytesWritten;
-	SDCard_Init();
+
+uint16_t SDWriteTime() {
+	uint16_t bytesWritten;
+	uint8_t timeData[10] = {0};
 
 	UTCTimeStruct time;
 	UTC_convertUTCTime(&time, UTC_getClock());
-	sprintf(timeStr,"%02d:%02d",time.hour,time.minutes);
 
-	// open the output file for writing
-	dataFile = fopen(outputfile, "w");
+	// set up time markers
+	timeData[0] = 0xAA;
+	timeData[1] = 0xBB;
+	timeData[2] = 0xCC;
+	timeData[3] = time.month;
+	timeData[4] = time.day;
+	timeData[5] = (uint8_t)(time.year - 2000);
+	timeData[6] = time.hour;
+	timeData[7] = time.minutes;
+	timeData[8] = time.seconds;
+	timeData[9] = 0xDD;
+
+	// open the output file for writing (appending data)
+	dataFile = fopen(outputfile, "a");
 	// check to see if file opened
 	if (dataFile) {
 		// fwrite(dataToWrite, size in bytes of each element, number of elements, file object)
-		bytesWritten = fwrite(timeStr, 1, 6, dataFile);
+		bytesWritten = fwrite(timeData, 1, 10, dataFile);
 
 		// flush the stream buffer
 		fflush(dataFile);
 
 		// close the data file
 		fclose(dataFile);
+		SDMasterWriteEnabled = true;
+	}
+	else {
+		SDMasterWriteEnabled = false;
 	}
 
+	return bytesWritten;
+}
+static void SDCardFxn(UArg arg0, UArg arg1) {
+	SDCard_Init();
+	SDWriteTime();
 
 	while(1) {
 		// block until work to do
 		Semaphore_pend(semSDHandle, BIOS_WAIT_FOREVER);
 
 		while (!Queue_empty(hSDMsgQ)) {
-
+			SD_msg_t *pMsg = Queue_dequeue(hSDMsgQ); // dequeue the message
+			user_processSDMessage(pMsg); // process the message
+			free(pMsg); // free mem
 		}
+	}
+}
+
+static void user_processSDMessage(SD_msg_t *pMsg) {
+
+	switch (pMsg->type) {
+		case WRITE_TO_SD_MSG:
+			// check to see if master write is enabled
+			if(SDMasterWriteEnabled) {
+				dataFile = fopen(outputfile, "a");
+				// check to see if file opened
+				if (dataFile) {
+					GPIO_write(Board_SENSOR_1_LED, Board_LED_ON);
+					// fwrite(dataToWrite, size in bytes of each element, number of elements, file object)
+					fwrite(pMsg->pdu, 1, pMsg->length, dataFile);
+					// flush the stream buffer
+					fflush(dataFile);
+					// close the data file
+					fclose(dataFile);
+					GPIO_write(Board_SENSOR_1_LED, Board_LED_OFF);
+				}
+			}
+			break;
+	}
+}
+
+void enqueueSDTaskMsg(SD_msg_types_t msgType, uint8_t *buffer, uint16_t len) {
+	SD_msg_t *pMsg = malloc(sizeof(SD_msg_t) + len); // create a new message for the queue
+	if (pMsg != NULL) {
+		pMsg->type = msgType;
+		pMsg->length = len;
+		memcpy(pMsg->pdu,buffer,len); // copy the data into the message
+		Queue_enqueue(hSDMsgQ, &pMsg->_elem); // enqueue the message
+		Semaphore_post(semSDHandle);
 	}
 }
 

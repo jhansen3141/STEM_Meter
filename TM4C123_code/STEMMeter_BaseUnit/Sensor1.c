@@ -26,6 +26,7 @@
 #include "Board.h"
 #include "Sensor.h"
 #include "BLEWrite.h"
+#include "FatSD.h"
 
 #define TASKSTACKSIZE       768
 #define TASK_PRIORITY 		1
@@ -34,7 +35,7 @@ static Task_Struct sensor1TaskStruct;
 static Char sensor1TaskStack[TASKSTACKSIZE];
 
 static uint8_t uartBufferRX[25];
-
+bool Sensor1SDWriteEnabled = true;
 static UART_Handle      UART0Handle;
 
 static void Sensor1TaskFxn(UArg arg0, UArg arg1);
@@ -95,9 +96,13 @@ static void Sensor1TaskFxn(UArg arg0, UArg arg1) {
 		{
 			// write the bytes to the CC2640
 			enqueueBLEWritetTaskMsg(SENSOR_1_UPDATE_DATA_MSG,uartBufferRX+FRAME_BYTES_OFFSET,SENSOR_DATA_LENGTH);
+			// if SD write is enabled for this sensor then write the reading to the SD card
+			if(Sensor1SDWriteEnabled) {
+				enqueueSDTaskMsg(WRITE_TO_SD_MSG,uartBufferRX+FRAME_BYTES_OFFSET,SENSOR_DATA_LENGTH);
+			}
 		}
 		else {
-			// TODO Reset sensor module
+			// TODO Handle frame out of sync error
 		}
 	}
 }

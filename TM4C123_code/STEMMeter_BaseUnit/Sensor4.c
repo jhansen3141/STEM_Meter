@@ -25,6 +25,7 @@
 #include "Board.h"
 #include "Sensor.h"
 #include "BLEWrite.h"
+#include "FatSD.h"
 
 
 #define TASKSTACKSIZE       768
@@ -35,7 +36,7 @@ static Char sensor4TaskStack[TASKSTACKSIZE];
 
 //static uint8_t uartBufferTX[25];
 static uint8_t uartBufferRX[25];
-
+bool Sensor4SDWriteEnabled = true;
 static UART_Handle      UART3Handle;
 
 static void Sensor4TaskFxn(UArg arg0, UArg arg1);
@@ -96,6 +97,10 @@ static void Sensor4TaskFxn(UArg arg0, UArg arg1) {
 		{
 			// write the bytes to the CC2640
 			enqueueBLEWritetTaskMsg(SENSOR_4_UPDATE_DATA_MSG,uartBufferRX+FRAME_BYTES_OFFSET,SENSOR_DATA_LENGTH);
+			// if SD write is enabled for this sensor then write the reading to the SD card
+			if(Sensor4SDWriteEnabled) {
+				enqueueSDTaskMsg(WRITE_TO_SD_MSG,uartBufferRX+FRAME_BYTES_OFFSET,SENSOR_DATA_LENGTH);
+			}
 		}
 		else {
 			// TODO Reset sensor module

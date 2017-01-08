@@ -75,7 +75,7 @@ static void BLEWrite_Init();
 static bool SPISendUpdate(uint8_t *txBuffer, uint8_t *rxBuffer);
 static void user_processBLEWriteMessage(bleWrite_msg_t *pMsg);
 static void startUpLEDRoutine(uint8_t rotations);
-static void SPISlaveInterrupt();
+static void SPISlaveInterrupt(unsigned int index);
 static void enqueueSelfMsg(bleWrite_msg_types_t msgType);
 static void updateSensorConfig();
 
@@ -122,7 +122,7 @@ static void BLEWrite_Init() {
 
 }
 
-static void SPISlaveInterrupt() {
+static void SPISlaveInterrupt(unsigned int index) {
 	enqueueSelfMsg(UPDATE_SENSOR_CONFIG_MSG);
 	// disable the interrupt until finished
 	GPIO_disableInt(Board_SPI_SLAVE_INT);
@@ -220,18 +220,42 @@ static void updateSensorConfig() {
 		sensorFreq = localRXBuffer[1];
 		sdCardWrite = localRXBuffer[2];
 		switch(sensorNumber) {
-		case SENSOR_1_ID:
-			Sensor1WriteConfig(sensorFreq);
-			break;
-		case SENSOR_2_ID:
-			Sensor2WriteConfig(sensorFreq);
-			break;
-		case SENSOR_3_ID:
-			Sensor3WriteConfig(sensorFreq);
-			break;
-		case SENSOR_4_ID:
-			Sensor4WriteConfig(sensorFreq);
-			break;
+			case SENSOR_1_ID:
+				Sensor1WriteConfig(sensorFreq);
+				if(sdCardWrite) {
+					Sensor1SDWriteEnabled = true;
+				}
+				else {
+					Sensor1SDWriteEnabled = false;
+				}
+				break;
+			case SENSOR_2_ID:
+				Sensor2WriteConfig(sensorFreq);
+				if(sdCardWrite) {
+					Sensor2SDWriteEnabled = true;
+				}
+				else {
+					Sensor2SDWriteEnabled = false;
+				}
+				break;
+			case SENSOR_3_ID:
+				Sensor3WriteConfig(sensorFreq);
+				if(sdCardWrite) {
+					Sensor3SDWriteEnabled = true;
+				}
+				else {
+					Sensor3SDWriteEnabled = false;
+				}
+				break;
+			case SENSOR_4_ID:
+				Sensor4WriteConfig(sensorFreq);
+				if(sdCardWrite) {
+					Sensor4SDWriteEnabled = true;
+				}
+				else {
+					Sensor4SDWriteEnabled = false;
+				}
+				break;
 		}
 	}
 	else {
