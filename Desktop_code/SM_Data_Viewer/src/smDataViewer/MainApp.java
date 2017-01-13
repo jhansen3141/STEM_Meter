@@ -63,7 +63,6 @@ public class MainApp extends Application {
 	private NumberAxis xAxis = new NumberAxis(0,400,0.5);
 	private NumberAxis yAxis = new NumberAxis(0,150,0.5);
 
-
 	@FXML
 	private LineChart <Number,Number>mainChart = new LineChart<Number,Number>(xAxis,yAxis);
 
@@ -72,7 +71,6 @@ public class MainApp extends Application {
 
 	@FXML
 	private VBox sensorListVBox;
-
 
 	@FXML
 	protected void initialize() {
@@ -83,7 +81,6 @@ public class MainApp extends Application {
 		mainChart.setTitle("Sensor Data");
 		//mainChart.getData().add(series);
 	}
-
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -101,11 +98,15 @@ public class MainApp extends Application {
 		if(fileChooser != null) {
 			File file = fileChooser.showOpenDialog(primaryStage);
 			if(file != null) {
+				// create a new log parser object with opened file
 				LogParser logParser = new LogParser(file);
+				// check to make sure file is valid (has date stamp))
 				if(logParser.isValidLogFile()) {
 					System.out.println("Valid Log File");
+					// create a list of log entries
 					ArrayList<SensorLogEntry> logEntries = logParser.getLogEntries();
 					System.out.println("Num entries: " + logEntries.size());
+					// for each log entry generate an entry into the list on left side of app
 					for(int i=0;i<logEntries.size();i++) {
 						generateListEntries(logEntries.get(i));
 					}
@@ -116,27 +117,30 @@ public class MainApp extends Application {
 				}
 			}
 		}
-
 	}
 
 	private void generateListEntries(SensorLogEntry logEntry) {
 		System.out.println("Generating List Entires...");
+		// get the start time for this entry
 		Date startTime = logEntry.getStartTime();
-
+		// get the list of data points for this entry
 		ArrayList<DataPoint> dataPointsList =  logEntry.getDataPoints();
 		System.out.println("DataPointList Size: " + dataPointsList.size());
+		// go through all of the data points and separate them into different sensors
 		for(int i=0; i<dataPointsList.size(); i++) {
 			DataPoint currentDataPoint = dataPointsList.get(i);
+			// if the list is empty then add the first entry
 			if(sensorListEntries.size() == 0) {
-				System.out.println("Adding List Entry");
 				SensorListEntry firstEntry = new SensorListEntry(currentDataPoint.getSensorType(),startTime,mainChart);
 				firstEntry.addLogToSeries(logEntry);
 				sensorListEntries.add(firstEntry);
 			}
+			// if not empty list then only add if sensor doesn't already exists
 			else {
 				final int sensorListEntriesSize = sensorListEntries.size();
 				for(int j=0; j<sensorListEntriesSize; j++) {
 					final int dataPointType = currentDataPoint.getSensorType();
+					// check to see if this type of sensor already exists in the list
 					if(!(sensorExistsInList(dataPointType))) {
 						SensorListEntry entry = new SensorListEntry(currentDataPoint.getSensorType(),startTime,mainChart);
 						entry.addLogToSeries(logEntry);
@@ -145,18 +149,22 @@ public class MainApp extends Application {
 				}
 			}
 		}
-		System.out.println("Generating CheckBox Entries...");
+		// set the text with the date for this log entry
 		Text dateText = new Text(logEntry.dateToString());
 		dateText.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
+		// add the date text to the vbox on left side of app
 		sensorListVBox.getChildren().add(dateText);
+
+		// add a separator under the date
 		Separator separator = new Separator();
 		sensorListVBox.getChildren().add(separator);
+
+		// add check boxes for each sensor type under this log entry
 		final int numEntries = sensorListEntries.size();
 		for(int i=0; i< numEntries; i++) {
 			CheckBox cb = sensorListEntries.get(i).getCheckBox();
 			cb.setPadding(new Insets(10,0,10,0));
 			sensorListVBox.getChildren().add(cb);
-
 		}
 	}
 
@@ -171,11 +179,9 @@ public class MainApp extends Application {
 		return exists;
 	}
 
-
-
 	@FXML
 	protected void convertCVSAction() {
-
+		// TODO add function to convert data to CVS
 	}
 
 	@FXML
@@ -184,9 +190,6 @@ public class MainApp extends Application {
 		Platform.exit();
 	}
 
-    /**
-     * Initializes the root layout.
-     */
     public void initRootLayout() {
         try {
             // Load root layout from fxml file.
@@ -203,10 +206,6 @@ public class MainApp extends Application {
         }
     }
 
-    /**
-     * Returns the main stage.
-     * @return
-     */
     public Stage getPrimaryStage() {
         return primaryStage;
     }

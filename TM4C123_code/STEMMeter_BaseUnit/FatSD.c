@@ -81,7 +81,8 @@ void SDCard_createTask(void) {
     Task_Params_init(&taskParams);
     taskParams.stackSize = TASKSTACKSIZE;
     taskParams.stack = &SDCardTaskStack;
-    Task_construct(&SDCardTaskStruct, (Task_FuncPtr)SDCardFxn, &taskParams, NULL);
+    Task_construct(&SDCardTaskStruct,
+		(Task_FuncPtr)SDCardFxn, &taskParams, NULL);
 }
 
 
@@ -138,7 +139,7 @@ static void SDCard_Init() {
 	}
 
 	Semaphore_Params semSDParams;
-	// Construct a Semaphore object to be used as a resource lock, inital count 0
+	// Construct a Semaphore object to be used as a resource lock
 	Semaphore_Params_init(&semSDParams);
 	Semaphore_construct(&semSDStruct, 0, &semSDParams);
 
@@ -182,7 +183,8 @@ uint16_t SDWriteTime() {
 	dataFile = fopen(outputfile, "a");
 	// check to see if file opened
 	if (dataFile) {
-		// fwrite(dataToWrite, size in bytes of each element, number of elements, file object)
+		// fwrite(dataToWrite, size in bytes of each element,
+		// number of elements, file object)
 		bytesWritten = fwrite(timeData, 1, 10, dataFile);
 
 		// flush the stream buffer
@@ -224,7 +226,7 @@ static void user_processSDMessage(SD_msg_t *pMsg) {
 				// check to see if file opened
 				if (dataFile) {
 					GPIO_write(Board_SENSOR_1_LED, Board_LED_ON);
-					// fwrite(dataToWrite, size in bytes of each element, number of elements, file object)
+
 					fwrite(pMsg->pdu, 1, pMsg->length, dataFile);
 					// flush the stream buffer
 					fflush(dataFile);
@@ -238,7 +240,8 @@ static void user_processSDMessage(SD_msg_t *pMsg) {
 }
 
 void enqueueSDTaskMsg(SD_msg_types_t msgType, uint8_t *buffer, uint16_t len) {
-	SD_msg_t *pMsg = malloc(sizeof(SD_msg_t) + len); // create a new message for the queue
+	// create a new message for the queue
+	SD_msg_t *pMsg = malloc(sizeof(SD_msg_t) + len);
 	if (pMsg != NULL) {
 		pMsg->type = msgType;
 		pMsg->length = len;

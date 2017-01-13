@@ -98,7 +98,7 @@ static void Sensor1TaskFxn(UArg arg0, UArg arg1) {
 			enqueueBLEWritetTaskMsg(SENSOR_1_UPDATE_DATA_MSG,uartBufferRX+FRAME_BYTES_OFFSET,SENSOR_DATA_LENGTH);
 			// if SD write is enabled for this sensor then write the reading to the SD card
 			if(Sensor1SDWriteEnabled) {
-				enqueueSDTaskMsg(WRITE_TO_SD_MSG,uartBufferRX+FRAME_BYTES_OFFSET,SENSOR_DATA_LENGTH);
+				enqueueSDTaskMsg(WRITE_TO_SD_MSG,uartBufferRX,SENSOR_DATA_LENGTH+FRAME_BYTES_OFFSET);
 			}
 		}
 		else {

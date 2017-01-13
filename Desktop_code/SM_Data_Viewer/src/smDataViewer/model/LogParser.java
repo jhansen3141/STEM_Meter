@@ -16,7 +16,6 @@ public class LogParser {
 	public LogParser(File logFile) {
 		sensorLogEntries = new ArrayList<SensorLogEntry>();
 		parseFile(logFile);
-
 	}
 
 	@SuppressWarnings("deprecation")
@@ -80,7 +79,6 @@ public class LogParser {
 						threeByteArray[1] == Constants.LOG_MARKER_B1 &&
 						threeByteArray[2] == Constants.LOG_MARKER_B2)
 				{
-					//System.out.println("Data point found");
 					bytesRead = fileStream.read(twentyByteArray,0,20);
 					// add the data point to the log entry list of data points
 					DataPoint dataPoint = rawToDataPoint(twentyByteArray);
@@ -112,12 +110,12 @@ public class LogParser {
 		case Constants.IMU_MPU6050:
 			sensor = new IMU_MPU6050(sensorData);
 			sensor.calcSensorData();
-			dataPoint = new DataPoint(Constants.IMU_MPU6050,sensor.getSyncNumber(),sensor.getGraphData());
+			dataPoint = new DataPoint(Constants.IMU_MPU6050,sensor.getSyncNumber(),sensor.getSensorRate(),sensor.getGraphData());
 			break;
 		case Constants.TEMP_MCP9808:
 			sensor = new TEMP_MCP9808(sensorData);
 			sensor.calcSensorData();
-			dataPoint = new DataPoint(Constants.TEMP_MCP9808,sensor.getSyncNumber(),sensor.getGraphData());
+			dataPoint = new DataPoint(Constants.TEMP_MCP9808,sensor.getSyncNumber(),sensor.getSensorRate(),sensor.getGraphData());
 			break;
 		}
 		return dataPoint;

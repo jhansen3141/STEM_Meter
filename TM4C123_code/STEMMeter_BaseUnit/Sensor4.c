@@ -88,7 +88,6 @@ static void Sensor4TaskFxn(UArg arg0, UArg arg1) {
 	while(1) {
 		// block until 20 bytes have been recieved
 		UART_read(UART3Handle,uartBufferRX,SENSOR_FRAME_LENGTH);
-		enqueueBLEWritetTaskMsg(SENSOR_4_UPDATE_DATA_MSG,uartBufferRX+FRAME_BYTES_OFFSET,SENSOR_DATA_LENGTH);
 
 		// make sure frame sync bytes are correct
 		if(uartBufferRX[0] == FRAME_BYTE_0 &&
@@ -99,7 +98,7 @@ static void Sensor4TaskFxn(UArg arg0, UArg arg1) {
 			enqueueBLEWritetTaskMsg(SENSOR_4_UPDATE_DATA_MSG,uartBufferRX+FRAME_BYTES_OFFSET,SENSOR_DATA_LENGTH);
 			// if SD write is enabled for this sensor then write the reading to the SD card
 			if(Sensor4SDWriteEnabled) {
-				enqueueSDTaskMsg(WRITE_TO_SD_MSG,uartBufferRX+FRAME_BYTES_OFFSET,SENSOR_DATA_LENGTH);
+				enqueueSDTaskMsg(WRITE_TO_SD_MSG,uartBufferRX,SENSOR_DATA_LENGTH+FRAME_BYTES_OFFSET);
 			}
 		}
 		else {
