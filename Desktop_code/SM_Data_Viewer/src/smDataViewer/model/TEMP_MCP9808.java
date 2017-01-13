@@ -1,12 +1,14 @@
 package smDataViewer.model;
 
+import java.util.ArrayList;
+
 public class TEMP_MCP9808 extends Sensor {
 
     private String[] sensorStringArray;
     private float tempF, tempC;
 
-    public TEMP_MCP9808(byte[] data, int sensorPosition) {
-        super(data, sensorPosition);
+    public TEMP_MCP9808(byte[] data) {
+        super(data);
     }
 
     @Override
@@ -31,8 +33,10 @@ public class TEMP_MCP9808 extends Sensor {
     }
 
     @Override
-    float getGraphData() {
-        return tempF;
+    ArrayList<Float> getGraphData() {
+    	ArrayList<Float> graphData = new ArrayList<>();
+    	graphData.add(tempF);
+        return graphData;
     }
 
     @Override

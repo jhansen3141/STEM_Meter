@@ -1,5 +1,7 @@
 package smDataViewer.model;
 
+import java.util.ArrayList;
+
 public class IMU_MPU6050 extends Sensor{
 
     private float ACCEL_SENSE = 2048.0f; // +-16g
@@ -8,8 +10,8 @@ public class IMU_MPU6050 extends Sensor{
     private float xAccelF,yAccelF,zAccelF,xGyroF,yGyroF,zGyroF;
 
 
-    public IMU_MPU6050(byte[] data, int sensorPosition) {
-        super(data, sensorPosition);
+    public IMU_MPU6050(byte[] data) {
+        super(data);
     }
 
     @Override
@@ -44,8 +46,12 @@ public class IMU_MPU6050 extends Sensor{
     }
 
     @Override
-    float getGraphData() {
-        return xAccelF;
+    ArrayList<Float> getGraphData() {
+    	ArrayList<Float> graphData = new ArrayList<>();
+    	graphData.add(xAccelF);
+    	graphData.add(yAccelF);
+    	graphData.add(zAccelF);
+        return graphData;
     }
 
     @Override

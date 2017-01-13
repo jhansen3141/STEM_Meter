@@ -1,13 +1,27 @@
 package smDataViewer.model;
 
-public class DataPoint {
-	float time;
-	float value;
+import java.util.ArrayList;
 
-	public DataPoint(float time, float value) {
+public class DataPoint {
+	private int time;
+	private ArrayList<Float> sensorValues;
+	private int sensorType;
+
+	public DataPoint(int sensorType, int time, ArrayList<Float> sensorValues) {
+		this.sensorType = sensorType;
 		this.time = time;
-		this.value = value;
+		this.sensorValues = sensorValues;
 	}
 
+	public int getStartTime() {
+		return time;
+	}
 
+	public int getSensorType() {
+		return sensorType;
+	}
+
+	public ArrayList<Float> getSensorValues() {
+		return sensorValues;
+	}
 }

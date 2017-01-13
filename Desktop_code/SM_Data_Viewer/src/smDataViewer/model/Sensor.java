@@ -1,15 +1,16 @@
 package smDataViewer.model;
 
+import java.util.ArrayList;
+
 public abstract class Sensor {
 
 	byte data[];
-    private int sensorNumber;
+
     private int syncNumber;
     private int sensorRate;
     private boolean SDLog;
 
-    public Sensor(byte data[], int sensorNumber) {
-        this.sensorNumber = sensorNumber;
+    public Sensor(byte data[]) {
         this.data = data;
         //sensor rate is held is second byte
         sensorRate = (int)data[1];
@@ -31,17 +32,13 @@ public abstract class Sensor {
         return sensorRate;
     }
 
-    public int getSensorNumber() {
-        return sensorNumber;
-    }
-
     public boolean isSDLog() {
         return SDLog;
     }
 
     abstract String[] calcSensorData();
 
-    abstract float getGraphData();
+    abstract ArrayList<Float> getGraphData();
 
 
 }
