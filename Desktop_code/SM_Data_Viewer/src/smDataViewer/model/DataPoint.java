@@ -15,7 +15,7 @@ public class DataPoint {
 		this.sensorValues = sensorValues;
 	}
 
-	public int getStartTime() {
+	public int getTime() {
 		return time;
 	}
 
@@ -31,6 +31,8 @@ public class DataPoint {
 		return sensorRate;
 	}
 
+	// returns how many series each of the sensors has
+	// Ex: 6-axis IMU has 6 graph series
 	public int sensorTypeToSeriesNumber() {
 		int seriesNumber = 1;
 		switch(sensorType) {

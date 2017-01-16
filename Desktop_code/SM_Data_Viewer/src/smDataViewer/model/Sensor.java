@@ -15,13 +15,13 @@ public abstract class Sensor {
         //sensor rate is held is second byte
         sensorRate = (int)data[1];
         // the sync number (24 bits) is held in bytes 2-4
-        syncNumber = ((int)data[2]<<16) | ((int)data[3]<<8) | ((int)data[4]);
+        syncNumber = (int)(((data[2]<<16) & 0xFF0000) | ((data[3]<<8) & 0xFF00) | (data[4] & 0xFF));
     }
 
     public void updateData(byte data[]) {
         this.data = data;
         sensorRate = (int)data[1];
-        syncNumber = ((int)data[2]<<16) | ((int)data[3]<<8) | ((int)data[4]);
+        syncNumber = (int)(((data[2]<<16) & 0xFF0000) | ((data[3]<<8) & 0xFF00) | (data[4] & 0xFF));
     }
 
     public int getSyncNumber() {

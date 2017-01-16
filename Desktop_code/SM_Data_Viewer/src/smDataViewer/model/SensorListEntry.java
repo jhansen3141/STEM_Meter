@@ -12,18 +12,18 @@ import javafx.scene.control.CheckBox;
 public class SensorListEntry {
 	private int sensorType;
 	private CheckBox checkBox;
-	//private XYChart.Series<Number,Number> series;
 	private LineChart <Number,Number> mainChart;
 	private Date date;
 	private String rateString;
-	private int numberOfSeries;
-	private ArrayList<XYChart.Series<Number, Number>> seriesList;
+	private XYChart.Series<Number, Number> series;
+	private String sensorStr;
+	private int timeOffset = 0;
 
 	public SensorListEntry(int sensorType, Date date,LineChart <Number,Number> mainChart) {
 		this.mainChart = mainChart;
 		this.sensorType = sensorType;
 		this.date = date;
-		seriesList = new ArrayList<XYChart.Series<Number, Number>>();
+		series = new XYChart.Series<Number, Number>();
 		checkBox = new CheckBox();
 		checkBox.selectedProperty().addListener(checkChange);
 	}
@@ -32,15 +32,12 @@ public class SensorListEntry {
 		@Override
 		public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
 			if (newValue) {
-				for(int i=0;i<numberOfSeries;i++) {
-					mainChart.getData().add(seriesList.get(i));
-				}
+				series.setName(sensorStr);
+				mainChart.getData().add(series);
 			}
 			else {
 				// remove the series from the graph
-				for(int i=0;i<numberOfSeries;i++) {
-					mainChart.getData().removeAll(seriesList.get(i));
-				}
+				mainChart.getData().removeAll(series);
 			}
 		}
 	};
@@ -49,11 +46,30 @@ public class SensorListEntry {
 		return rateString;
 	}
 
-	public String sensorTypeToString() {
-		String sensorStr = null;
-		switch(sensorType) {
+	public String sensorTypeToString(int baseSensorType, int subSensorType) {
+		switch(baseSensorType) {
 		case Constants.IMU_MPU6050:
 			sensorStr = "IMU";
+			switch(subSensorType) {
+				case Constants.IMU_ACCEL_X:
+					sensorStr = "ACCEL: X";
+					break;
+				case Constants.IMU_ACCEL_Y:
+					sensorStr = "ACCEL: Y";
+					break;
+				case Constants.IMU_ACCEL_Z:
+					sensorStr = "ACCEL: Z";
+					break;
+				case Constants.IMU_GYRO_X:
+					sensorStr = "ACCEL: X";
+					break;
+				case Constants.IMU_GYRO_Y:
+					sensorStr = "GYRO: Y";
+					break;
+				case Constants.IMU_GYRO_Z:
+					sensorStr = "GYRO: Z";
+					break;
+			}
 			break;
 		case Constants.TEMP_MCP9808:
 			sensorStr = "TEMP";
@@ -63,33 +79,31 @@ public class SensorListEntry {
 		return sensorStr;
 	}
 
-	public void addLogToSeries(SensorLogEntry logEntry) {
+	public void addLogToSeries(SensorLogEntry logEntry, int valueIndex) {
 		boolean rateStringSet = false;
-		System.out.println("Adding log to series. Type: " + sensorTypeToString());
 		ArrayList<DataPoint> dataPointsList = logEntry.getDataPoints();
 		for(int i=0; i<dataPointsList.size();i++) {
 			DataPoint currentDataPoint = dataPointsList.get(i);
 			if(currentDataPoint.getSensorType() == sensorType) {
 				if(!rateStringSet) {
-					setInitialValues(currentDataPoint);
+					setInitialValues(currentDataPoint,valueIndex);
 					rateStringSet = true;
 				}
-				for(int k=0;k<numberOfSeries;k++) {
-					seriesList.get(k).getData().add(
-							new Data<Number, Number>(currentDataPoint.getStartTime(),currentDataPoint.getSensorValues().get(k)));
-				}
+				int timeWithOffset = currentDataPoint.getTime() - timeOffset;
+				series.getData().add(new Data<Number, Number>(timeWithOffset,
+						currentDataPoint.getSensorValues().get(valueIndex)));
 			}
 		}
 	}
 
-	private void setInitialValues(DataPoint dataPoint) {
+	private void setInitialValues(DataPoint dataPoint, int subSensorType) {
 		rateString = rateToString(dataPoint.getRate());
-		checkBox.setText(sensorTypeToString() + " : " + rateString);
-		numberOfSeries = dataPoint.sensorTypeToSeriesNumber();
-		System.out.println("Number of series: " + numberOfSeries);
-		for(int j=0;j<numberOfSeries;j++) {
-			seriesList.add(new XYChart.Series<Number, Number>());
-		}
+		timeOffset = dataPoint.getTime();
+		System.out.println("Time offset: " + timeOffset);
+		// set the sensor type string
+		sensorTypeToString(dataPoint.getSensorType(),subSensorType);
+		// set the check box text
+		checkBox.setText(sensorStr + " : " + rateString);
 	}
 
 	public String rateToString(int rate) {
@@ -152,7 +166,6 @@ public class SensorListEntry {
 				mult = 60 * 60;
 				break;
 		}
-
 		return mult;
 	}
 
@@ -160,8 +173,8 @@ public class SensorListEntry {
 		return sensorType;
 	}
 
-	public ArrayList<XYChart.Series<Number, Number>> getSeries() {
-		return seriesList;
+	public XYChart.Series<Number, Number> getSeries() {
+		return series;
 	}
 
 	public CheckBox getCheckBox() {

@@ -11,7 +11,7 @@
 #include "sensorCommon.h"
 
 #define SENSOR_NUMBER IMU_MPU6050
-#define SENSOR_DEFAULT_RATE RATE_TEN_HZ
+#define SENSOR_DEFAULT_RATE RATE_ONE_HZ
 
 // Sensor Specific Register Addresses
 #define MPU6050_ADDRESS 0x68

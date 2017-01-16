@@ -104,13 +104,14 @@ public class MainApp extends Application {
 				if(logParser.isValidLogFile()) {
 					System.out.println("Valid Log File");
 					// create a list of log entries
+					// each log entry is a start time followed by the data from all logged sensors
+					// between that start time and the next start time in the log file
 					ArrayList<SensorLogEntry> logEntries = logParser.getLogEntries();
 					System.out.println("Num entries: " + logEntries.size());
 					// for each log entry generate an entry into the list on left side of app
 					for(int i=0;i<logEntries.size();i++) {
 						generateListEntries(logEntries.get(i));
 					}
-
 				}
 				else {
 					// TODO handle invalid or corrupt file
@@ -131,9 +132,14 @@ public class MainApp extends Application {
 			DataPoint currentDataPoint = dataPointsList.get(i);
 			// if the list is empty then add the first entry
 			if(sensorListEntries.size() == 0) {
-				SensorListEntry firstEntry = new SensorListEntry(currentDataPoint.getSensorType(),startTime,mainChart);
-				firstEntry.addLogToSeries(logEntry);
-				sensorListEntries.add(firstEntry);
+				for(int l=0;l<currentDataPoint.sensorTypeToSeriesNumber();l++) {
+					SensorListEntry entry = new SensorListEntry(currentDataPoint.getSensorType(),startTime,mainChart);
+					// parses the data points in the log entry and only adds the data
+					// from the appropriate sensor to the series
+					entry.addLogToSeries(logEntry,l);
+					sensorListEntries.add(entry);
+				}
+
 			}
 			// if not empty list then only add if sensor doesn't already exists
 			else {
@@ -142,9 +148,11 @@ public class MainApp extends Application {
 					final int dataPointType = currentDataPoint.getSensorType();
 					// check to see if this type of sensor already exists in the list
 					if(!(sensorExistsInList(dataPointType))) {
-						SensorListEntry entry = new SensorListEntry(currentDataPoint.getSensorType(),startTime,mainChart);
-						entry.addLogToSeries(logEntry);
-						sensorListEntries.add(entry);
+						for(int a=0;a<currentDataPoint.sensorTypeToSeriesNumber();a++) {
+							SensorListEntry entry = new SensorListEntry(currentDataPoint.getSensorType(),startTime,mainChart);
+							entry.addLogToSeries(logEntry,a);
+							sensorListEntries.add(entry);
+						}
 					}
 				}
 			}

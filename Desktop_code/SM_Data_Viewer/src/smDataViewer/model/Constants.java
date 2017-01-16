@@ -21,6 +21,12 @@ public class Constants {
     public static final int INVALID_SENSOR = 0;
     public static final int TEMP_MCP9808 = 1;
     public static final int IMU_MPU6050 = 2;
+	    public static final int IMU_ACCEL_X = 0;
+	    public static final int IMU_ACCEL_Y = 1;
+	    public static final int IMU_ACCEL_Z = 2;
+	    public static final int IMU_GYRO_X = 3;
+	    public static final int IMU_GYRO_Y = 4;
+	    public static final int IMU_GYRO_Z = 5;
 
     // Update Rates
     public static final int RATE_OFF = 0;
