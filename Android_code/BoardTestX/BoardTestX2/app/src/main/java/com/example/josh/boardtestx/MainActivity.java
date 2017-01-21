@@ -44,7 +44,8 @@ public class MainActivity extends AppCompatActivity
     public final static String ACTION_GATT_SERVICES_DISCOVERED = "com.example.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
     public final static String ACTION_DATA_AVAILABLE = "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
     public final static String EXTRA_DATA = "com.example.bluetooth.le.EXTRA_DATA";
-    public final static String DEVICE_MAC_STR = "CC:78:AB:19:9A:31";
+    // First version is CC:78:AB:19:9A:31
+    public final static String DEVICE_MAC_STR = "CC:78:AB:19:9A:21";
 
     public final static UUID BOARD_UUID = UUID.fromString("0000ABAE-0000-1000-8000-00805F9B34FB");
     public final static UUID SENSOR_1_DATA_UUID = UUID.fromString("F000BEAA-0451-4000-B000-000000000000");
@@ -86,10 +87,25 @@ public class MainActivity extends AppCompatActivity
     private Sensor sensor3;
     private Sensor sensor4;
 
+    private byte[] configData = new byte[8];
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Byte 0 = S1 Freq | Byte 1 = S1 SD Log
+        // Byte 2 = S2 Freq | Byte 3 = S2 SD Log
+        // Byte 4 = S3 Freq | Byte 5 = S3 SD Log
+        // Byte 6 = S4 Freq | Byte 7 = S4 SD Log
+        configData[0] = (byte)SensorList.RATE_ONE_HZ;
+        configData[1] = (byte)0;
+        configData[2] = (byte)SensorList.RATE_ONE_HZ;
+        configData[3] = (byte)0;
+        configData[4] = (byte)SensorList.RATE_ONE_HZ;
+        configData[5] = (byte)0;
+        configData[6] = (byte)SensorList.RATE_ONE_HZ;
+        configData[7] = (byte)0;
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -511,22 +527,40 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void sensorConfigWrite(int sensorNumber, int sensorRate) {
-        // Byte 0 = Sensor Position Number
-        // Byte 1 = Sensor Freq
-        // Byte 2 = Sensor SD Log
-        byte[] configData = new byte[3];
-        configData[0] = (byte)sensorNumber;
-        configData[1] = (byte)sensorRate;
-        configData[2] = (byte)0;
+        // Byte 0 = S1 Freq | Byte 1 = S1 SD Log
+        // Byte 2 = S2 Freq | Byte 3 = S2 SD Log
+        // Byte 4 = S3 Freq | Byte 5 = S3 SD Log
+        // Byte 6 = S4 Freq | Byte 7 = S4 SD Log
+
+        switch(sensorNumber) {
+            case SensorList.SENSOR_1:
+                configData[0] = (byte)sensorRate;
+                configData[1] = (byte)0;
+                break;
+            case SensorList.SENSOR_2:
+                configData[2] = (byte)sensorRate;
+                configData[3] = (byte)0;
+                break;
+            case SensorList.SENSOR_3:
+                configData[4] = (byte)sensorRate;
+                configData[5] = (byte)0;
+                break;
+            case SensorList.SENSOR_4:
+                configData[6] = (byte)sensorRate;
+                configData[7] = (byte)0;
+                break;
+
+        }
 
         writeCharacteristic(BoardSensor1ConfigChar, configData);
         // write the config twice to solve bug on embedded side
+
         writeCharacteristic(BoardSensor1ConfigChar, configData);
     }
 
     public int writeCharacteristic(BluetoothGattCharacteristic characteristic, byte[] data) {
         byte[] dataToSend = new byte[20];
-
+        StringBuilder str = new StringBuilder();
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
             Log.w(TAG, "BluetoothAdapter not initialized");
             return FAILURE;
@@ -538,10 +572,11 @@ public class MainActivity extends AppCompatActivity
 
         for(int i=0;i<data.length;i++) {
             dataToSend[i] = data[i];
+            str.append(Integer.toString(dataToSend[i]));
         }
 
         try {
-            Log.i(TAG, "Sending: " + dataToSend[0] + " " + dataToSend[1] + " " + dataToSend[2]);
+            Log.i(TAG, "Sending: " + str);
             characteristic.setValue(dataToSend);
             mBluetoothGatt.writeCharacteristic(characteristic);
         } catch (NullPointerException npe) {

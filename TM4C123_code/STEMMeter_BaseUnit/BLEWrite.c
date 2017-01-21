@@ -60,9 +60,6 @@ static Queue_Handle hBleWritesMsgQ;
 static Semaphore_Struct semBLEWriteStruct;
 static Semaphore_Handle semBLEWriteHandle;
 
-//static uint8_t txBuffer[21];
-//static uint8_t rxBuffer[21];
-
 // Struct for task messages
 typedef struct {
   Queue_Elem _elem;
@@ -74,7 +71,7 @@ static void BLEWriteFxn(UArg arg0, UArg arg1);
 static void BLEWrite_Init();
 static bool SPISendUpdate(uint8_t *txBuffer, uint8_t *rxBuffer);
 static void user_processBLEWriteMessage(bleWrite_msg_t *pMsg);
-static void startUpLEDRoutine(uint8_t rotations);
+static void sdCardLEDBlink(uint8_t numBlink);
 static void SPISlaveInterrupt(unsigned int index);
 static void enqueueSelfMsg(bleWrite_msg_types_t msgType);
 static void updateSensorConfig();
@@ -118,11 +115,12 @@ static void BLEWrite_Init() {
 	GPIO_setCallback(Board_SPI_SLAVE_INT, SPISlaveInterrupt);
 
 	// Enable interrupt
-	//GPIO_enableInt(Board_SPI_SLAVE_INT);
+	GPIO_enableInt(Board_SPI_SLAVE_INT);
 
 }
 
 static void SPISlaveInterrupt(unsigned int index) {
+	// enqueue a message to tell task that sensor update is requested
 	enqueueSelfMsg(UPDATE_SENSOR_CONFIG_MSG);
 	// disable the interrupt until finished
 	GPIO_disableInt(Board_SPI_SLAVE_INT);
@@ -130,14 +128,17 @@ static void SPISlaveInterrupt(unsigned int index) {
 
 static bool SPISendUpdate(uint8_t *txBuffer, uint8_t *rxBuffer) {
 	bool returnStatus;
+	// bring the CS line active to tell slave SPI transfer about to start
 	GPIO_write(Board_SPI_CS_INT, Board_CS_ACTIVE);
-	//memset(rxBuffer,0,21); // clear the RX buffer first
+
 	SPI_Transaction spiTransaction;
 	spiTransaction.count = 21;
 	spiTransaction.txBuf = txBuffer;
 	spiTransaction.rxBuf = rxBuffer;
 	// do the SPI transfer
 	returnStatus = SPI_transfer(SPIHandle, &spiTransaction);
+
+	// deactivate the SPI CS line
 	GPIO_write(Board_SPI_CS_INT, Board_CS_DEACTIVE);
 	return returnStatus;
 }
@@ -146,7 +147,8 @@ static void BLEWriteFxn(UArg arg0, UArg arg1) {
 
 	BLEWrite_Init();
 
-	startUpLEDRoutine(3);
+	// Blink the LED 3 times on power up
+	sdCardLEDBlink(3);
 
 	while(1) {
 		// block until work to do
@@ -200,67 +202,58 @@ static void user_processBLEWriteMessage(bleWrite_msg_t *pMsg) {
 	}
 }
 
+// Sends sensor config data to appropriate sensor over UART
 static void updateSensorConfig() {
 	bool ret;
-	uint8_t sensorNumber;
-	uint8_t sensorFreq;
-	uint8_t sdCardWrite;
 	uint8_t dummyTXBuffer[21];;
 	uint8_t localRXBuffer[21];
 
 	memset(dummyTXBuffer,0,21);
-
+	Task_sleep(25);
+	// perform a transfer to get the config data from the CC2640
 	ret = SPISendUpdate(dummyTXBuffer,localRXBuffer);
 
 	if (ret) {
-		// Byte 0 = Sensor Position Number
-		// Byte 1 = Sensor Freq
-		// Byte 2 = Sensor SD Log
-		sensorNumber = localRXBuffer[0];
-		sensorFreq = localRXBuffer[1];
-		sdCardWrite = localRXBuffer[2];
-		switch(sensorNumber) {
-			case SENSOR_1_ID:
-				Sensor1WriteConfig(sensorFreq);
-				if(sdCardWrite) {
-					Sensor1SDWriteEnabled = true;
-				}
-				else {
-					Sensor1SDWriteEnabled = false;
-				}
-				break;
-			case SENSOR_2_ID:
-				Sensor2WriteConfig(sensorFreq);
-				if(sdCardWrite) {
-					Sensor2SDWriteEnabled = true;
-				}
-				else {
-					Sensor2SDWriteEnabled = false;
-				}
-				break;
-			case SENSOR_3_ID:
-				Sensor3WriteConfig(sensorFreq);
-				if(sdCardWrite) {
-					Sensor3SDWriteEnabled = true;
-				}
-				else {
-					Sensor3SDWriteEnabled = false;
-				}
-				break;
-			case SENSOR_4_ID:
-				Sensor4WriteConfig(sensorFreq);
-				if(sdCardWrite) {
-					Sensor4SDWriteEnabled = true;
-				}
-				else {
-					Sensor4SDWriteEnabled = false;
-				}
-				break;
+		// Byte 0 = S1 Freq | Byte 1 = S1 SD Log
+		// Byte 2 = S2 Freq | Byte 3 = S2 SD Log
+		// Byte 4 = S3 Freq | Byte 5 = S3 SD Log
+		// Byte 6 = S4 Freq | Byte 7 = S4 SD Log
+
+		if(localRXBuffer[20] == SPI_CONFIG_DATA_MARKER) {
+			Sensor1WriteConfig(localRXBuffer[0]);
+			if(localRXBuffer[1]) {
+				Sensor1SDWriteEnabled = true;
+			}
+			else {
+				Sensor1SDWriteEnabled = false;
+			}
+
+			Sensor2WriteConfig(localRXBuffer[2]);
+			if(localRXBuffer[3]) {
+				Sensor2SDWriteEnabled = true;
+			}
+			else {
+				Sensor2SDWriteEnabled = false;
+			}
+
+			Sensor3WriteConfig(localRXBuffer[4]);
+			if(localRXBuffer[5]) {
+				Sensor3SDWriteEnabled = true;
+			}
+			else {
+				Sensor3SDWriteEnabled = false;
+			}
+
+			Sensor4WriteConfig(localRXBuffer[6]);
+			if(localRXBuffer[7]) {
+				Sensor4SDWriteEnabled = true;
+			}
+			else {
+				Sensor4SDWriteEnabled = false;
+			}
 		}
 	}
-	else {
-		// TODO handle config set error
-	}
+
 	// Re-Enable interrupt
 	GPIO_enableInt(Board_SPI_SLAVE_INT);
 }
@@ -284,25 +277,12 @@ static void enqueueSelfMsg(bleWrite_msg_types_t msgType) {
 	}
 }
 
-static void startUpLEDRoutine(uint8_t rotations) {
+static void sdCardLEDBlink(uint8_t numBlink) {
 	uint8_t i;
-	for(i=0;i<rotations;i++) {
-		GPIO_write(Board_SENSOR_1_LED, Board_LED_ON);
-		Task_sleep(100);
-		GPIO_write(Board_SENSOR_3_LED, Board_LED_ON);
-		Task_sleep(100);
-		GPIO_write(Board_SENSOR_4_LED, Board_LED_ON);
-		Task_sleep(100);
-		GPIO_write(Board_SENSOR_2_LED, Board_LED_ON);
-		Task_sleep(100);
-
-		GPIO_write(Board_SENSOR_1_LED, Board_LED_OFF);
-		Task_sleep(100);
-		GPIO_write(Board_SENSOR_3_LED, Board_LED_OFF);
-		Task_sleep(100);
-		GPIO_write(Board_SENSOR_4_LED, Board_LED_OFF);
-		Task_sleep(100);
-		GPIO_write(Board_SENSOR_2_LED, Board_LED_OFF);
-		Task_sleep(100);
+	for(i=0;i<numBlink;i++) {
+		GPIO_write(Board_SD_CARD_LED, Board_LED_ON);
+		Task_sleep(300);
+		GPIO_write(Board_SD_CARD_LED, Board_LED_OFF);
+		Task_sleep(300);
 	}
 }

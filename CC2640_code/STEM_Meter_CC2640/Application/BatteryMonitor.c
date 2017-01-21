@@ -43,11 +43,15 @@ static I2C_Transaction masterTransaction;
 static Clock_Struct batteryUpdateClock;
 static Clock_Handle hBatteryUpdateClock;
 
+static PIN_Handle ledPinHandle;
+static PIN_State ledPinState;
 
- // Enum of message types
-typedef enum {
-  BATMONITOR_MSG_UPDATE_BAT_VALUES
-} batMonitor_msg_types_t;
+PIN_Config ledPinTable[] = {
+	Board_RED_SLED| PIN_GPIO_OUTPUT_EN | PIN_GPIO_HIGH | PIN_PUSHPULL | PIN_DRVSTR_MAX, // Red Status LED
+	Board_BLU_SLED| PIN_GPIO_OUTPUT_EN | PIN_GPIO_HIGH | PIN_PUSHPULL | PIN_DRVSTR_MAX, // Blue Status LED
+	Board_GRN_SLED| PIN_GPIO_OUTPUT_EN | PIN_GPIO_HIGH | PIN_PUSHPULL | PIN_DRVSTR_MAX, // Green Status LED
+    PIN_TERMINATE
+};
 
 
 // Struct for task messages
@@ -75,7 +79,7 @@ static float Get_Tempature();
 static float Get_Batt_Current();
 static void updateBatteryValues();
 static void FiveSecUpdate();
-static void enqueueBatMonitortTaskMsg(batMonitor_msg_types_t msgType);
+static void cycleStatusLEDs();
 
 
 // Input - None
@@ -101,6 +105,8 @@ static void BatMonitor_init() {
 	Queue_construct(&batMonitorMsgQ, NULL);
 	hBatMonitorMsgQ = Queue_handle(&batMonitorMsgQ);
 
+	// Configure pins used by this task
+	ledPinHandle = PIN_open(&ledPinState, ledPinTable);
 
 	// Init I2C
 	I2C_init();
@@ -130,6 +136,7 @@ static void BatMonitor_init() {
 static void BatMonitor_taskFxn(UArg a0, UArg a1) {
 	// Allocate and init resources used for this task
 	BatMonitor_init();
+	cycleStatusLEDs();
 	while(1) {
 		ICall_Errno errno = ICall_wait(ICALL_TIMEOUT_FOREVER); // waits until semaphore is signaled
 
@@ -148,6 +155,24 @@ static void user_processBatMonitorMessage(batMonitor_msg_t *pMsg) {
 	switch (pMsg->type) {
 		case BATMONITOR_MSG_UPDATE_BAT_VALUES:
 			updateBatteryValues();
+			break;
+		case BATMONITOR_MSG_RED_LED_ON:
+			PIN_setOutputValue(ledPinHandle, Board_RED_SLED, 0);
+			break;
+		case BATMONITOR_MSG_GRN_LED_ON:
+			PIN_setOutputValue(ledPinHandle, Board_GRN_SLED, 0);
+			break;
+		case BATMONITOR_MSG_BLU_LED_ON:
+			PIN_setOutputValue(ledPinHandle, Board_BLU_SLED, 0);
+			break;
+		case BATMONITOR_MSG_RED_LED_OFF:
+			PIN_setOutputValue(ledPinHandle, Board_RED_SLED, 1);
+			break;
+		case BATMONITOR_MSG_GRN_LED_OFF:
+			PIN_setOutputValue(ledPinHandle, Board_GRN_SLED, 1);
+			break;
+		case BATMONITOR_MSG_BLU_LED_OFF:
+			PIN_setOutputValue(ledPinHandle, Board_BLU_SLED, 1);
 			break;
 	}
 }
@@ -176,7 +201,7 @@ static void user_enqueueRawBatMonitorMsg(batMonitor_msg_types_t deviceMsgType, u
 	}
 }
 
-static void enqueueBatMonitortTaskMsg(batMonitor_msg_types_t msgType) {
+void enqueueBatMonitortTaskMsg(batMonitor_msg_types_t msgType) {
 	batMonitor_msg_t *pMsg = ICall_malloc(sizeof(batMonitor_msg_t));
 	if (pMsg != NULL) {
 		pMsg->type = msgType;
@@ -287,5 +312,19 @@ static void updateBatteryValues() {
 	sprintf(batteryString,"%.2f;%.2f;%.2f",voltage,current,temp);
 	// send updated values to BLE task
 	enqueueBatteryCharUpdate((uint8_t *)batteryString);
+}
+
+static void cycleStatusLEDs() {
+	PIN_setOutputValue(ledPinHandle, Board_RED_SLED, 0);
+	Task_sleep(500 * (1000/Clock_tickPeriod));
+	PIN_setOutputValue(ledPinHandle, Board_RED_SLED, 1);
+
+	PIN_setOutputValue(ledPinHandle, Board_BLU_SLED, 0);
+	Task_sleep(500 * (1000/Clock_tickPeriod));
+	PIN_setOutputValue(ledPinHandle, Board_BLU_SLED, 1);
+
+	PIN_setOutputValue(ledPinHandle, Board_GRN_SLED, 0);
+	Task_sleep(500 * (1000/Clock_tickPeriod));
+	PIN_setOutputValue(ledPinHandle, Board_GRN_SLED, 1);
 }
 

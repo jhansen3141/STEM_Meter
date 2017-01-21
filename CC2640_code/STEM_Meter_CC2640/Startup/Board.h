@@ -48,6 +48,10 @@ extern "C" {
 #define     Board_BUTTON0           Board_BTN1
 #define     Board_BUTTON1           Board_BTN2
 
+#define 	Board_BLU_SLED			Board_BLU_LED
+#define 	Board_RED_SLED			Board_RED_LED
+#define 	Board_GRN_SLED			Board_GRN_LED
+
 #define     Board_UART0             Board_UART
 #define     Board_AES0              Board_AES
 #define     Board_WATCHDOG0         Board_WATCHDOG

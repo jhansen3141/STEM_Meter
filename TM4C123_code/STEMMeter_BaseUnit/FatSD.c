@@ -225,14 +225,14 @@ static void user_processSDMessage(SD_msg_t *pMsg) {
 				dataFile = fopen(outputfile, "a");
 				// check to see if file opened
 				if (dataFile) {
-					GPIO_write(Board_SENSOR_1_LED, Board_LED_ON);
+					GPIO_write(Board_SD_CARD_LED, Board_LED_ON);
 
 					fwrite(pMsg->pdu, 1, pMsg->length, dataFile);
 					// flush the stream buffer
 					fflush(dataFile);
 					// close the data file
 					fclose(dataFile);
-					GPIO_write(Board_SENSOR_1_LED, Board_LED_OFF);
+					GPIO_write(Board_SD_CARD_LED, Board_LED_OFF);
 				}
 			}
 			break;

@@ -23,4 +23,17 @@
 #define BATT_GAUGE_REG_TEMP_LOW 0x0A
 #define BATT_GAUGE_REG_TEMP_HIGH 0x0B
 
+ // Enum of message types
+typedef enum {
+	BATMONITOR_MSG_UPDATE_BAT_VALUES,
+	BATMONITOR_MSG_RED_LED_OFF,
+	BATMONITOR_MSG_GRN_LED_OFF,
+	BATMONITOR_MSG_BLU_LED_OFF,
+	BATMONITOR_MSG_RED_LED_ON,
+	BATMONITOR_MSG_GRN_LED_ON,
+	BATMONITOR_MSG_BLU_LED_ON,
+} batMonitor_msg_types_t;
+
+extern void enqueueBatMonitortTaskMsg(batMonitor_msg_types_t msgType);
+
 #endif /* APPLICATION_BATTERYMONITOR_H_ */

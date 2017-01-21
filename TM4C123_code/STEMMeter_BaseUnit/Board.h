@@ -89,10 +89,7 @@ extern "C" {
 #define Board_SD_CARD_INT			SD_CARD_INT_INPUT
 #define Board_SPI_CS_INT			SPI_CS_OUTPUT
 
-#define Board_SENSOR_1_LED			SENSOR_1_LED
-#define Board_SENSOR_2_LED			SENSOR_2_LED
-#define Board_SENSOR_3_LED			SENSOR_3_LED
-#define Board_SENSOR_4_LED			SENSOR_4_LED
+#define Board_SD_CARD_LED			SD_CARD_LED
 
 #define Board_LED_ON				(0)
 #define Board_LED_OFF				(1)

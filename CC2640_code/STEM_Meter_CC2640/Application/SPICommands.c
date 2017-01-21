@@ -19,7 +19,7 @@
 #include "SPICommands.h"
 #include "SMMain.h"
 
-#define SPICOMMANDS_TASK_STACK_SIZE	    1024 // spiCommands task size in bytes
+#define SPICOMMANDS_TASK_STACK_SIZE	    1500 // spiCommands task size in bytes
 #define SPICOMMANDS_TASK_PRIORITY 		2 // spiCommands Priority
 #define SPI_BUFFER_SIZE 				21
 #define MASTER_SEND_ID 					0
@@ -154,7 +154,6 @@ static void SPICommands_init() {
 		Task_exit();
 	}
 
-	//SPI_transfer(SPIHandle, &SPITransaction);
 }
 
 
@@ -174,13 +173,13 @@ static void intPinCallbackFxn(PIN_Handle handle, PIN_Id pinId) {
 }
 
 static void transferCallback(SPI_Handle handle, SPI_Transaction *transaction) {
-	uint8_t sensorCharNum = SPIBufRX[0]; // sensor number is held in first byte
+	// sensor number is held in first byte
+	uint8_t sensorCharNum = SPIBufRX[0];
 	uint8_t sensorData[20] = {0};
 
-	// check to see if this callback is due to needing to send data to master
-	// if it is then the data we received was dummy data so don't do anything with it
 	if(transaction->status == SPI_TRANSFER_COMPLETED) {
-		memcpy(sensorData,SPIBufRX+1,20); // copy the sensor data into array
+		// copy the sensor data into array minus the first byte which is s num
+		memcpy(sensorData,SPIBufRX+1,20);
 
 		switch(sensorCharNum) {
 		// enqueue an update for the sensor char with the new data
@@ -201,9 +200,6 @@ static void transferCallback(SPI_Handle handle, SPI_Transaction *transaction) {
 
 	// re-enable the SPI CS interrupt
 	PIN_setConfig(intPinHandle, PIN_BM_IRQ, Board_SPI_CS | PIN_IRQ_NEGEDGE);
-
-	// start a new SPI transfer to wait for the next data
-	//SPI_transfer(SPIHandle, &SPITransaction);
 }
 
 // Input - Task arguments
@@ -213,11 +209,15 @@ static void SPICommands_taskFxn(UArg a0, UArg a1) {
 	// Allocate and init resources used for this task
 	SPICommands_init();
 	while(1) {
-		ICall_Errno errno = ICall_wait(ICALL_TIMEOUT_FOREVER); // waits until semaphore is signaled
+		// waits until semaphore is signaled
+		ICall_Errno errno = ICall_wait(ICALL_TIMEOUT_FOREVER);
 		while (!Queue_empty(hSpiCommandsMsgQ)) {
-			spiCommands_msg_t *pMsg = Queue_dequeue(hSpiCommandsMsgQ); // dequeue the message
-			user_processSPICommandsMessage(pMsg); // process the message
-			ICall_free(pMsg); // free mem
+			// dequeue the message
+			spiCommands_msg_t *pMsg = Queue_dequeue(hSpiCommandsMsgQ);
+			// process the message
+			user_processSPICommandsMessage(pMsg);
+			// free mem
+			ICall_free(pMsg);
 		}
 	}
 }
@@ -232,16 +232,18 @@ static void user_processSPICommandsMessage(spiCommands_msg_t *pMsg) {
 			break;
 		// message from BLE task to update sensor config
 		case SENSOR_UPDATE_CONFIG_MSG:
-			// set last byte to show config data is correct
-			SPIBufTX[20] = SPI_CONFIG_DATA_MARKER;
 
 			// copy the incoming config data to TX buffer
 			memcpy(SPIBufTX,pMsg->pdu,20);
+
+			// set last byte to show config data is correct
+			SPIBufTX[20] = SPI_CONFIG_DATA_MARKER;
 
 			// Toggle interrupt line to let master know data is ready to be recieved
 			// Master will then perform SPI transfer to get config data from TX buffer
 			PIN_setOutputValue(intPinHandle, Board_SPIINT, 1);
 			PIN_setOutputValue(intPinHandle, Board_SPIINT, 0);
+
 			break;
 	}
 }

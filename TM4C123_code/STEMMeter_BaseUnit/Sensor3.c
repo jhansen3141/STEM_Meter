@@ -84,6 +84,7 @@ static void UART2WriteCallback(UART_Handle handle, void *buffer, size_t size) {
 static void Sensor3TaskFxn(UArg arg0, UArg arg1) {
 
 	Sensor3TaskInit();
+	UART_writePolling(UART2Handle,"S3 UP",5);
 	while(1) {
 		// block until 20 bytes have been recieved
 		UART_read(UART2Handle,uartBufferRX,SENSOR_FRAME_LENGTH);
