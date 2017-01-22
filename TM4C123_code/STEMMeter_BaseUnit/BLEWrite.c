@@ -40,12 +40,17 @@
 #define CONFIG_RECIEVED_MARKER 			0x55
 
 typedef enum {
-	NO_SENSOR_ID = 0,
+	INVALID_ID = 0,
 	SENSOR_1_ID,
 	SENSOR_2_ID,
 	SENSOR_3_ID,
-	SENSOR_4_ID
-} sensorID_t;
+	SENSOR_4_ID,
+	CHARGE_START_ID,
+	CHARGE_STOP_ID,
+	CHARGE_FULL_ID,
+	CHARGE_NOT_FULL_ID
+} spiMsgID_t;
+
 
 Task_Struct task0Struct;
 Char task0Stack[TASKSTACKSIZE];
@@ -75,6 +80,8 @@ static void sdCardLEDBlink(uint8_t numBlink);
 static void SPISlaveInterrupt(unsigned int index);
 static void enqueueSelfMsg(bleWrite_msg_types_t msgType);
 static void updateSensorConfig();
+static void InputPowerGoodInterrupt(unsigned int index);
+static void ChargeCompleteInterrupt(unsigned int index);
 
 
 void BLEWrite_createTask(void) {
@@ -114,9 +121,39 @@ static void BLEWrite_Init() {
 	// install SPI Slave Interrupt callback
 	GPIO_setCallback(Board_SPI_SLAVE_INT, SPISlaveInterrupt);
 
-	// Enable interrupt
-	GPIO_enableInt(Board_SPI_SLAVE_INT);
+	// install input power good interrupt callback
+	GPIO_setCallback(Board_PG_INT, InputPowerGoodInterrupt);
 
+	// install charge complete interrupt callback
+	GPIO_setCallback(Board_CHG_INT, ChargeCompleteInterrupt);
+
+	// Enable interrupts
+	GPIO_enableInt(Board_SPI_SLAVE_INT);
+	GPIO_enableInt(Board_PG_INT);
+	GPIO_enableInt(Board_CHG_INT);
+
+}
+
+static void InputPowerGoodInterrupt(unsigned int index) {
+	// if pin is high then charge stopped
+	if(GPIO_read(Board_PG_INT)) {
+		enqueueSelfMsg(CHARGE_STOPPED_MSG);
+	}
+	// otherwise charge started
+	else {
+		enqueueSelfMsg(CHARGE_STARTED_MSG);
+	}
+}
+
+static void ChargeCompleteInterrupt(unsigned int index) {
+	// if pin is high then charge not full
+	if(GPIO_read(Board_CHG_INT)) {
+		enqueueSelfMsg(CHARGE_NOT_COMPLETE_MSG);
+	}
+	// otherwise charge full
+	else {
+		enqueueSelfMsg(CHARGE_COMPLETE_MSG);
+	}
 }
 
 static void SPISlaveInterrupt(unsigned int index) {
@@ -167,6 +204,7 @@ static void BLEWriteFxn(UArg arg0, UArg arg1) {
 // Description - Called from device task context when message dequeued
 static void user_processBLEWriteMessage(bleWrite_msg_t *pMsg) {
 	bool shouldSendUpdate = true;
+	bool oneByteMsg = false;
 	uint8_t txBufferUpdate[21];
 	uint8_t rxBuffer[21];
 	switch (pMsg->type) {
@@ -192,11 +230,35 @@ static void user_processBLEWriteMessage(bleWrite_msg_t *pMsg) {
 			shouldSendUpdate = false;
 			updateSensorConfig();
 			break;
+		case CHARGE_COMPLETE_MSG:
+			txBufferUpdate[0] = CHARGE_FULL_ID;
+			oneByteMsg = true;
+			break;
+		case CHARGE_NOT_COMPLETE_MSG:
+			txBufferUpdate[0] = CHARGE_NOT_FULL_ID;
+			oneByteMsg = true;
+			break;
+		case CHARGE_STARTED_MSG:
+			txBufferUpdate[0] = CHARGE_START_ID;
+			oneByteMsg = true;
+			break;
+		case CHARGE_STOPPED_MSG:
+			txBufferUpdate[0] = CHARGE_STOP_ID;
+			oneByteMsg = true;
+			break;
 	}
 
 	if(shouldSendUpdate) {
 		// copy sensor data into txBuffer
-		memcpy(txBufferUpdate+1,pMsg->pdu,20);
+		if(oneByteMsg) {
+			memset(txBufferUpdate+1,0,20);
+			// Need to block the task
+			// otherwise SPI data gets out of sync
+			Task_sleep(5);
+		}
+		else {
+			memcpy(txBufferUpdate+1,pMsg->pdu,20);
+		}
 		// send the updated data
 		SPISendUpdate(txBufferUpdate,rxBuffer);
 	}
@@ -209,7 +271,10 @@ static void updateSensorConfig() {
 	uint8_t localRXBuffer[21];
 
 	memset(dummyTXBuffer,0,21);
+	// Need to block the task
+	// otherwise SPI data gets out of sync
 	Task_sleep(25);
+
 	// perform a transfer to get the config data from the CC2640
 	ret = SPISendUpdate(dummyTXBuffer,localRXBuffer);
 

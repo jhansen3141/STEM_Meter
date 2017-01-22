@@ -18,6 +18,7 @@
 #include "Board.h"
 #include "SPICommands.h"
 #include "SMMain.h"
+#include "BatteryMonitor.h"
 
 #define SPICOMMANDS_TASK_STACK_SIZE	    1500 // spiCommands task size in bytes
 #define SPICOMMANDS_TASK_PRIORITY 		2 // spiCommands Priority
@@ -65,14 +66,18 @@ PIN_Config intPinTable[] = {
 };
 
 
- // Enum of message types
+// Enum of message types
 typedef enum {
-	SENSOR_1_CHAR = 1,
-	SENSOR_2_CHAR,
-	SENSOR_3_CHAR,
-	SENSOR_4_CHAR
-} sensorChar_t;
-
+	INVALID_ID = 0,
+	SENSOR_1_ID,
+	SENSOR_2_ID,
+	SENSOR_3_ID,
+	SENSOR_4_ID,
+	CHARGE_START_ID,
+	CHARGE_STOP_ID,
+	CHARGE_FULL_ID,
+	CHARGE_NOT_FULL_ID
+} spiMsgID_t;
 
 // Struct for task messages
 typedef struct {
@@ -174,26 +179,41 @@ static void intPinCallbackFxn(PIN_Handle handle, PIN_Id pinId) {
 
 static void transferCallback(SPI_Handle handle, SPI_Transaction *transaction) {
 	// sensor number is held in first byte
-	uint8_t sensorCharNum = SPIBufRX[0];
+	uint8_t messageID = SPIBufRX[0];
 	uint8_t sensorData[20] = {0};
 
 	if(transaction->status == SPI_TRANSFER_COMPLETED) {
-		// copy the sensor data into array minus the first byte which is s num
-		memcpy(sensorData,SPIBufRX+1,20);
 
-		switch(sensorCharNum) {
+		switch(messageID) {
 		// enqueue an update for the sensor char with the new data
-		case SENSOR_1_CHAR:
+		case SENSOR_1_ID:
+			// copy the sensor data into array minus the first byte which is s num
+			memcpy(sensorData,SPIBufRX+1,20);
 			enqueueSensorCharUpdate(STEMMETER_SERVICE_SENSOR1DATA_UUID,sensorData);
 			break;
-		case SENSOR_2_CHAR:
+		case SENSOR_2_ID:
+			memcpy(sensorData,SPIBufRX+1,20);
 			enqueueSensorCharUpdate(STEMMETER_SERVICE_SENSOR2DATA_UUID,sensorData);
 			break;
-		case SENSOR_3_CHAR:
+		case SENSOR_3_ID:
+			memcpy(sensorData,SPIBufRX+1,20);
 			enqueueSensorCharUpdate(STEMMETER_SERVICE_SENSOR3DATA_UUID,sensorData);
 			break;
-		case SENSOR_4_CHAR:
+		case SENSOR_4_ID:
+			memcpy(sensorData,SPIBufRX+1,20);
 			enqueueSensorCharUpdate(STEMMETER_SERVICE_SENSOR4DATA_UUID,sensorData);
+			break;
+		case CHARGE_START_ID:
+			enqueueBatMonitortTaskMsg(BATMONITOR_MSG_RED_LED_ON);
+			break;
+		case CHARGE_STOP_ID:
+			enqueueBatMonitortTaskMsg(BATMONITOR_MSG_RED_LED_OFF);
+			break;
+		case CHARGE_FULL_ID:
+			enqueueBatMonitortTaskMsg(BATMONITOR_MSG_GRN_LED_ON);
+			break;
+		case CHARGE_NOT_FULL_ID:
+			enqueueBatMonitortTaskMsg(BATMONITOR_MSG_GRN_LED_OFF);
 			break;
 		}
 	}

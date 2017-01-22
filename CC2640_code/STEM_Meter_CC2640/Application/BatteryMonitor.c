@@ -81,7 +81,6 @@ static void updateBatteryValues();
 static void FiveSecUpdate();
 static void cycleStatusLEDs();
 
-
 // Input - None
 // Output - None
 // Description - Initializes task. Called from main
@@ -124,9 +123,9 @@ static void BatMonitor_init() {
 
 	clockParams.period = (5000 * (1000/Clock_tickPeriod)); // 5s battery update rate
 	clockParams.startFlag = FALSE;
-
 	Clock_construct(&batteryUpdateClock, FiveSecUpdate, 5, &clockParams);
 	hBatteryUpdateClock = Clock_handle(&batteryUpdateClock);
+
 	Clock_start(hBatteryUpdateClock);
 }
 
@@ -157,9 +156,16 @@ static void user_processBatMonitorMessage(batMonitor_msg_t *pMsg) {
 			updateBatteryValues();
 			break;
 		case BATMONITOR_MSG_RED_LED_ON:
+			// Make RED and Green LED mutually exclusive
+			// turn Green led off
+			PIN_setOutputValue(ledPinHandle, Board_GRN_SLED, 1);
+			// turn Red led on
 			PIN_setOutputValue(ledPinHandle, Board_RED_SLED, 0);
 			break;
 		case BATMONITOR_MSG_GRN_LED_ON:
+			// turn Red led off
+			PIN_setOutputValue(ledPinHandle, Board_RED_SLED, 1);
+			// turn green led on
 			PIN_setOutputValue(ledPinHandle, Board_GRN_SLED, 0);
 			break;
 		case BATMONITOR_MSG_BLU_LED_ON:
@@ -176,7 +182,6 @@ static void user_processBatMonitorMessage(batMonitor_msg_t *pMsg) {
 			break;
 	}
 }
-
 
 // Input - Task message type, messge data, message length
 // Output - None

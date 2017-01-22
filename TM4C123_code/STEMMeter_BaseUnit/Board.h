@@ -89,6 +89,9 @@ extern "C" {
 #define Board_SD_CARD_INT			SD_CARD_INT_INPUT
 #define Board_SPI_CS_INT			SPI_CS_OUTPUT
 
+#define Board_PG_INT				CHARGE_PG_INPUT
+#define Board_CHG_INT				CHARGE_CHG_INPUT
+
 #define Board_SD_CARD_LED			SD_CARD_LED
 
 #define Board_LED_ON				(0)

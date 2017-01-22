@@ -164,6 +164,10 @@ GPIO_PinConfig gpioPinConfigs[] = {
 	GPIOTiva_PD_0 | GPIO_CFG_IN_PD | GPIO_CFG_IN_INT_RISING,
 	// SD Card Detect
 	GPIOTiva_PD_3 | GPIO_CFG_IN_NOPULL | GPIO_CFG_IN_INT_BOTH_EDGES,
+	// Charge Input Power Good Interrupt
+	GPIOTiva_PA_7 | GPIO_CFG_IN_PU | GPIO_CFG_IN_INT_BOTH_EDGES,
+	// Charge Charge Complete Interrupt
+	GPIOTiva_PA_6 | GPIO_CFG_IN_PU | GPIO_CFG_IN_INT_BOTH_EDGES,
 
     /* Output pins */
 	// Sensor 1 Output
