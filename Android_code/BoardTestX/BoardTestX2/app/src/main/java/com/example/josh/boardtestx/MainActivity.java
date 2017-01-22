@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Looper;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
@@ -53,6 +54,7 @@ public class MainActivity extends AppCompatActivity
     public final static UUID SENSOR_3_DATA_UUID = UUID.fromString("F000BEAC-0451-4000-B000-000000000000");
     public final static UUID SENSOR_4_DATA_UUID = UUID.fromString("F000BEAD-0451-4000-B000-000000000000");
     public final static UUID SENSOR_1_CONFIG_UUID = UUID.fromString("F000BEAE-0451-4000-B000-000000000000");
+    public final static UUID BATTERY_INFO_UUID = UUID.fromString("F000BEBC-0451-4000-B000-000000000000");
     public static final UUID CHARACTERISTIC_UPDATE_NOTIFICATION_DESCRIPTOR_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
 
     private BluetoothGattCharacteristic BoardSensor1DataChar;
@@ -60,6 +62,7 @@ public class MainActivity extends AppCompatActivity
     private BluetoothGattCharacteristic BoardSensor3DataChar;
     private BluetoothGattCharacteristic BoardSensor4DataChar;
     private BluetoothGattCharacteristic BoardSensor1ConfigChar;
+    private BluetoothGattCharacteristic BoardBatteryInfoChar;
     private BluetoothGattService BoardService;
 
     private BluetoothDevice boardDevice;
@@ -88,6 +91,7 @@ public class MainActivity extends AppCompatActivity
     private Sensor sensor4;
 
     private byte[] configData = new byte[8];
+    private BaseUnitBattery baseUnitBattery;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,6 +110,9 @@ public class MainActivity extends AppCompatActivity
         configData[5] = (byte)0;
         configData[6] = (byte)SensorList.RATE_ONE_HZ;
         configData[7] = (byte)0;
+
+        baseUnitBattery = new BaseUnitBattery();
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -229,11 +236,12 @@ public class MainActivity extends AppCompatActivity
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                        BoardSensor1DataChar = BoardService.getCharacteristic(SENSOR_1_DATA_UUID); // get the SMS characteristic
-                        BoardSensor2DataChar = BoardService.getCharacteristic(SENSOR_2_DATA_UUID); // get the SMS characteristic
-                        BoardSensor3DataChar = BoardService.getCharacteristic(SENSOR_3_DATA_UUID); // get the SMS characteristic
-                        BoardSensor4DataChar = BoardService.getCharacteristic(SENSOR_4_DATA_UUID); // get the Time characteristic
-                        BoardSensor1ConfigChar = BoardService.getCharacteristic(SENSOR_1_CONFIG_UUID);
+                        BoardSensor1DataChar = BoardService.getCharacteristic(SENSOR_1_DATA_UUID); // get sensor 1 char
+                        BoardSensor2DataChar = BoardService.getCharacteristic(SENSOR_2_DATA_UUID);// get sensor 2 char
+                        BoardSensor3DataChar = BoardService.getCharacteristic(SENSOR_3_DATA_UUID); /// get sensor 3 char
+                        BoardSensor4DataChar = BoardService.getCharacteristic(SENSOR_4_DATA_UUID); // get sensor 4 char
+                        BoardSensor1ConfigChar = BoardService.getCharacteristic(SENSOR_1_CONFIG_UUID); // get the sensor config char
+                        BoardBatteryInfoChar = BoardService.getCharacteristic(BATTERY_INFO_UUID); // get the battery info char
 
                         // Enable Sensor 1 Char Notifications
                         gatt.setCharacteristicNotification(BoardSensor1DataChar, true);
@@ -277,7 +285,18 @@ public class MainActivity extends AppCompatActivity
                 // Result of a characteristic read operation
                 public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
                     if (status == BluetoothGatt.GATT_SUCCESS) {
-                        // Not currently reading characteristics. Using notify on change.
+                        if (characteristic == BoardBatteryInfoChar) {
+                            String charString = characteristic.getStringValue(0);
+                            Log.i(TAG,"Bat Char: " + charString);
+                            baseUnitBattery.updateBatteryValues(charString);
+                            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(getApplicationContext(), baseUnitBattery.getBatStr(), Toast.LENGTH_LONG).show();
+                                }
+                            });
+
+                        }
                     }
                 }
 
@@ -490,7 +509,12 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            // TODO Do something when user clicks settings button
+            if (mBluetoothAdapter == null || mBluetoothGatt == null ||  mConnectionState == STATE_DISCONNECTED) {
+                Toast.makeText(this,"Not Connected", Toast.LENGTH_SHORT).show();
+            }
+            else if(BoardBatteryInfoChar != null) {
+                mBluetoothGatt.readCharacteristic(BoardBatteryInfoChar);
+            }
             return true;
         }
 

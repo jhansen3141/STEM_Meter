@@ -82,6 +82,7 @@ static void enqueueSelfMsg(bleWrite_msg_types_t msgType);
 static void updateSensorConfig();
 static void InputPowerGoodInterrupt(unsigned int index);
 static void ChargeCompleteInterrupt(unsigned int index);
+static void checkChargeStatus();
 
 
 void BLEWrite_createTask(void) {
@@ -97,7 +98,7 @@ void BLEWrite_createTask(void) {
 static void BLEWrite_Init() {
 	Semaphore_Params semParams;
 
-    // Construct a Semaphore object to be used as a resource lock, inital count 0
+    // Construct a Semaphore object to be used as a resource lock
     Semaphore_Params_init(&semParams);
     Semaphore_construct(&semBLEWriteStruct, 0, &semParams);
 
@@ -186,6 +187,13 @@ static void BLEWriteFxn(UArg arg0, UArg arg1) {
 
 	// Blink the LED 3 times on power up
 	sdCardLEDBlink(3);
+
+	// give the CC2640 time to start up before sending any data to it
+	Task_sleep(2000);
+
+	// check the battery charging status to see if any of the LEDs
+	// need to be lit up
+	checkChargeStatus();
 
 	while(1) {
 		// block until work to do
@@ -349,5 +357,25 @@ static void sdCardLEDBlink(uint8_t numBlink) {
 		Task_sleep(300);
 		GPIO_write(Board_SD_CARD_LED, Board_LED_OFF);
 		Task_sleep(300);
+	}
+}
+
+static void checkChargeStatus() {
+	// if pin is high then charge stopped
+	if(GPIO_read(Board_PG_INT)) {
+		enqueueSelfMsg(CHARGE_STOPPED_MSG);
+	}
+	// otherwise charge started
+	else {
+		enqueueSelfMsg(CHARGE_STARTED_MSG);
+	}
+
+	// if pin is high then charge not full
+	if(GPIO_read(Board_CHG_INT)) {
+		enqueueSelfMsg(CHARGE_NOT_COMPLETE_MSG);
+	}
+	// otherwise charge full
+	else {
+		enqueueSelfMsg(CHARGE_COMPLETE_MSG);
 	}
 }
