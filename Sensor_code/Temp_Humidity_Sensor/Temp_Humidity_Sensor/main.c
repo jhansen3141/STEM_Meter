@@ -135,9 +135,6 @@ int main(void) {
 	cmdInit();
 	cmdAdd("SF",setSensorFreq);
 	
-	_delay_ms(500);
-	initSensor();
-	
 	// enable global interrupts
 	sei();
 	

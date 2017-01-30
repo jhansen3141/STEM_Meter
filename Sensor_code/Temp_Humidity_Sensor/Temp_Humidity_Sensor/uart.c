@@ -57,6 +57,7 @@ void writeBaseUnitData(sensorData_t *data) {
 		// Write all of the raw data
 		UARTWrite(data->sensorDataRaw[i]);
 	}	
+	
 	UARTWrite(NUMBER_DATA_POINTS);
 	
 	// Write the size of the string data

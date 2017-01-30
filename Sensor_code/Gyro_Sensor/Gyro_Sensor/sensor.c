@@ -50,35 +50,35 @@ static void MPU6050_Write(uint8_t reg, uint8_t data) {
 void readSensor(sensorData_t *data) {
 	uint8_t IMUData[6];
 	char tempStr[6];
-	int16_t accelX, accelY, accelZ;
-	float fAccelX, fAccelY, fAccelZ;
+	int16_t gyroX, gyroY, gyroZ;
+	float fGyroX, fGyroY, fGyroZ;
 	
 	memset(data->sensorDataRaw,0,RAW_DATA_SIZE);
 	memset(data->sensorDataStr,0,STR_DATA_SIZE);
 	
-	I2CReadMult(MPU6050_ADDRESS,ACCEL_XOUT_H,IMUData,6);
+	I2CReadMult(MPU6050_ADDRESS,GYRO_XOUT_H,IMUData,6);
 	
 	// copy the raw data into the struct
 	memcpy(data->sensorDataRaw,IMUData,6);
 
 	// combine the bytes together
-	accelX = ( ( (int16_t)IMUData[0]<<8 ) | IMUData[1] );
-	accelY = ( ( (int16_t)IMUData[2]<<8 ) | IMUData[3] );
-	accelZ = ( ( (int16_t)IMUData[4]<<8 ) | IMUData[5] );
+	gyroX = ( ( (int16_t)IMUData[0]<<8 ) | IMUData[1] );
+	gyroY = ( ( (int16_t)IMUData[2]<<8 ) | IMUData[3] );
+	gyroZ = ( ( (int16_t)IMUData[4]<<8 ) | IMUData[5] );
 	
 	
-	fAccelX = (float)accelX / ACCEL_SENSE;
-	fAccelY = (float)accelY / ACCEL_SENSE;
-	fAccelZ = (float)accelZ / ACCEL_SENSE;
+	fGyroX = (float)gyroX / GYRO_SENSE;
+	fGyroY = (float)gyroY / GYRO_SENSE;
+	fGyroZ = (float)gyroZ / GYRO_SENSE;
 	
 	
-	sprintf(tempStr,"%1.2f;",fAccelX);
+	sprintf(tempStr,"%1.2f;",fGyroX);
 	strcat(data->sensorDataStr,tempStr);
 	
-	sprintf(tempStr,"%1.2f;",fAccelY);
+	sprintf(tempStr,"%1.2f;",fGyroY);
 	strcat(data->sensorDataStr,tempStr);
 	
-	sprintf(tempStr,"%1.2f;",fAccelZ);
+	sprintf(tempStr,"%1.2f;",fGyroZ);
 	strcat(data->sensorDataStr,tempStr);
 
 }
