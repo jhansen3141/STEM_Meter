@@ -32,14 +32,13 @@
 #include "FatSD.h"
 
 
-#define TASKSTACKSIZE       768
+#define TASKSTACKSIZE       1024
 #define TASK_PRIORITY 		1
 
 static Task_Struct task2Struct;
 static Char task2Stack[TASKSTACKSIZE];
 
-//static uint8_t uartBufferTX[25];
-static uint8_t uartBufferRX[25];
+static uint8_t uartBufferRX[SENSOR_FRAME_LENGTH+1];
 bool Sensor2SDWriteEnabled = true;
 static UART_Handle      UART1Handle;
 
@@ -87,6 +86,12 @@ void Sensor2WriteConfig(uint8_t freq) {
 	UART_writePolling(UART1Handle,txBuffer,5);
 }
 
+void Sensor2RequestStr() {
+	char txBuffer[5];
+	strcpy(txBuffer,"RS\n");
+	UART_writePolling(UART1Handle,txBuffer,3);
+}
+
 static void UART1WriteCallback(UART_Handle handle, void *buffer, size_t size) {
 	// TODO Ack write complete
 }
@@ -106,13 +111,17 @@ static void Sensor2TaskFxn(UArg arg0, UArg arg1) {
 		{
 			// write the bytes to the CC2640
 			enqueueBLEWritetTaskMsg(SENSOR_2_UPDATE_DATA_MSG,uartBufferRX+FRAME_BYTES_OFFSET,SENSOR_DATA_LENGTH);
-			// if SD write is enabled for this sensor then write the reading to the SD card
+			// if SD write is enabled for this sensor then enqueue the string data to the SD card task
 			if(Sensor2SDWriteEnabled) {
-				enqueueSDTaskMsg(WRITE_TO_SD_MSG,uartBufferRX,SENSOR_DATA_LENGTH+FRAME_BYTES_OFFSET);
+				// enqueue only the string data portion of the incomming data, not the raw data
+				enqueueSDTaskMsg(WRITE_S2_TO_SD_MSG,uartBufferRX+STR_BYTES_OFFSET,STR_DATA_LENGTH,uartBufferRX[3]);
 			}
 		}
-		else {
-			// TODO Handle frame out of sync error
+		else if(uartBufferRX[0] == STR_FRAME_BYTE_0 &&
+				uartBufferRX[1] == STR_FRAME_BYTE_1 &&
+				uartBufferRX[2] == STR_FRAME_BYTE_2)
+		{
+			// TODO handle getting sensor string
 		}
 	}
 

@@ -27,6 +27,7 @@
 #include "Board.h"
 #include "time_clock.h"
 #include "FatSD.h"
+#include "Sensor.h"
 
 /* Buffer size used for the file copy process */
 #ifndef CPY_BUFF_SIZE
@@ -41,6 +42,8 @@
 #define DRIVE_NUM           0
 
 #define TASKSTACKSIZE       2048
+
+#define TIME_STR_LEN		18
 
 Task_Struct SDCardTaskStruct;
 Char SDCardTaskStack[TASKSTACKSIZE];
@@ -60,9 +63,13 @@ static FILE *dataFile;
 static SDSPI_Handle sdspiHandle;
 static SDSPI_Params sdspiParams;
 
+static uint8_t attachedSensor[4] = {0,0,0,0};
+static uint8_t sensorNumDataPoints[4] = {0,0,0,0};
+
 typedef struct {
   Queue_Elem _elem;
   SD_msg_types_t type;
+  uint8_t sensorType;
   uint16_t length;
   uint8_t pdu[];
 } SD_msg_t;
@@ -72,8 +79,9 @@ typedef struct {
 static void SDCardFxn(UArg arg0, UArg arg1);
 static void SDCard_Init();
 static void user_processSDMessage(SD_msg_t *pMsg);
-static void SDCardDetectInterrupt(unsigned int index);
-
+static void writeSensorDataToSD(uint8_t sNum, SD_msg_t *sData);
+static void getTimeStr(char *timeStr);
+static void writeCommas(uint8_t sNum);
 
 void SDCard_createTask(void) {
     Task_Params taskParams;
@@ -99,22 +107,6 @@ uint32_t fatTimeHook() {
 			| (time.minutes << 5)
 			| (time.seconds >> 1)
 			;
-}
-
-static void SDCardDetectInterrupt(unsigned int index) {
-	// disable the interrupt until finished
-	GPIO_disableInt(Board_SD_CARD_INT);
-
-	// if pin is high then card was removed
-	if(GPIO_read(Board_SD_CARD_INT)) {
-		SDCardInserted = false;
-	}
-	// otherwise it was inserted
-	else {
-		SDCardInserted = true;
-	}
-
-	GPIO_enableInt(Board_SD_CARD_INT);
 }
 
 static void SDCard_Init() {
@@ -149,60 +141,11 @@ static void SDCard_Init() {
 	// create the task queue
 	Queue_construct(&SDMsgQ, NULL);
 	hSDMsgQ = Queue_handle(&SDMsgQ);
-
-	// setup SD Card Detect Interrupt callback
-	GPIO_setCallback(Board_SD_CARD_INT, SDCardDetectInterrupt);
-
-	// Enable interrupt
-	// Not working now due to issue with PCB layout
-	// Using software to detect card insert
-	//GPIO_enableInt(Board_SD_CARD_INT);
-
 }
 
-uint16_t SDWriteTime() {
-	uint16_t bytesWritten;
-	uint8_t timeData[10] = {0};
 
-	UTCTimeStruct time;
-	UTC_convertUTCTime(&time, UTC_getClock());
-
-	// set up time markers
-	timeData[0] = 0xAA;
-	timeData[1] = 0xBB;
-	timeData[2] = 0xCC;
-	timeData[3] = time.month;
-	timeData[4] = time.day;
-	timeData[5] = (uint8_t)(time.year - 2000);
-	timeData[6] = time.hour;
-	timeData[7] = time.minutes;
-	timeData[8] = time.seconds;
-	timeData[9] = 0xDD;
-
-	// open the output file for writing (appending data)
-	dataFile = fopen(outputfile, "a");
-	// check to see if file opened
-	if (dataFile) {
-		// fwrite(dataToWrite, size in bytes of each element,
-		// number of elements, file object)
-		bytesWritten = fwrite(timeData, 1, 10, dataFile);
-
-		// flush the stream buffer
-		fflush(dataFile);
-
-		// close the data file
-		fclose(dataFile);
-		SDMasterWriteEnabled = true;
-	}
-	else {
-		SDMasterWriteEnabled = false;
-	}
-
-	return bytesWritten;
-}
 static void SDCardFxn(UArg arg0, UArg arg1) {
 	SDCard_Init();
-	SDWriteTime();
 
 	while(1) {
 		// block until work to do
@@ -216,35 +159,123 @@ static void SDCardFxn(UArg arg0, UArg arg1) {
 	}
 }
 
+static void getTimeStr(char *timeStr) {
+	UTCTimeStruct time;
+	UTC_convertUTCTime(&time, UTC_getClock());
+	sprintf(timeStr,"%2d-%2d-%2d %2d:%2d:%2d,",
+			time.month,time.day,(uint8_t)(time.year - 2000),
+			time.hour,time.minutes,time.seconds);
+}
+
+static void writeCommas(uint8_t sNum) {
+	uint8_t numCommas = 0;
+	char commaStr[20];
+	uint8_t i;
+
+	// set string to null
+	memset(commaStr,0,20);
+
+	// get the number of commas needed
+	switch(sNum) {
+	case 1:
+		numCommas = 0;
+		break;
+	case 2:
+		numCommas = sensorNumDataPoints[0];
+		break;
+	case 3:
+		numCommas = sensorNumDataPoints[0] + sensorNumDataPoints[1];
+		break;
+	case 4:
+		numCommas = sensorNumDataPoints[0] + sensorNumDataPoints[1] + sensorNumDataPoints[2];
+		break;
+	}
+
+
+	if(numCommas != 0) {
+		// create string with commas needed
+		for(i=0; i<numCommas; i++) {
+			strcat(commaStr,",");
+		}
+
+		// write the string with commas
+		fwrite(commaStr, 1, numCommas, dataFile);
+	}
+}
+
+
+static void writeSensorDataToSD(uint8_t sNum, SD_msg_t *sData) {
+	 uint8_t sensorType = sData->sensorType;
+	 uint8_t numDataPoints = sData->pdu[0];
+	 uint8_t dataStrLen = (sData->length) - STR_META_DATA_LEN;
+	 char timeString[TIME_STR_LEN];
+
+	// check to see if master write is enabled
+	if(SDMasterWriteEnabled) {
+		// open the output file for writing (appending data)
+		dataFile = fopen(outputfile, "a");
+
+		// check to see if file opened
+		if (dataFile) {
+			// if new sensor was attached
+			if(attachedSensor[sNum] != sensorType) {
+				sensorNumDataPoints[sNum-1] = numDataPoints;
+				// write the number of columns
+				writeCommas(sNum);
+				// write the title of the column
+				// column str starts at sensor string + 1
+				fwrite(sData->pdu+1, 1, 5, dataFile);
+				fwrite("\n",1,1,dataFile);
+			}
+			// get the current time as a string
+			getTimeStr(timeString);
+
+			// write the time string
+			fwrite(timeString, 1, TIME_STR_LEN, dataFile);
+
+			// write the number of commas needed
+			writeCommas(sNum);
+
+			// write the actual sensor data string
+			fwrite(sData->pdu+STR_START_OFFSET, 1, dataStrLen, dataFile);
+
+			// flush the stream buffer
+			fflush(dataFile);
+
+			// close the data file
+			fclose(dataFile);
+		}
+	}
+}
+
 static void user_processSDMessage(SD_msg_t *pMsg) {
 
-	switch (pMsg->type) {
-		case WRITE_TO_SD_MSG:
-			// check to see if master write is enabled
-			if(SDMasterWriteEnabled) {
-				dataFile = fopen(outputfile, "a");
-				// check to see if file opened
-				if (dataFile) {
-					GPIO_write(Board_SD_CARD_LED, Board_LED_ON);
 
-					fwrite(pMsg->pdu, 1, pMsg->length, dataFile);
-					// flush the stream buffer
-					fflush(dataFile);
-					// close the data file
-					fclose(dataFile);
-					GPIO_write(Board_SD_CARD_LED, Board_LED_OFF);
-				}
-			}
+	switch (pMsg->type) {
+		case WRITE_S1_TO_SD_MSG:
+			writeSensorDataToSD(1,pMsg);
+			break;
+		case WRITE_S2_TO_SD_MSG:
+			writeSensorDataToSD(2,pMsg);
+			break;
+		case WRITE_S3_TO_SD_MSG:
+			writeSensorDataToSD(3,pMsg);
+			break;
+		case WRITE_S4_TO_SD_MSG:
+			writeSensorDataToSD(4,pMsg);
+			break;
+		case WRITE_SENSOR_STR_MSG:
 			break;
 	}
 }
 
-void enqueueSDTaskMsg(SD_msg_types_t msgType, uint8_t *buffer, uint16_t len) {
+void enqueueSDTaskMsg(SD_msg_types_t msgType, uint8_t *buffer, uint16_t len, uint8_t sType) {
 	// create a new message for the queue
 	SD_msg_t *pMsg = malloc(sizeof(SD_msg_t) + len);
 	if (pMsg != NULL) {
 		pMsg->type = msgType;
 		pMsg->length = len;
+		pMsg->sensorType = sType;
 		memcpy(pMsg->pdu,buffer,len); // copy the data into the message
 		Queue_enqueue(hSDMsgQ, &pMsg->_elem); // enqueue the message
 		Semaphore_post(semSDHandle);
