@@ -28,7 +28,7 @@
 #include "BLEWrite.h"
 #include "FatSD.h"
 
-#define TASKSTACKSIZE       1024
+#define TASKSTACKSIZE       1500
 #define TASK_PRIORITY 		1
 
 static Task_Struct sensor1TaskStruct;
@@ -88,11 +88,11 @@ static void UART0WriteCallback(UART_Handle handle, void *buffer, size_t size) {
 }
 
 static void Sensor1TaskFxn(UArg arg0, UArg arg1) {
-	uint8_t strSize;
+
 	Sensor1TaskInit();
 
 	while(1) {
-		// block until 20 bytes have been recieved
+		// block until 59 bytes have been recieved
 		UART_read(UART0Handle,uartBufferRX,SENSOR_FRAME_LENGTH);
 
 		// make sure frame sync bytes are correct
@@ -104,21 +104,11 @@ static void Sensor1TaskFxn(UArg arg0, UArg arg1) {
 			enqueueBLEWritetTaskMsg(SENSOR_1_UPDATE_DATA_MSG,uartBufferRX+FRAME_BYTES_OFFSET,SENSOR_DATA_LENGTH);
 			// if SD write is enabled for this sensor then enqueue the string data to the SD card task
 			if(Sensor1SDWriteEnabled) {
-				strSize = strlen((const char*)(uartBufferRX+STR_BYTES_OFFSET));
 				// enqueue only the string data portion of the incomming data, not the raw data
 				// sensor type is held in byte 3
-				enqueueSDTaskMsg(WRITE_S1_TO_SD_MSG,uartBufferRX+STR_BYTES_OFFSET,strSize,uartBufferRX[3]);
+				enqueueSDTaskMsg(WRITE_S1_TO_SD_MSG,uartBufferRX+STR_BYTES_OFFSET,uartBufferRX[3]);
 			}
 		}
-		else if(uartBufferRX[0] == STR_FRAME_BYTE_0 &&
-				uartBufferRX[1] == STR_FRAME_BYTE_1 &&
-				uartBufferRX[2] == STR_FRAME_BYTE_2)
-		{
-			// TODO handle getting sensor string
-		}
+
 	}
 }
-
-
-
-

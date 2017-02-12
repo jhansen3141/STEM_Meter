@@ -33,6 +33,7 @@
 #include "STEMMeter_Service.h"
 #include "Board.h"
 #include "SPICommands.h"
+#include "BatteryMonitor.h"
 
 /*********************************************************************
  * CONSTANTS
@@ -153,6 +154,7 @@ static uint8_t advertData[] =
 
 // GAP GATT Attributes
 static uint8_t attDeviceName[GAP_DEVICE_NAME_LEN] = "STEM Meter";
+static bool isAdvertising = TRUE;
 
 // Globals used for ATT Response retransmission
 static gattMsgEvent_t *pAttRsp = NULL;
@@ -342,7 +344,9 @@ static void ProjectZero_init(void) {
   STEMMeter_Service_SetParameter(STEMMETER_SERVICE_SENSOR2DATA, STEMMETER_SERVICE_SENSOR2DATA_LEN, &someVal);
   STEMMeter_Service_SetParameter(STEMMETER_SERVICE_SENSOR3DATA, STEMMETER_SERVICE_SENSOR3DATA_LEN, &someVal);
   STEMMeter_Service_SetParameter(STEMMETER_SERVICE_SENSOR4DATA, STEMMETER_SERVICE_SENSOR4DATA_LEN, &someVal);
+  STEMMeter_Service_SetParameter(STEMMETER_SERVICE_CONFIG, STEMMETER_SERVICE_CONFIG_LEN, &someVal);
   STEMMeter_Service_SetParameter(STEMMETER_SERVICE_BATTERYDATA, STEMMETER_SERVICE_BATTERYDATA_LEN, &someVal);
+  STEMMeter_Service_SetParameter(STEMMETER_SERVICE_TIME, STEMMETER_SERVICE_TIME_LEN, &someVal);
 
   // Start the stack in Peripheral mode.
   VOID GAPRole_StartDevice(&user_gapRoleCBs);
@@ -444,46 +448,16 @@ static void ProjectZero_taskFxn(UArg a0, UArg a1) {
 
 void user_STEMMeter_Service_ValueChangeDispatchHandler(server_char_write_t *pWrite) {
 	switch (pWrite->paramID) {
-		case STEMMETER_SERVICE_SENSOR1DATA:
-			// Do something useful with pWrite->data here
-			// -------------------------
-			break;
-        case STEMMETER_SERVICE_SENSOR2DATA:
-			// Do something useful with pWrite->data here
-			// -------------------------
-			break;
-        case STEMMETER_SERVICE_SENSOR3DATA:
-			// Do something useful with pWrite->data here
-			// -------------------------
-			break;
-        case STEMMETER_SERVICE_SENSOR4DATA:
-			// Do something useful with pWrite->data here
-			// -------------------------
-			break;
-        case STEMMETER_SERVICE_SENSOR1CONFIG:
+
+        case STEMMETER_SERVICE_CONFIG:
         	// Equeue the incomming Sensor config data to SPI
         	// task so it can be sent to TM4C123
 			user_enqueueRawSPICommandsMsg(SENSOR_UPDATE_CONFIG_MSG,pWrite->data,20);
 			break;
-        case STEMMETER_SERVICE_SENSOR2CONFIG:
-        	// TODO Only actually need one char for all 4 sensors config data
+        case STEMMETER_SERVICE_TIME:
+		 // Do something useful with pWrite->data here
         	break;
-        case STEMMETER_SERVICE_SENSOR3CONFIG:
-        	// TODO Only actually need one char for all 4 sensors config data
-			break;
-        case STEMMETER_SERVICE_SENSOR4CONFIG:
-        	// TODO Only actually need one char for all 4 sensors config data
-        	break;
-        case STEMMETER_SERVICE_BATTERYDATA:
-			// Do something useful with pWrite->data here
-			// -------------------------
-			break;
-        case STEMMETER_SERVICE_GENERALCONFIG:
-			// Do something useful with pWrite->data here
-			// -------------------------
-			break;
       }
-
 }
 
 
@@ -494,38 +468,14 @@ static void user_STEMMeter_ServiceValueChangeCB(uint8_t paramID) {
   // Send message to application message queue about received data.
   uint16_t readLen = 0; // How much to read via service API
 
-  switch (paramID) {
-    case STEMMETER_SERVICE_SENSOR1DATA:
-      readLen = STEMMETER_SERVICE_SENSOR1DATA_LEN;
-      break;
-    case STEMMETER_SERVICE_SENSOR2DATA:
-      readLen = STEMMETER_SERVICE_SENSOR2DATA_LEN;
-      break;
-    case STEMMETER_SERVICE_SENSOR3DATA:
-      readLen = STEMMETER_SERVICE_SENSOR3DATA_LEN;
-      break;
-    case STEMMETER_SERVICE_SENSOR4DATA:
-      readLen = STEMMETER_SERVICE_SENSOR4DATA_LEN;
-      break;
-    case STEMMETER_SERVICE_SENSOR1CONFIG:
-      readLen = STEMMETER_SERVICE_SENSOR1CONFIG_LEN;
-      break;
-    case STEMMETER_SERVICE_SENSOR2CONFIG:
-      readLen = STEMMETER_SERVICE_SENSOR2CONFIG_LEN;
-      break;
-    case STEMMETER_SERVICE_SENSOR3CONFIG:
-      readLen = STEMMETER_SERVICE_SENSOR3CONFIG_LEN;
-      break;
-    case STEMMETER_SERVICE_SENSOR4CONFIG:
-      readLen = STEMMETER_SERVICE_SENSOR4CONFIG_LEN;
-      break;
-    case STEMMETER_SERVICE_BATTERYDATA:
-      readLen = STEMMETER_SERVICE_BATTERYDATA_LEN;
-      break;
-    case STEMMETER_SERVICE_GENERALCONFIG:
-      readLen = STEMMETER_SERVICE_GENERALCONFIG_LEN;
-      break;
-  }
+	switch (paramID) {
+		case STEMMETER_SERVICE_CONFIG:
+		  readLen = STEMMETER_SERVICE_CONFIG_LEN;
+		  break;
+		case STEMMETER_SERVICE_TIME:
+		  readLen = STEMMETER_SERVICE_TIME_LEN;
+		  break;
+	}
 
   // Allocate memory for the message.
   // Note: The message doesn't have to contain the data itself, as that's stored in
@@ -596,9 +546,21 @@ static void user_processApplicationMessage(app_msg_t *pMsg) {
       }
       break;
 
-    case APP_MSG_BUTTON_DEBOUNCED: /* Message from swi about pin change */
+    case APP_MSG_TOGGLE_ADVERTISING:
+    {
+    	if(isAdvertising) {
+    		isAdvertising = FALSE;
+    	}
+    	else {
+    		isAdvertising = TRUE;
+    	}
 
-      break;
+		// Set advertisement enabled.
+		GAPRole_SetParameter(GAPROLE_ADVERT_ENABLED, sizeof(uint8_t),
+							 &isAdvertising);
+    }
+    	break;
+
   }
 }
 
@@ -1034,6 +996,14 @@ void enqueueSensorCharUpdate(uint16_t charUUID, uint8_t *pValue) {
 	}
 }
 
+void enqueueBLEMainMsg(app_msg_types_t msgType) {
+	app_msg_t *pMsg = ICall_malloc( sizeof(app_msg_t) );
+	if (pMsg != NULL) {
+		pMsg->type = msgType;
+		Queue_enqueue(hApplicationMsgQ, &pMsg->_elem);
+		Semaphore_post(BLESem);
+	}
+}
 
-/*********************************************************************
-*********************************************************************/
+
+

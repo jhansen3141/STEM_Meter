@@ -28,7 +28,7 @@
 #include "FatSD.h"
 
 
-#define TASKSTACKSIZE       1024
+#define TASKSTACKSIZE       1500
 #define TASK_PRIORITY 		1
 
 static Task_Struct sensor4TaskStruct;
@@ -91,7 +91,7 @@ static void Sensor4TaskFxn(UArg arg0, UArg arg1) {
 	Sensor4TaskInit();
 
 	while(1) {
-		// block until 20 bytes have been recieved
+		// block until 59 bytes have been recieved
 		UART_read(UART3Handle,uartBufferRX,SENSOR_FRAME_LENGTH);
 
 		// make sure frame sync bytes are correct
@@ -104,15 +104,10 @@ static void Sensor4TaskFxn(UArg arg0, UArg arg1) {
 			// if SD write is enabled for this sensor then enqueue the string data to the SD card task
 			if(Sensor4SDWriteEnabled) {
 				// enqueue only the string data portion of the incomming data, not the raw data
-				enqueueSDTaskMsg(WRITE_S4_TO_SD_MSG,uartBufferRX+STR_BYTES_OFFSET,STR_DATA_LENGTH,uartBufferRX[3]);
+				enqueueSDTaskMsg(WRITE_S4_TO_SD_MSG,uartBufferRX+STR_BYTES_OFFSET,uartBufferRX[3]);
 			}
 		}
-		else if(uartBufferRX[0] == STR_FRAME_BYTE_0 &&
-				uartBufferRX[1] == STR_FRAME_BYTE_1 &&
-				uartBufferRX[2] == STR_FRAME_BYTE_2)
-		{
-			// TODO handle getting sensor string
-		}
+
 	}
 
 }

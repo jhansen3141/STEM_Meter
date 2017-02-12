@@ -14,7 +14,7 @@ typedef enum {
   WRITE_SENSOR_STR_MSG
 } SD_msg_types_t;
 
-void enqueueSDTaskMsg(SD_msg_types_t msgType, uint8_t *buffer, uint16_t len, uint8_t sType);
+void enqueueSDTaskMsg(SD_msg_types_t msgType, uint8_t *buffer, uint8_t sType);
 uint16_t SDWriteTime();
 
 

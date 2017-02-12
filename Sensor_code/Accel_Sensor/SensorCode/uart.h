@@ -13,6 +13,7 @@ void UARTInit(void);
 void UARTWriteString(char *string);
 void UARTWrite(uint8_t data);
 void writeBaseUnitData(sensorData_t *data);
+void writeSensorString();
 
 
 #endif /* UART_H_ */

@@ -571,7 +571,7 @@ const UART_Config UART_config[] = {
 #include <ti/drivers/uart/UARTTiva.h>
 
 UARTTiva_Object uartTivaObjects[EK_TM4C123GXL_UARTCOUNT];
-unsigned char uartTivaRingBuffer[EK_TM4C123GXL_UARTCOUNT][32];
+unsigned char uartTivaRingBuffer[EK_TM4C123GXL_UARTCOUNT][92];
 
 /* UART configuration structure */
 const UARTTiva_HWAttrs uartTivaHWAttrs[EK_TM4C123GXL_UARTCOUNT] = {

@@ -13,7 +13,7 @@
 static void MPU6050_Write(uint8_t reg, uint8_t data);
 
 void initBoard(void) {
-	DDRB |= (1<<0); // LED as output
+	DDRC |= (1<<0); // LED as output
 	DDRD &= ~(1<<2); // UART Re-send line as input
 	
 	I2CInit();
@@ -48,6 +48,7 @@ static void MPU6050_Write(uint8_t reg, uint8_t data) {
 }
 
 void readSensor(sensorData_t *data) {
+	moduleLED(ON);
 	uint8_t IMUData[6];
 	char tempStr[6];
 	int16_t accelX, accelY, accelZ;
@@ -72,22 +73,23 @@ void readSensor(sensorData_t *data) {
 	fAccelZ = (float)accelZ / ACCEL_SENSE;
 	
 	
-	sprintf(tempStr,"%1.2f;",fAccelX);
+	sprintf(tempStr,"%1.2f,",fAccelX);
 	strcat(data->sensorDataStr,tempStr);
 	
-	sprintf(tempStr,"%1.2f;",fAccelY);
+	sprintf(tempStr,"%1.2f,",fAccelY);
 	strcat(data->sensorDataStr,tempStr);
 	
-	sprintf(tempStr,"%1.2f;",fAccelZ);
+	sprintf(tempStr,"%1.2f\n",fAccelZ);
 	strcat(data->sensorDataStr,tempStr);
+	moduleLED(OFF);
 
 }
 
 void moduleLED(ledState_t state) {
 	if(state == OFF) {
-		PORTB |= (1<<0);
+		PORTC |= (1<<0);
 	}
 	else {
-		PORTB &= ~(1<<0);
+		PORTC &= ~(1<<0);
 	}
 }

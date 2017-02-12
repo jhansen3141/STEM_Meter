@@ -28,7 +28,7 @@
 #include "FatSD.h"
 
 
-#define TASKSTACKSIZE       1024
+#define TASKSTACKSIZE       1500
 #define TASK_PRIORITY 		1
 
 static Task_Struct sensor3TaskStruct;
@@ -90,7 +90,7 @@ static void UART2WriteCallback(UART_Handle handle, void *buffer, size_t size) {
 static void Sensor3TaskFxn(UArg arg0, UArg arg1) {
 
 	Sensor3TaskInit();
-	UART_writePolling(UART2Handle,"S3 UP",5);
+
 	while(1) {
 		// block until 20 bytes have been recieved
 		UART_read(UART2Handle,uartBufferRX,SENSOR_FRAME_LENGTH);
@@ -105,15 +105,10 @@ static void Sensor3TaskFxn(UArg arg0, UArg arg1) {
 			// if SD write is enabled for this sensor then enqueue the string data to the SD card task
 			if(Sensor3SDWriteEnabled) {
 				// enqueue only the string data portion of the incomming data, not the raw data
-				enqueueSDTaskMsg(WRITE_S3_TO_SD_MSG,uartBufferRX+STR_BYTES_OFFSET,STR_DATA_LENGTH,uartBufferRX[3]);
+				enqueueSDTaskMsg(WRITE_S3_TO_SD_MSG,uartBufferRX+STR_BYTES_OFFSET,uartBufferRX[3]);
 			}
 		}
-		else if(uartBufferRX[0] == STR_FRAME_BYTE_0 &&
-				uartBufferRX[1] == STR_FRAME_BYTE_1 &&
-				uartBufferRX[2] == STR_FRAME_BYTE_2)
-		{
-			// TODO handle getting sensor string
-		}
+
 	}
 
 }

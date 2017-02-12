@@ -56,7 +56,7 @@ static Queue_Handle hSDMsgQ;
 static Semaphore_Struct semSDStruct;
 static Semaphore_Handle semSDHandle;
 
-const char outputfile[] = "fat:"STR(DRIVE_NUM)":SM_Data.bin";
+const char outputfile[] = "fat:"STR(DRIVE_NUM)":SM_Data.csv";
 bool SDCardInserted = false;
 bool SDMasterWriteEnabled = true;
 static FILE *dataFile;
@@ -70,7 +70,6 @@ typedef struct {
   Queue_Elem _elem;
   SD_msg_types_t type;
   uint8_t sensorType;
-  uint16_t length;
   uint8_t pdu[];
 } SD_msg_t;
 
@@ -162,7 +161,7 @@ static void SDCardFxn(UArg arg0, UArg arg1) {
 static void getTimeStr(char *timeStr) {
 	UTCTimeStruct time;
 	UTC_convertUTCTime(&time, UTC_getClock());
-	sprintf(timeStr,"%2d-%2d-%2d %2d:%2d:%2d,",
+	sprintf(timeStr,"%02d-%02d-%02d %02d:%02d:%02d,",
 			time.month,time.day,(uint8_t)(time.year - 2000),
 			time.hour,time.minutes,time.seconds);
 }
@@ -207,7 +206,8 @@ static void writeCommas(uint8_t sNum) {
 static void writeSensorDataToSD(uint8_t sNum, SD_msg_t *sData) {
 	 uint8_t sensorType = sData->sensorType;
 	 uint8_t numDataPoints = sData->pdu[0];
-	 uint8_t dataStrLen = (sData->length) - STR_META_DATA_LEN;
+	 uint8_t dataStrLen = strlen((const char*)(sData->pdu+STR_META_DATA_LEN));
+	 uint8_t sNameLen = strlen((const char*)(sData->pdu+STR_NAME_OFFSET));
 	 char timeString[TIME_STR_LEN];
 
 	// check to see if master write is enabled
@@ -218,13 +218,14 @@ static void writeSensorDataToSD(uint8_t sNum, SD_msg_t *sData) {
 		// check to see if file opened
 		if (dataFile) {
 			// if new sensor was attached
-			if(attachedSensor[sNum] != sensorType) {
+			if(attachedSensor[sNum-1] != sensorType) {
+				attachedSensor[sNum-1] = sensorType;
 				sensorNumDataPoints[sNum-1] = numDataPoints;
 				// write the number of columns
 				writeCommas(sNum);
 				// write the title of the column
 				// column str starts at sensor string + 1
-				fwrite(sData->pdu+1, 1, 5, dataFile);
+				fwrite(sData->pdu+STR_NAME_OFFSET, 1, sNameLen, dataFile);
 				fwrite("\n",1,1,dataFile);
 			}
 			// get the current time as a string
@@ -237,7 +238,7 @@ static void writeSensorDataToSD(uint8_t sNum, SD_msg_t *sData) {
 			writeCommas(sNum);
 
 			// write the actual sensor data string
-			fwrite(sData->pdu+STR_START_OFFSET, 1, dataStrLen, dataFile);
+			fwrite(sData->pdu+STR_META_DATA_LEN, 1, dataStrLen, dataFile);
 
 			// flush the stream buffer
 			fflush(dataFile);
@@ -249,7 +250,6 @@ static void writeSensorDataToSD(uint8_t sNum, SD_msg_t *sData) {
 }
 
 static void user_processSDMessage(SD_msg_t *pMsg) {
-
 
 	switch (pMsg->type) {
 		case WRITE_S1_TO_SD_MSG:
@@ -269,14 +269,13 @@ static void user_processSDMessage(SD_msg_t *pMsg) {
 	}
 }
 
-void enqueueSDTaskMsg(SD_msg_types_t msgType, uint8_t *buffer, uint16_t len, uint8_t sType) {
+void enqueueSDTaskMsg(SD_msg_types_t msgType, uint8_t *buffer, uint8_t sType) {
 	// create a new message for the queue
-	SD_msg_t *pMsg = malloc(sizeof(SD_msg_t) + len);
+	SD_msg_t *pMsg = malloc(sizeof(SD_msg_t) + SD_CARD_DATA_LEN);
 	if (pMsg != NULL) {
 		pMsg->type = msgType;
-		pMsg->length = len;
 		pMsg->sensorType = sType;
-		memcpy(pMsg->pdu,buffer,len); // copy the data into the message
+		memcpy(pMsg->pdu,buffer,SD_CARD_DATA_LEN); // copy the data into the message
 		Queue_enqueue(hSDMsgQ, &pMsg->_elem); // enqueue the message
 		Semaphore_post(semSDHandle);
 	}

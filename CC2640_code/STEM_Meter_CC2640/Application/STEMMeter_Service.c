@@ -69,60 +69,45 @@
 */
 
 // STEMMeter_Service Service UUID
-CONST uint8_t STEMMeter_ServiceUUID[ATT_BT_UUID_SIZE] =
+CONST uint8_t STEMMeter_ServiceUUID[ATT_UUID_SIZE] =
 {
-  LO_UINT16(STEMMETER_SERVICE_SERV_UUID), HI_UINT16(STEMMETER_SERVICE_SERV_UUID)
+  TI_BASE_UUID_128(STEMMETER_SERVICE_SERV_UUID)
 };
 
-// sensor1Data UUID
-CONST uint8_t STEMMeter_Service_Sensor1DataUUID[ATT_UUID_SIZE] =
+// SENSOR1DATA UUID
+CONST uint8_t STEMMeter_Service_SENSOR1DATAUUID[ATT_UUID_SIZE] =
 {
   TI_BASE_UUID_128(STEMMETER_SERVICE_SENSOR1DATA_UUID)
 };
-// sensor2Data UUID
-CONST uint8_t STEMMeter_Service_Sensor2DataUUID[ATT_UUID_SIZE] =
+// SENSOR2DATA UUID
+CONST uint8_t STEMMeter_Service_SENSOR2DATAUUID[ATT_UUID_SIZE] =
 {
   TI_BASE_UUID_128(STEMMETER_SERVICE_SENSOR2DATA_UUID)
 };
-// sensor3Data UUID
-CONST uint8_t STEMMeter_Service_Sensor3DataUUID[ATT_UUID_SIZE] =
+// SENSOR3DATA UUID
+CONST uint8_t STEMMeter_Service_SENSOR3DATAUUID[ATT_UUID_SIZE] =
 {
   TI_BASE_UUID_128(STEMMETER_SERVICE_SENSOR3DATA_UUID)
 };
-// sensor4Data UUID
-CONST uint8_t STEMMeter_Service_Sensor4DataUUID[ATT_UUID_SIZE] =
+// SENSOR4DATA UUID
+CONST uint8_t STEMMeter_Service_SENSOR4DATAUUID[ATT_UUID_SIZE] =
 {
   TI_BASE_UUID_128(STEMMETER_SERVICE_SENSOR4DATA_UUID)
 };
-// sensor1Config UUID
-CONST uint8_t STEMMeter_Service_Sensor1ConfigUUID[ATT_UUID_SIZE] =
+// CONFIG UUID
+CONST uint8_t STEMMeter_Service_CONFIGUUID[ATT_UUID_SIZE] =
 {
-  TI_BASE_UUID_128(STEMMETER_SERVICE_SENSOR1CONFIG_UUID)
+  TI_BASE_UUID_128(STEMMETER_SERVICE_CONFIG_UUID)
 };
-// sensor2Config UUID
-CONST uint8_t STEMMeter_Service_Sensor2ConfigUUID[ATT_UUID_SIZE] =
-{
-  TI_BASE_UUID_128(STEMMETER_SERVICE_SENSOR2CONFIG_UUID)
-};
-// sensor3Config UUID
-CONST uint8_t STEMMeter_Service_Sensor3ConfigUUID[ATT_UUID_SIZE] =
-{
-  TI_BASE_UUID_128(STEMMETER_SERVICE_SENSOR3CONFIG_UUID)
-};
-// sensor4Config UUID
-CONST uint8_t STEMMeter_Service_Sensor4ConfigUUID[ATT_UUID_SIZE] =
-{
-  TI_BASE_UUID_128(STEMMETER_SERVICE_SENSOR4CONFIG_UUID)
-};
-// batteryData UUID
-CONST uint8_t STEMMeter_Service_BatteryDataUUID[ATT_UUID_SIZE] =
+// BATTERYDATA UUID
+CONST uint8_t STEMMeter_Service_BATTERYDATAUUID[ATT_UUID_SIZE] =
 {
   TI_BASE_UUID_128(STEMMETER_SERVICE_BATTERYDATA_UUID)
 };
-// generalConfig UUID
-CONST uint8_t STEMMeter_Service_GeneralConfigUUID[ATT_UUID_SIZE] =
+// TIME UUID
+CONST uint8_t STEMMeter_Service_TIMEUUID[ATT_UUID_SIZE] =
 {
-  TI_BASE_UUID_128(STEMMETER_SERVICE_GENERALCONFIG_UUID)
+  TI_BASE_UUID_128(STEMMETER_SERVICE_TIME_UUID)
 };
 
 /*********************************************************************
@@ -136,88 +121,64 @@ static STEMMeter_ServiceCBs_t *pAppCBs = NULL;
 */
 
 // Service declaration
-static CONST gattAttrType_t STEMMeter_ServiceDecl = { ATT_BT_UUID_SIZE, STEMMeter_ServiceUUID };
+static CONST gattAttrType_t STEMMeter_ServiceDecl = { ATT_UUID_SIZE, STEMMeter_ServiceUUID };
 
-// Characteristic "Sensor1Data" Properties (for declaration)
-static uint8_t STEMMeter_Service_Sensor1DataProps = GATT_PROP_READ | GATT_PROP_NOTIFY;
+// Characteristic "SENSOR1DATA" Properties (for declaration)
+static uint8_t STEMMeter_Service_SENSOR1DATAProps = GATT_PROP_READ | GATT_PROP_NOTIFY;
 
-// Characteristic "Sensor1Data" Value variable
-static uint8_t STEMMeter_Service_Sensor1DataVal[STEMMETER_SERVICE_SENSOR1DATA_LEN] = {0};
+// Characteristic "SENSOR1DATA" Value variable
+static uint8_t STEMMeter_Service_SENSOR1DATAVal[STEMMETER_SERVICE_SENSOR1DATA_LEN] = {0};
 
-// Characteristic "Sensor1Data" CCCD
-static gattCharCfg_t *STEMMeter_Service_Sensor1DataConfig;
-// Characteristic "Sensor2Data" Properties (for declaration)
-static uint8_t STEMMeter_Service_Sensor2DataProps = GATT_PROP_READ | GATT_PROP_NOTIFY;
+// Characteristic "SENSOR1DATA" CCCD
+static gattCharCfg_t *STEMMeter_Service_SENSOR1DATAConfig;
+// Characteristic "SENSOR2DATA" Properties (for declaration)
+static uint8_t STEMMeter_Service_SENSOR2DATAProps = GATT_PROP_READ | GATT_PROP_NOTIFY;
 
-// Characteristic "Sensor2Data" Value variable
-static uint8_t STEMMeter_Service_Sensor2DataVal[STEMMETER_SERVICE_SENSOR2DATA_LEN] = {0};
+// Characteristic "SENSOR2DATA" Value variable
+static uint8_t STEMMeter_Service_SENSOR2DATAVal[STEMMETER_SERVICE_SENSOR2DATA_LEN] = {0};
 
-// Characteristic "Sensor2Data" CCCD
-static gattCharCfg_t *STEMMeter_Service_Sensor2DataConfig;
-// Characteristic "Sensor3Data" Properties (for declaration)
-static uint8_t STEMMeter_Service_Sensor3DataProps = GATT_PROP_READ | GATT_PROP_NOTIFY;
+// Characteristic "SENSOR2DATA" CCCD
+static gattCharCfg_t *STEMMeter_Service_SENSOR2DATAConfig;
+// Characteristic "SENSOR3DATA" Properties (for declaration)
+static uint8_t STEMMeter_Service_SENSOR3DATAProps = GATT_PROP_READ | GATT_PROP_NOTIFY;
 
-// Characteristic "Sensor3Data" Value variable
-static uint8_t STEMMeter_Service_Sensor3DataVal[STEMMETER_SERVICE_SENSOR3DATA_LEN] = {0};
+// Characteristic "SENSOR3DATA" Value variable
+static uint8_t STEMMeter_Service_SENSOR3DATAVal[STEMMETER_SERVICE_SENSOR3DATA_LEN] = {0};
 
-// Characteristic "Sensor3Data" CCCD
-static gattCharCfg_t *STEMMeter_Service_Sensor3DataConfig;
-// Characteristic "Sensor4Data" Properties (for declaration)
-static uint8_t STEMMeter_Service_Sensor4DataProps = GATT_PROP_READ | GATT_PROP_NOTIFY;
+// Characteristic "SENSOR3DATA" CCCD
+static gattCharCfg_t *STEMMeter_Service_SENSOR3DATAConfig;
+// Characteristic "SENSOR4DATA" Properties (for declaration)
+static uint8_t STEMMeter_Service_SENSOR4DATAProps = GATT_PROP_READ | GATT_PROP_NOTIFY;
 
-// Characteristic "Sensor4Data" Value variable
-static uint8_t STEMMeter_Service_Sensor4DataVal[STEMMETER_SERVICE_SENSOR4DATA_LEN] = {0};
+// Characteristic "SENSOR4DATA" Value variable
+static uint8_t STEMMeter_Service_SENSOR4DATAVal[STEMMETER_SERVICE_SENSOR4DATA_LEN] = {0};
 
-// Characteristic "Sensor4Data" CCCD
-static gattCharCfg_t *STEMMeter_Service_Sensor4DataConfig;
-// Characteristic "Sensor1Config" Properties (for declaration)
-static uint8_t STEMMeter_Service_Sensor1ConfigProps = GATT_PROP_WRITE | GATT_PROP_NOTIFY;
+// Characteristic "SENSOR4DATA" CCCD
+static gattCharCfg_t *STEMMeter_Service_SENSOR4DATAConfig;
+// Characteristic "CONFIG" Properties (for declaration)
+static uint8_t STEMMeter_Service_CONFIGProps = GATT_PROP_READ | GATT_PROP_WRITE | GATT_PROP_NOTIFY;
 
-// Characteristic "Sensor1Config" Value variable
-static uint8_t STEMMeter_Service_Sensor1ConfigVal[STEMMETER_SERVICE_SENSOR1CONFIG_LEN] = {0};
+// Characteristic "CONFIG" Value variable
+static uint8_t STEMMeter_Service_CONFIGVal[STEMMETER_SERVICE_CONFIG_LEN] = {0};
 
-// Characteristic "Sensor1Config" CCCD
-static gattCharCfg_t *STEMMeter_Service_Sensor1ConfigConfig;
-// Characteristic "Sensor2Config" Properties (for declaration)
-static uint8_t STEMMeter_Service_Sensor2ConfigProps = GATT_PROP_WRITE | GATT_PROP_NOTIFY;
+// Characteristic "CONFIG" CCCD
+static gattCharCfg_t *STEMMeter_Service_CONFIGConfig;
+// Characteristic "BATTERYDATA" Properties (for declaration)
+static uint8_t STEMMeter_Service_BATTERYDATAProps = GATT_PROP_READ | GATT_PROP_NOTIFY;
 
-// Characteristic "Sensor2Config" Value variable
-static uint8_t STEMMeter_Service_Sensor2ConfigVal[STEMMETER_SERVICE_SENSOR2CONFIG_LEN] = {0};
+// Characteristic "BATTERYDATA" Value variable
+static uint8_t STEMMeter_Service_BATTERYDATAVal[STEMMETER_SERVICE_BATTERYDATA_LEN] = {0};
 
-// Characteristic "Sensor2Config" CCCD
-static gattCharCfg_t *STEMMeter_Service_Sensor2ConfigConfig;
-// Characteristic "Sensor3Config" Properties (for declaration)
-static uint8_t STEMMeter_Service_Sensor3ConfigProps = GATT_PROP_WRITE | GATT_PROP_NOTIFY;
+// Characteristic "BATTERYDATA" CCCD
+static gattCharCfg_t *STEMMeter_Service_BATTERYDATAConfig;
+// Characteristic "TIME" Properties (for declaration)
+static uint8_t STEMMeter_Service_TIMEProps = GATT_PROP_READ | GATT_PROP_WRITE | GATT_PROP_NOTIFY;
 
-// Characteristic "Sensor3Config" Value variable
-static uint8_t STEMMeter_Service_Sensor3ConfigVal[STEMMETER_SERVICE_SENSOR3CONFIG_LEN] = {0};
+// Characteristic "TIME" Value variable
+static uint8_t STEMMeter_Service_TIMEVal[STEMMETER_SERVICE_TIME_LEN] = {0};
 
-// Characteristic "Sensor3Config" CCCD
-static gattCharCfg_t *STEMMeter_Service_Sensor3ConfigConfig;
-// Characteristic "Sensor4Config" Properties (for declaration)
-static uint8_t STEMMeter_Service_Sensor4ConfigProps = GATT_PROP_WRITE | GATT_PROP_NOTIFY;
-
-// Characteristic "Sensor4Config" Value variable
-static uint8_t STEMMeter_Service_Sensor4ConfigVal[STEMMETER_SERVICE_SENSOR4CONFIG_LEN] = {0};
-
-// Characteristic "Sensor4Config" CCCD
-static gattCharCfg_t *STEMMeter_Service_Sensor4ConfigConfig;
-// Characteristic "BatteryData" Properties (for declaration)
-static uint8_t STEMMeter_Service_BatteryDataProps = GATT_PROP_READ | GATT_PROP_NOTIFY;
-
-// Characteristic "BatteryData" Value variable
-static uint8_t STEMMeter_Service_BatteryDataVal[STEMMETER_SERVICE_BATTERYDATA_LEN] = {0};
-
-// Characteristic "BatteryData" CCCD
-static gattCharCfg_t *STEMMeter_Service_BatteryDataConfig;
-// Characteristic "GeneralConfig" Properties (for declaration)
-static uint8_t STEMMeter_Service_GeneralConfigProps = GATT_PROP_WRITE | GATT_PROP_NOTIFY;
-
-// Characteristic "GeneralConfig" Value variable
-static uint8_t STEMMeter_Service_GeneralConfigVal[STEMMETER_SERVICE_GENERALCONFIG_LEN] = {0};
-
-// Characteristic "GeneralConfig" CCCD
-static gattCharCfg_t *STEMMeter_Service_GeneralConfigConfig;
+// Characteristic "TIME" CCCD
+static gattCharCfg_t *STEMMeter_Service_TIMEConfig;
 
 /*********************************************************************
 * Profile Attributes - Table
@@ -232,215 +193,152 @@ static gattAttribute_t STEMMeter_ServiceAttrTbl[] =
     0,
     (uint8_t *)&STEMMeter_ServiceDecl
   },
-    // Sensor1Data Characteristic Declaration
+    // SENSOR1DATA Characteristic Declaration
     {
       { ATT_BT_UUID_SIZE, characterUUID },
       GATT_PERMIT_READ,
       0,
-      &STEMMeter_Service_Sensor1DataProps
+      &STEMMeter_Service_SENSOR1DATAProps
     },
-      // Sensor1Data Characteristic Value
+      // SENSOR1DATA Characteristic Value
       {
-        { ATT_UUID_SIZE, STEMMeter_Service_Sensor1DataUUID },
-        GATT_PERMIT_READ | GATT_PERMIT_WRITE,
+        { ATT_UUID_SIZE, STEMMeter_Service_SENSOR1DATAUUID },
+        GATT_PERMIT_READ,
         0,
-        STEMMeter_Service_Sensor1DataVal
+        STEMMeter_Service_SENSOR1DATAVal
       },
-      // Sensor1Data CCCD
+      // SENSOR1DATA CCCD
       {
         { ATT_BT_UUID_SIZE, clientCharCfgUUID },
         GATT_PERMIT_READ | GATT_PERMIT_WRITE,
         0,
-        (uint8 *)&STEMMeter_Service_Sensor1DataConfig
+        (uint8 *)&STEMMeter_Service_SENSOR1DATAConfig
       },
-    // Sensor2Data Characteristic Declaration
+    // SENSOR2DATA Characteristic Declaration
     {
       { ATT_BT_UUID_SIZE, characterUUID },
       GATT_PERMIT_READ,
       0,
-      &STEMMeter_Service_Sensor2DataProps
+      &STEMMeter_Service_SENSOR2DATAProps
     },
-      // Sensor2Data Characteristic Value
+      // SENSOR2DATA Characteristic Value
       {
-        { ATT_UUID_SIZE, STEMMeter_Service_Sensor2DataUUID },
-        GATT_PERMIT_READ | GATT_PERMIT_WRITE,
+        { ATT_UUID_SIZE, STEMMeter_Service_SENSOR2DATAUUID },
+        GATT_PERMIT_READ,
         0,
-        STEMMeter_Service_Sensor2DataVal
+        STEMMeter_Service_SENSOR2DATAVal
       },
-      // Sensor2Data CCCD
+      // SENSOR2DATA CCCD
       {
         { ATT_BT_UUID_SIZE, clientCharCfgUUID },
         GATT_PERMIT_READ | GATT_PERMIT_WRITE,
         0,
-        (uint8 *)&STEMMeter_Service_Sensor2DataConfig
+        (uint8 *)&STEMMeter_Service_SENSOR2DATAConfig
       },
-    // Sensor3Data Characteristic Declaration
+    // SENSOR3DATA Characteristic Declaration
     {
       { ATT_BT_UUID_SIZE, characterUUID },
       GATT_PERMIT_READ,
       0,
-      &STEMMeter_Service_Sensor3DataProps
+      &STEMMeter_Service_SENSOR3DATAProps
     },
-      // Sensor3Data Characteristic Value
+      // SENSOR3DATA Characteristic Value
       {
-        { ATT_UUID_SIZE, STEMMeter_Service_Sensor3DataUUID },
-        GATT_PERMIT_READ | GATT_PERMIT_WRITE,
+        { ATT_UUID_SIZE, STEMMeter_Service_SENSOR3DATAUUID },
+        GATT_PERMIT_READ,
         0,
-        STEMMeter_Service_Sensor3DataVal
+        STEMMeter_Service_SENSOR3DATAVal
       },
-      // Sensor3Data CCCD
+      // SENSOR3DATA CCCD
       {
         { ATT_BT_UUID_SIZE, clientCharCfgUUID },
         GATT_PERMIT_READ | GATT_PERMIT_WRITE,
         0,
-        (uint8 *)&STEMMeter_Service_Sensor3DataConfig
+        (uint8 *)&STEMMeter_Service_SENSOR3DATAConfig
       },
-    // Sensor4Data Characteristic Declaration
+    // SENSOR4DATA Characteristic Declaration
     {
       { ATT_BT_UUID_SIZE, characterUUID },
       GATT_PERMIT_READ,
       0,
-      &STEMMeter_Service_Sensor4DataProps
+      &STEMMeter_Service_SENSOR4DATAProps
     },
-      // Sensor4Data Characteristic Value
+      // SENSOR4DATA Characteristic Value
       {
-        { ATT_UUID_SIZE, STEMMeter_Service_Sensor4DataUUID },
-        GATT_PERMIT_READ | GATT_PERMIT_WRITE,
+        { ATT_UUID_SIZE, STEMMeter_Service_SENSOR4DATAUUID },
+        GATT_PERMIT_READ,
         0,
-        STEMMeter_Service_Sensor4DataVal
+        STEMMeter_Service_SENSOR4DATAVal
       },
-      // Sensor4Data CCCD
+      // SENSOR4DATA CCCD
       {
         { ATT_BT_UUID_SIZE, clientCharCfgUUID },
         GATT_PERMIT_READ | GATT_PERMIT_WRITE,
         0,
-        (uint8 *)&STEMMeter_Service_Sensor4DataConfig
+        (uint8 *)&STEMMeter_Service_SENSOR4DATAConfig
       },
-    // Sensor1Config Characteristic Declaration
+    // CONFIG Characteristic Declaration
     {
       { ATT_BT_UUID_SIZE, characterUUID },
       GATT_PERMIT_READ,
       0,
-      &STEMMeter_Service_Sensor1ConfigProps
+      &STEMMeter_Service_CONFIGProps
     },
-      // Sensor1Config Characteristic Value
+      // CONFIG Characteristic Value
       {
-        { ATT_UUID_SIZE, STEMMeter_Service_Sensor1ConfigUUID },
+        { ATT_UUID_SIZE, STEMMeter_Service_CONFIGUUID },
         GATT_PERMIT_READ | GATT_PERMIT_WRITE,
         0,
-        STEMMeter_Service_Sensor1ConfigVal
+        STEMMeter_Service_CONFIGVal
       },
-      // Sensor1Config CCCD
+      // CONFIG CCCD
       {
         { ATT_BT_UUID_SIZE, clientCharCfgUUID },
         GATT_PERMIT_READ | GATT_PERMIT_WRITE,
         0,
-        (uint8 *)&STEMMeter_Service_Sensor1ConfigConfig
+        (uint8 *)&STEMMeter_Service_CONFIGConfig
       },
-    // Sensor2Config Characteristic Declaration
+    // BATTERYDATA Characteristic Declaration
     {
       { ATT_BT_UUID_SIZE, characterUUID },
       GATT_PERMIT_READ,
       0,
-      &STEMMeter_Service_Sensor2ConfigProps
+      &STEMMeter_Service_BATTERYDATAProps
     },
-      // Sensor2Config Characteristic Value
+      // BATTERYDATA Characteristic Value
       {
-        { ATT_UUID_SIZE, STEMMeter_Service_Sensor2ConfigUUID },
-        GATT_PERMIT_READ | GATT_PERMIT_WRITE,
+        { ATT_UUID_SIZE, STEMMeter_Service_BATTERYDATAUUID },
+        GATT_PERMIT_READ,
         0,
-        STEMMeter_Service_Sensor2ConfigVal
+        STEMMeter_Service_BATTERYDATAVal
       },
-      // Sensor2Config CCCD
+      // BATTERYDATA CCCD
       {
         { ATT_BT_UUID_SIZE, clientCharCfgUUID },
         GATT_PERMIT_READ | GATT_PERMIT_WRITE,
         0,
-        (uint8 *)&STEMMeter_Service_Sensor2ConfigConfig
+        (uint8 *)&STEMMeter_Service_BATTERYDATAConfig
       },
-    // Sensor3Config Characteristic Declaration
+    // TIME Characteristic Declaration
     {
       { ATT_BT_UUID_SIZE, characterUUID },
       GATT_PERMIT_READ,
       0,
-      &STEMMeter_Service_Sensor3ConfigProps
+      &STEMMeter_Service_TIMEProps
     },
-      // Sensor3Config Characteristic Value
+      // TIME Characteristic Value
       {
-        { ATT_UUID_SIZE, STEMMeter_Service_Sensor3ConfigUUID },
+        { ATT_UUID_SIZE, STEMMeter_Service_TIMEUUID },
         GATT_PERMIT_READ | GATT_PERMIT_WRITE,
         0,
-        STEMMeter_Service_Sensor3ConfigVal
+        STEMMeter_Service_TIMEVal
       },
-      // Sensor3Config CCCD
+      // TIME CCCD
       {
         { ATT_BT_UUID_SIZE, clientCharCfgUUID },
         GATT_PERMIT_READ | GATT_PERMIT_WRITE,
         0,
-        (uint8 *)&STEMMeter_Service_Sensor3ConfigConfig
-      },
-    // Sensor4Config Characteristic Declaration
-    {
-      { ATT_BT_UUID_SIZE, characterUUID },
-      GATT_PERMIT_READ,
-      0,
-      &STEMMeter_Service_Sensor4ConfigProps
-    },
-      // Sensor4Config Characteristic Value
-      {
-        { ATT_UUID_SIZE, STEMMeter_Service_Sensor4ConfigUUID },
-        GATT_PERMIT_READ | GATT_PERMIT_WRITE,
-        0,
-        STEMMeter_Service_Sensor4ConfigVal
-      },
-      // Sensor4Config CCCD
-      {
-        { ATT_BT_UUID_SIZE, clientCharCfgUUID },
-        GATT_PERMIT_READ | GATT_PERMIT_WRITE,
-        0,
-        (uint8 *)&STEMMeter_Service_Sensor4ConfigConfig
-      },
-    // BatteryData Characteristic Declaration
-    {
-      { ATT_BT_UUID_SIZE, characterUUID },
-      GATT_PERMIT_READ,
-      0,
-      &STEMMeter_Service_BatteryDataProps
-    },
-      // BatteryData Characteristic Value
-      {
-        { ATT_UUID_SIZE, STEMMeter_Service_BatteryDataUUID },
-        GATT_PERMIT_READ | GATT_PERMIT_WRITE,
-        0,
-        STEMMeter_Service_BatteryDataVal
-      },
-      // BatteryData CCCD
-      {
-        { ATT_BT_UUID_SIZE, clientCharCfgUUID },
-        GATT_PERMIT_READ | GATT_PERMIT_WRITE,
-        0,
-        (uint8 *)&STEMMeter_Service_BatteryDataConfig
-      },
-    // GeneralConfig Characteristic Declaration
-    {
-      { ATT_BT_UUID_SIZE, characterUUID },
-      GATT_PERMIT_READ,
-      0,
-      &STEMMeter_Service_GeneralConfigProps
-    },
-      // GeneralConfig Characteristic Value
-      {
-        { ATT_UUID_SIZE, STEMMeter_Service_GeneralConfigUUID },
-        GATT_PERMIT_READ | GATT_PERMIT_WRITE,
-        0,
-        STEMMeter_Service_GeneralConfigVal
-      },
-      // GeneralConfig CCCD
-      {
-        { ATT_BT_UUID_SIZE, clientCharCfgUUID },
-        GATT_PERMIT_READ | GATT_PERMIT_WRITE,
-        0,
-        (uint8 *)&STEMMeter_Service_GeneralConfigConfig
+        (uint8 *)&STEMMeter_Service_TIMEConfig
       },
 };
 
@@ -479,95 +377,68 @@ bStatus_t STEMMeter_Service_AddService( void )
   uint8_t status;
 
   // Allocate Client Characteristic Configuration table
-  STEMMeter_Service_Sensor1DataConfig = (gattCharCfg_t *)ICall_malloc( sizeof(gattCharCfg_t) * linkDBNumConns );
-  if ( STEMMeter_Service_Sensor1DataConfig == NULL )
+  STEMMeter_Service_SENSOR1DATAConfig = (gattCharCfg_t *)ICall_malloc( sizeof(gattCharCfg_t) * linkDBNumConns );
+  if ( STEMMeter_Service_SENSOR1DATAConfig == NULL )
   {
     return ( bleMemAllocError );
   }
 
   // Initialize Client Characteristic Configuration attributes
-  GATTServApp_InitCharCfg( INVALID_CONNHANDLE, STEMMeter_Service_Sensor1DataConfig );
+  GATTServApp_InitCharCfg( INVALID_CONNHANDLE, STEMMeter_Service_SENSOR1DATAConfig );
   // Allocate Client Characteristic Configuration table
-  STEMMeter_Service_Sensor2DataConfig = (gattCharCfg_t *)ICall_malloc( sizeof(gattCharCfg_t) * linkDBNumConns );
-  if ( STEMMeter_Service_Sensor2DataConfig == NULL )
+  STEMMeter_Service_SENSOR2DATAConfig = (gattCharCfg_t *)ICall_malloc( sizeof(gattCharCfg_t) * linkDBNumConns );
+  if ( STEMMeter_Service_SENSOR2DATAConfig == NULL )
   {
     return ( bleMemAllocError );
   }
 
   // Initialize Client Characteristic Configuration attributes
-  GATTServApp_InitCharCfg( INVALID_CONNHANDLE, STEMMeter_Service_Sensor2DataConfig );
+  GATTServApp_InitCharCfg( INVALID_CONNHANDLE, STEMMeter_Service_SENSOR2DATAConfig );
   // Allocate Client Characteristic Configuration table
-  STEMMeter_Service_Sensor3DataConfig = (gattCharCfg_t *)ICall_malloc( sizeof(gattCharCfg_t) * linkDBNumConns );
-  if ( STEMMeter_Service_Sensor3DataConfig == NULL )
+  STEMMeter_Service_SENSOR3DATAConfig = (gattCharCfg_t *)ICall_malloc( sizeof(gattCharCfg_t) * linkDBNumConns );
+  if ( STEMMeter_Service_SENSOR3DATAConfig == NULL )
   {
     return ( bleMemAllocError );
   }
 
   // Initialize Client Characteristic Configuration attributes
-  GATTServApp_InitCharCfg( INVALID_CONNHANDLE, STEMMeter_Service_Sensor3DataConfig );
+  GATTServApp_InitCharCfg( INVALID_CONNHANDLE, STEMMeter_Service_SENSOR3DATAConfig );
   // Allocate Client Characteristic Configuration table
-  STEMMeter_Service_Sensor4DataConfig = (gattCharCfg_t *)ICall_malloc( sizeof(gattCharCfg_t) * linkDBNumConns );
-  if ( STEMMeter_Service_Sensor4DataConfig == NULL )
+  STEMMeter_Service_SENSOR4DATAConfig = (gattCharCfg_t *)ICall_malloc( sizeof(gattCharCfg_t) * linkDBNumConns );
+  if ( STEMMeter_Service_SENSOR4DATAConfig == NULL )
   {
     return ( bleMemAllocError );
   }
 
   // Initialize Client Characteristic Configuration attributes
-  GATTServApp_InitCharCfg( INVALID_CONNHANDLE, STEMMeter_Service_Sensor4DataConfig );
+  GATTServApp_InitCharCfg( INVALID_CONNHANDLE, STEMMeter_Service_SENSOR4DATAConfig );
   // Allocate Client Characteristic Configuration table
-  STEMMeter_Service_Sensor1ConfigConfig = (gattCharCfg_t *)ICall_malloc( sizeof(gattCharCfg_t) * linkDBNumConns );
-  if ( STEMMeter_Service_Sensor1ConfigConfig == NULL )
+  STEMMeter_Service_CONFIGConfig = (gattCharCfg_t *)ICall_malloc( sizeof(gattCharCfg_t) * linkDBNumConns );
+  if ( STEMMeter_Service_CONFIGConfig == NULL )
   {
     return ( bleMemAllocError );
   }
 
   // Initialize Client Characteristic Configuration attributes
-  GATTServApp_InitCharCfg( INVALID_CONNHANDLE, STEMMeter_Service_Sensor1ConfigConfig );
+  GATTServApp_InitCharCfg( INVALID_CONNHANDLE, STEMMeter_Service_CONFIGConfig );
   // Allocate Client Characteristic Configuration table
-  STEMMeter_Service_Sensor2ConfigConfig = (gattCharCfg_t *)ICall_malloc( sizeof(gattCharCfg_t) * linkDBNumConns );
-  if ( STEMMeter_Service_Sensor2ConfigConfig == NULL )
+  STEMMeter_Service_BATTERYDATAConfig = (gattCharCfg_t *)ICall_malloc( sizeof(gattCharCfg_t) * linkDBNumConns );
+  if ( STEMMeter_Service_BATTERYDATAConfig == NULL )
   {
     return ( bleMemAllocError );
   }
 
   // Initialize Client Characteristic Configuration attributes
-  GATTServApp_InitCharCfg( INVALID_CONNHANDLE, STEMMeter_Service_Sensor2ConfigConfig );
+  GATTServApp_InitCharCfg( INVALID_CONNHANDLE, STEMMeter_Service_BATTERYDATAConfig );
   // Allocate Client Characteristic Configuration table
-  STEMMeter_Service_Sensor3ConfigConfig = (gattCharCfg_t *)ICall_malloc( sizeof(gattCharCfg_t) * linkDBNumConns );
-  if ( STEMMeter_Service_Sensor3ConfigConfig == NULL )
+  STEMMeter_Service_TIMEConfig = (gattCharCfg_t *)ICall_malloc( sizeof(gattCharCfg_t) * linkDBNumConns );
+  if ( STEMMeter_Service_TIMEConfig == NULL )
   {
     return ( bleMemAllocError );
   }
 
   // Initialize Client Characteristic Configuration attributes
-  GATTServApp_InitCharCfg( INVALID_CONNHANDLE, STEMMeter_Service_Sensor3ConfigConfig );
-  // Allocate Client Characteristic Configuration table
-  STEMMeter_Service_Sensor4ConfigConfig = (gattCharCfg_t *)ICall_malloc( sizeof(gattCharCfg_t) * linkDBNumConns );
-  if ( STEMMeter_Service_Sensor4ConfigConfig == NULL )
-  {
-    return ( bleMemAllocError );
-  }
-
-  // Initialize Client Characteristic Configuration attributes
-  GATTServApp_InitCharCfg( INVALID_CONNHANDLE, STEMMeter_Service_Sensor4ConfigConfig );
-  // Allocate Client Characteristic Configuration table
-  STEMMeter_Service_BatteryDataConfig = (gattCharCfg_t *)ICall_malloc( sizeof(gattCharCfg_t) * linkDBNumConns );
-  if ( STEMMeter_Service_BatteryDataConfig == NULL )
-  {
-    return ( bleMemAllocError );
-  }
-
-  // Initialize Client Characteristic Configuration attributes
-  GATTServApp_InitCharCfg( INVALID_CONNHANDLE, STEMMeter_Service_BatteryDataConfig );
-  // Allocate Client Characteristic Configuration table
-  STEMMeter_Service_GeneralConfigConfig = (gattCharCfg_t *)ICall_malloc( sizeof(gattCharCfg_t) * linkDBNumConns );
-  if ( STEMMeter_Service_GeneralConfigConfig == NULL )
-  {
-    return ( bleMemAllocError );
-  }
-
-  // Initialize Client Characteristic Configuration attributes
-  GATTServApp_InitCharCfg( INVALID_CONNHANDLE, STEMMeter_Service_GeneralConfigConfig );
+  GATTServApp_InitCharCfg( INVALID_CONNHANDLE, STEMMeter_Service_TIMEConfig );
   // Register GATT attribute list and CBs with GATT Server App
   status = GATTServApp_RegisterService( STEMMeter_ServiceAttrTbl,
                                         GATT_NUM_ATTRS( STEMMeter_ServiceAttrTbl ),
@@ -615,10 +486,10 @@ bStatus_t STEMMeter_Service_SetParameter( uint8 param, uint8 len, void *value )
     case STEMMETER_SERVICE_SENSOR1DATA:
       if ( len == STEMMETER_SERVICE_SENSOR1DATA_LEN )
       {
-        memcpy(STEMMeter_Service_Sensor1DataVal, value, len);
+        memcpy(STEMMeter_Service_SENSOR1DATAVal, value, len);
 
         // Try to send notification.
-        GATTServApp_ProcessCharCfg( STEMMeter_Service_Sensor1DataConfig, (uint8_t *)&STEMMeter_Service_Sensor1DataVal, FALSE,
+        GATTServApp_ProcessCharCfg( STEMMeter_Service_SENSOR1DATAConfig, (uint8_t *)&STEMMeter_Service_SENSOR1DATAVal, FALSE,
                                     STEMMeter_ServiceAttrTbl, GATT_NUM_ATTRS( STEMMeter_ServiceAttrTbl ),
                                     INVALID_TASK_ID,  STEMMeter_Service_ReadAttrCB);
       }
@@ -631,10 +502,10 @@ bStatus_t STEMMeter_Service_SetParameter( uint8 param, uint8 len, void *value )
     case STEMMETER_SERVICE_SENSOR2DATA:
       if ( len == STEMMETER_SERVICE_SENSOR2DATA_LEN )
       {
-        memcpy(STEMMeter_Service_Sensor2DataVal, value, len);
+        memcpy(STEMMeter_Service_SENSOR2DATAVal, value, len);
 
         // Try to send notification.
-        GATTServApp_ProcessCharCfg( STEMMeter_Service_Sensor2DataConfig, (uint8_t *)&STEMMeter_Service_Sensor2DataVal, FALSE,
+        GATTServApp_ProcessCharCfg( STEMMeter_Service_SENSOR2DATAConfig, (uint8_t *)&STEMMeter_Service_SENSOR2DATAVal, FALSE,
                                     STEMMeter_ServiceAttrTbl, GATT_NUM_ATTRS( STEMMeter_ServiceAttrTbl ),
                                     INVALID_TASK_ID,  STEMMeter_Service_ReadAttrCB);
       }
@@ -647,10 +518,10 @@ bStatus_t STEMMeter_Service_SetParameter( uint8 param, uint8 len, void *value )
     case STEMMETER_SERVICE_SENSOR3DATA:
       if ( len == STEMMETER_SERVICE_SENSOR3DATA_LEN )
       {
-        memcpy(STEMMeter_Service_Sensor3DataVal, value, len);
+        memcpy(STEMMeter_Service_SENSOR3DATAVal, value, len);
 
         // Try to send notification.
-        GATTServApp_ProcessCharCfg( STEMMeter_Service_Sensor3DataConfig, (uint8_t *)&STEMMeter_Service_Sensor3DataVal, FALSE,
+        GATTServApp_ProcessCharCfg( STEMMeter_Service_SENSOR3DATAConfig, (uint8_t *)&STEMMeter_Service_SENSOR3DATAVal, FALSE,
                                     STEMMeter_ServiceAttrTbl, GATT_NUM_ATTRS( STEMMeter_ServiceAttrTbl ),
                                     INVALID_TASK_ID,  STEMMeter_Service_ReadAttrCB);
       }
@@ -663,10 +534,10 @@ bStatus_t STEMMeter_Service_SetParameter( uint8 param, uint8 len, void *value )
     case STEMMETER_SERVICE_SENSOR4DATA:
       if ( len == STEMMETER_SERVICE_SENSOR4DATA_LEN )
       {
-        memcpy(STEMMeter_Service_Sensor4DataVal, value, len);
+        memcpy(STEMMeter_Service_SENSOR4DATAVal, value, len);
 
         // Try to send notification.
-        GATTServApp_ProcessCharCfg( STEMMeter_Service_Sensor4DataConfig, (uint8_t *)&STEMMeter_Service_Sensor4DataVal, FALSE,
+        GATTServApp_ProcessCharCfg( STEMMeter_Service_SENSOR4DATAConfig, (uint8_t *)&STEMMeter_Service_SENSOR4DATAVal, FALSE,
                                     STEMMeter_ServiceAttrTbl, GATT_NUM_ATTRS( STEMMeter_ServiceAttrTbl ),
                                     INVALID_TASK_ID,  STEMMeter_Service_ReadAttrCB);
       }
@@ -676,61 +547,13 @@ bStatus_t STEMMeter_Service_SetParameter( uint8 param, uint8 len, void *value )
       }
       break;
 
-    case STEMMETER_SERVICE_SENSOR1CONFIG:
-      if ( len == STEMMETER_SERVICE_SENSOR1CONFIG_LEN )
+    case STEMMETER_SERVICE_CONFIG:
+      if ( len == STEMMETER_SERVICE_CONFIG_LEN )
       {
-        memcpy(STEMMeter_Service_Sensor1ConfigVal, value, len);
+        memcpy(STEMMeter_Service_CONFIGVal, value, len);
 
         // Try to send notification.
-        GATTServApp_ProcessCharCfg( STEMMeter_Service_Sensor1ConfigConfig, (uint8_t *)&STEMMeter_Service_Sensor1ConfigVal, FALSE,
-                                    STEMMeter_ServiceAttrTbl, GATT_NUM_ATTRS( STEMMeter_ServiceAttrTbl ),
-                                    INVALID_TASK_ID,  STEMMeter_Service_ReadAttrCB);
-      }
-      else
-      {
-        ret = bleInvalidRange;
-      }
-      break;
-
-    case STEMMETER_SERVICE_SENSOR2CONFIG:
-      if ( len == STEMMETER_SERVICE_SENSOR2CONFIG_LEN )
-      {
-        memcpy(STEMMeter_Service_Sensor2ConfigVal, value, len);
-
-        // Try to send notification.
-        GATTServApp_ProcessCharCfg( STEMMeter_Service_Sensor2ConfigConfig, (uint8_t *)&STEMMeter_Service_Sensor2ConfigVal, FALSE,
-                                    STEMMeter_ServiceAttrTbl, GATT_NUM_ATTRS( STEMMeter_ServiceAttrTbl ),
-                                    INVALID_TASK_ID,  STEMMeter_Service_ReadAttrCB);
-      }
-      else
-      {
-        ret = bleInvalidRange;
-      }
-      break;
-
-    case STEMMETER_SERVICE_SENSOR3CONFIG:
-      if ( len == STEMMETER_SERVICE_SENSOR3CONFIG_LEN )
-      {
-        memcpy(STEMMeter_Service_Sensor3ConfigVal, value, len);
-
-        // Try to send notification.
-        GATTServApp_ProcessCharCfg( STEMMeter_Service_Sensor3ConfigConfig, (uint8_t *)&STEMMeter_Service_Sensor3ConfigVal, FALSE,
-                                    STEMMeter_ServiceAttrTbl, GATT_NUM_ATTRS( STEMMeter_ServiceAttrTbl ),
-                                    INVALID_TASK_ID,  STEMMeter_Service_ReadAttrCB);
-      }
-      else
-      {
-        ret = bleInvalidRange;
-      }
-      break;
-
-    case STEMMETER_SERVICE_SENSOR4CONFIG:
-      if ( len == STEMMETER_SERVICE_SENSOR4CONFIG_LEN )
-      {
-        memcpy(STEMMeter_Service_Sensor4ConfigVal, value, len);
-
-        // Try to send notification.
-        GATTServApp_ProcessCharCfg( STEMMeter_Service_Sensor4ConfigConfig, (uint8_t *)&STEMMeter_Service_Sensor4ConfigVal, FALSE,
+        GATTServApp_ProcessCharCfg( STEMMeter_Service_CONFIGConfig, (uint8_t *)&STEMMeter_Service_CONFIGVal, FALSE,
                                     STEMMeter_ServiceAttrTbl, GATT_NUM_ATTRS( STEMMeter_ServiceAttrTbl ),
                                     INVALID_TASK_ID,  STEMMeter_Service_ReadAttrCB);
       }
@@ -743,10 +566,10 @@ bStatus_t STEMMeter_Service_SetParameter( uint8 param, uint8 len, void *value )
     case STEMMETER_SERVICE_BATTERYDATA:
       if ( len == STEMMETER_SERVICE_BATTERYDATA_LEN )
       {
-        memcpy(STEMMeter_Service_BatteryDataVal, value, len);
+        memcpy(STEMMeter_Service_BATTERYDATAVal, value, len);
 
         // Try to send notification.
-        GATTServApp_ProcessCharCfg( STEMMeter_Service_BatteryDataConfig, (uint8_t *)&STEMMeter_Service_BatteryDataVal, FALSE,
+        GATTServApp_ProcessCharCfg( STEMMeter_Service_BATTERYDATAConfig, (uint8_t *)&STEMMeter_Service_BATTERYDATAVal, FALSE,
                                     STEMMeter_ServiceAttrTbl, GATT_NUM_ATTRS( STEMMeter_ServiceAttrTbl ),
                                     INVALID_TASK_ID,  STEMMeter_Service_ReadAttrCB);
       }
@@ -756,13 +579,13 @@ bStatus_t STEMMeter_Service_SetParameter( uint8 param, uint8 len, void *value )
       }
       break;
 
-    case STEMMETER_SERVICE_GENERALCONFIG:
-      if ( len == STEMMETER_SERVICE_GENERALCONFIG_LEN )
+    case STEMMETER_SERVICE_TIME:
+      if ( len == STEMMETER_SERVICE_TIME_LEN )
       {
-        memcpy(STEMMeter_Service_GeneralConfigVal, value, len);
+        memcpy(STEMMeter_Service_TIMEVal, value, len);
 
         // Try to send notification.
-        GATTServApp_ProcessCharCfg( STEMMeter_Service_GeneralConfigConfig, (uint8_t *)&STEMMeter_Service_GeneralConfigVal, FALSE,
+        GATTServApp_ProcessCharCfg( STEMMeter_Service_TIMEConfig, (uint8_t *)&STEMMeter_Service_TIMEVal, FALSE,
                                     STEMMeter_ServiceAttrTbl, GATT_NUM_ATTRS( STEMMeter_ServiceAttrTbl ),
                                     INVALID_TASK_ID,  STEMMeter_Service_ReadAttrCB);
       }
@@ -788,51 +611,18 @@ bStatus_t STEMMeter_Service_SetParameter( uint8 param, uint8 len, void *value )
  *          the parameter ID and WILL be cast to the appropriate
  *          data type (example: data type of uint16 will be cast to
  *          uint16 pointer).
- *          THIS FUNCTION HAS BUG. memcpy args needed to be switched around
  */
 bStatus_t STEMMeter_Service_GetParameter( uint8 param, void *value )
 {
   bStatus_t ret = SUCCESS;
   switch ( param )
   {
-    case STEMMETER_SERVICE_SENSOR1DATA:
-      memcpy(value, STEMMeter_Service_Sensor1DataVal, STEMMETER_SERVICE_SENSOR1DATA_LEN);
+    case STEMMETER_SERVICE_CONFIG:
+      memcpy(value, STEMMeter_Service_CONFIGVal, STEMMETER_SERVICE_CONFIG_LEN);
       break;
 
-    case STEMMETER_SERVICE_SENSOR2DATA:
-      memcpy(value, STEMMeter_Service_Sensor2DataVal, STEMMETER_SERVICE_SENSOR2DATA_LEN);
-      break;
-
-    case STEMMETER_SERVICE_SENSOR3DATA:
-      memcpy(value, STEMMeter_Service_Sensor3DataVal, STEMMETER_SERVICE_SENSOR3DATA_LEN);
-      break;
-
-    case STEMMETER_SERVICE_SENSOR4DATA:
-      memcpy(value, STEMMeter_Service_Sensor4DataVal, STEMMETER_SERVICE_SENSOR4DATA_LEN);
-      break;
-
-    case STEMMETER_SERVICE_SENSOR1CONFIG:
-      memcpy(value, STEMMeter_Service_Sensor1ConfigVal, STEMMETER_SERVICE_SENSOR1CONFIG_LEN);
-      break;
-
-    case STEMMETER_SERVICE_SENSOR2CONFIG:
-      memcpy(value, STEMMeter_Service_Sensor2ConfigVal, STEMMETER_SERVICE_SENSOR2CONFIG_LEN);
-      break;
-
-    case STEMMETER_SERVICE_SENSOR3CONFIG:
-      memcpy(value, STEMMeter_Service_Sensor3ConfigVal, STEMMETER_SERVICE_SENSOR3CONFIG_LEN);
-      break;
-
-    case STEMMETER_SERVICE_SENSOR4CONFIG:
-      memcpy(value, STEMMeter_Service_Sensor4ConfigVal, STEMMETER_SERVICE_SENSOR4CONFIG_LEN);
-      break;
-
-    case STEMMETER_SERVICE_BATTERYDATA:
-      memcpy(value, STEMMeter_Service_BatteryDataVal, STEMMETER_SERVICE_BATTERYDATA_LEN);
-      break;
-
-    case STEMMETER_SERVICE_GENERALCONFIG:
-      memcpy(value, STEMMeter_Service_GeneralConfigVal, STEMMETER_SERVICE_GENERALCONFIG_LEN);
+    case STEMMETER_SERVICE_TIME:
+      memcpy(value, STEMMeter_Service_TIMEVal, STEMMETER_SERVICE_TIME_LEN);
       break;
 
     default:
@@ -864,8 +654,8 @@ static bStatus_t STEMMeter_Service_ReadAttrCB( uint16 connHandle, gattAttribute_
 {
   bStatus_t status = SUCCESS;
 
-  // See if request is regarding the Sensor1Data Characteristic Value
-if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_Sensor1DataUUID, pAttr->type.len) )
+  // See if request is regarding the SENSOR1DATA Characteristic Value
+if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_SENSOR1DATAUUID, pAttr->type.len) )
   {
     if ( offset > STEMMETER_SERVICE_SENSOR1DATA_LEN )  // Prevent malicious ATT ReadBlob offsets.
     {
@@ -877,8 +667,8 @@ if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_Sensor1DataUUID, pAttr->type.l
       memcpy(pValue, pAttr->pValue + offset, *pLen);
     }
   }
-  // See if request is regarding the Sensor2Data Characteristic Value
-else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_Sensor2DataUUID, pAttr->type.len) )
+  // See if request is regarding the SENSOR2DATA Characteristic Value
+else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_SENSOR2DATAUUID, pAttr->type.len) )
   {
     if ( offset > STEMMETER_SERVICE_SENSOR2DATA_LEN )  // Prevent malicious ATT ReadBlob offsets.
     {
@@ -890,8 +680,8 @@ else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_Sensor2DataUUID, pAttr->t
       memcpy(pValue, pAttr->pValue + offset, *pLen);
     }
   }
-  // See if request is regarding the Sensor3Data Characteristic Value
-else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_Sensor3DataUUID, pAttr->type.len) )
+  // See if request is regarding the SENSOR3DATA Characteristic Value
+else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_SENSOR3DATAUUID, pAttr->type.len) )
   {
     if ( offset > STEMMETER_SERVICE_SENSOR3DATA_LEN )  // Prevent malicious ATT ReadBlob offsets.
     {
@@ -903,8 +693,8 @@ else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_Sensor3DataUUID, pAttr->t
       memcpy(pValue, pAttr->pValue + offset, *pLen);
     }
   }
-  // See if request is regarding the Sensor4Data Characteristic Value
-else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_Sensor4DataUUID, pAttr->type.len) )
+  // See if request is regarding the SENSOR4DATA Characteristic Value
+else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_SENSOR4DATAUUID, pAttr->type.len) )
   {
     if ( offset > STEMMETER_SERVICE_SENSOR4DATA_LEN )  // Prevent malicious ATT ReadBlob offsets.
     {
@@ -916,60 +706,21 @@ else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_Sensor4DataUUID, pAttr->t
       memcpy(pValue, pAttr->pValue + offset, *pLen);
     }
   }
-  // See if request is regarding the Sensor1Config Characteristic Value
-else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_Sensor1ConfigUUID, pAttr->type.len) )
+  // See if request is regarding the CONFIG Characteristic Value
+else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_CONFIGUUID, pAttr->type.len) )
   {
-    if ( offset > STEMMETER_SERVICE_SENSOR1CONFIG_LEN )  // Prevent malicious ATT ReadBlob offsets.
+    if ( offset > STEMMETER_SERVICE_CONFIG_LEN )  // Prevent malicious ATT ReadBlob offsets.
     {
       status = ATT_ERR_INVALID_OFFSET;
     }
     else
     {
-      *pLen = MIN(maxLen, STEMMETER_SERVICE_SENSOR1CONFIG_LEN - offset);  // Transmit as much as possible
+      *pLen = MIN(maxLen, STEMMETER_SERVICE_CONFIG_LEN - offset);  // Transmit as much as possible
       memcpy(pValue, pAttr->pValue + offset, *pLen);
     }
   }
-  // See if request is regarding the Sensor2Config Characteristic Value
-else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_Sensor2ConfigUUID, pAttr->type.len) )
-  {
-    if ( offset > STEMMETER_SERVICE_SENSOR2CONFIG_LEN )  // Prevent malicious ATT ReadBlob offsets.
-    {
-      status = ATT_ERR_INVALID_OFFSET;
-    }
-    else
-    {
-      *pLen = MIN(maxLen, STEMMETER_SERVICE_SENSOR2CONFIG_LEN - offset);  // Transmit as much as possible
-      memcpy(pValue, pAttr->pValue + offset, *pLen);
-    }
-  }
-  // See if request is regarding the Sensor3Config Characteristic Value
-else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_Sensor3ConfigUUID, pAttr->type.len) )
-  {
-    if ( offset > STEMMETER_SERVICE_SENSOR3CONFIG_LEN )  // Prevent malicious ATT ReadBlob offsets.
-    {
-      status = ATT_ERR_INVALID_OFFSET;
-    }
-    else
-    {
-      *pLen = MIN(maxLen, STEMMETER_SERVICE_SENSOR3CONFIG_LEN - offset);  // Transmit as much as possible
-      memcpy(pValue, pAttr->pValue + offset, *pLen);
-    }
-  }
-  // See if request is regarding the Sensor4Config Characteristic Value
-else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_Sensor4ConfigUUID, pAttr->type.len) )
-  {
-    if ( offset > STEMMETER_SERVICE_SENSOR4CONFIG_LEN )  // Prevent malicious ATT ReadBlob offsets.
-    {
-      status = ATT_ERR_INVALID_OFFSET;
-    }
-    else
-    {
-      *pLen = MIN(maxLen, STEMMETER_SERVICE_SENSOR4CONFIG_LEN - offset);  // Transmit as much as possible
-      memcpy(pValue, pAttr->pValue + offset, *pLen);
-    }
-  }
-  // See if request is regarding the BatteryData Characteristic Value
-else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_BatteryDataUUID, pAttr->type.len) )
+  // See if request is regarding the BATTERYDATA Characteristic Value
+else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_BATTERYDATAUUID, pAttr->type.len) )
   {
     if ( offset > STEMMETER_SERVICE_BATTERYDATA_LEN )  // Prevent malicious ATT ReadBlob offsets.
     {
@@ -981,16 +732,16 @@ else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_BatteryDataUUID, pAttr->t
       memcpy(pValue, pAttr->pValue + offset, *pLen);
     }
   }
-  // See if request is regarding the GeneralConfig Characteristic Value
-else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_GeneralConfigUUID, pAttr->type.len) )
+  // See if request is regarding the TIME Characteristic Value
+else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_TIMEUUID, pAttr->type.len) )
   {
-    if ( offset > STEMMETER_SERVICE_GENERALCONFIG_LEN )  // Prevent malicious ATT ReadBlob offsets.
+    if ( offset > STEMMETER_SERVICE_TIME_LEN )  // Prevent malicious ATT ReadBlob offsets.
     {
       status = ATT_ERR_INVALID_OFFSET;
     }
     else
     {
-      *pLen = MIN(maxLen, STEMMETER_SERVICE_GENERALCONFIG_LEN - offset);  // Transmit as much as possible
+      *pLen = MIN(maxLen, STEMMETER_SERVICE_TIME_LEN - offset);  // Transmit as much as possible
       memcpy(pValue, pAttr->pValue + offset, *pLen);
     }
   }
@@ -1034,10 +785,10 @@ static bStatus_t STEMMeter_Service_WriteAttrCB( uint16 connHandle, gattAttribute
     status = GATTServApp_ProcessCCCWriteReq( connHandle, pAttr, pValue, len,
                                              offset, GATT_CLIENT_CFG_NOTIFY);
   }
-  // See if request is regarding the Sensor1Data Characteristic Value
-  else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_Sensor1DataUUID, pAttr->type.len) )
+  // See if request is regarding the CONFIG Characteristic Value
+  else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_CONFIGUUID, pAttr->type.len) )
   {
-    if ( offset + len > STEMMETER_SERVICE_SENSOR1DATA_LEN )
+    if ( offset + len > STEMMETER_SERVICE_CONFIG_LEN )
     {
       status = ATT_ERR_INVALID_OFFSET;
     }
@@ -1047,14 +798,14 @@ static bStatus_t STEMMeter_Service_WriteAttrCB( uint16 connHandle, gattAttribute
       memcpy(pAttr->pValue + offset, pValue, len);
 
       // Only notify application if entire expected value is written
-      if ( offset + len == STEMMETER_SERVICE_SENSOR1DATA_LEN)
-        paramID = STEMMETER_SERVICE_SENSOR1DATA;
+      if ( offset + len == STEMMETER_SERVICE_CONFIG_LEN)
+        paramID = STEMMETER_SERVICE_CONFIG;
     }
   }
-  // See if request is regarding the Sensor2Data Characteristic Value
-  else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_Sensor2DataUUID, pAttr->type.len) )
+  // See if request is regarding the TIME Characteristic Value
+  else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_TIMEUUID, pAttr->type.len) )
   {
-    if ( offset + len > STEMMETER_SERVICE_SENSOR2DATA_LEN )
+    if ( offset + len > STEMMETER_SERVICE_TIME_LEN )
     {
       status = ATT_ERR_INVALID_OFFSET;
     }
@@ -1064,144 +815,8 @@ static bStatus_t STEMMeter_Service_WriteAttrCB( uint16 connHandle, gattAttribute
       memcpy(pAttr->pValue + offset, pValue, len);
 
       // Only notify application if entire expected value is written
-      if ( offset + len == STEMMETER_SERVICE_SENSOR2DATA_LEN)
-        paramID = STEMMETER_SERVICE_SENSOR2DATA;
-    }
-  }
-  // See if request is regarding the Sensor3Data Characteristic Value
-  else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_Sensor3DataUUID, pAttr->type.len) )
-  {
-    if ( offset + len > STEMMETER_SERVICE_SENSOR3DATA_LEN )
-    {
-      status = ATT_ERR_INVALID_OFFSET;
-    }
-    else
-    {
-      // Copy pValue into the variable we point to from the attribute table.
-      memcpy(pAttr->pValue + offset, pValue, len);
-
-      // Only notify application if entire expected value is written
-      if ( offset + len == STEMMETER_SERVICE_SENSOR3DATA_LEN)
-        paramID = STEMMETER_SERVICE_SENSOR3DATA;
-    }
-  }
-  // See if request is regarding the Sensor4Data Characteristic Value
-  else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_Sensor4DataUUID, pAttr->type.len) )
-  {
-    if ( offset + len > STEMMETER_SERVICE_SENSOR4DATA_LEN )
-    {
-      status = ATT_ERR_INVALID_OFFSET;
-    }
-    else
-    {
-      // Copy pValue into the variable we point to from the attribute table.
-      memcpy(pAttr->pValue + offset, pValue, len);
-
-      // Only notify application if entire expected value is written
-      if ( offset + len == STEMMETER_SERVICE_SENSOR4DATA_LEN)
-        paramID = STEMMETER_SERVICE_SENSOR4DATA;
-    }
-  }
-  // See if request is regarding the Sensor1Config Characteristic Value
-  else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_Sensor1ConfigUUID, pAttr->type.len) )
-  {
-    if ( offset + len > STEMMETER_SERVICE_SENSOR1CONFIG_LEN )
-    {
-      status = ATT_ERR_INVALID_OFFSET;
-    }
-    else
-    {
-      // Copy pValue into the variable we point to from the attribute table.
-      memcpy(pAttr->pValue + offset, pValue, len);
-
-      // Only notify application if entire expected value is written
-      if ( offset + len == STEMMETER_SERVICE_SENSOR1CONFIG_LEN)
-        paramID = STEMMETER_SERVICE_SENSOR1CONFIG;
-    }
-  }
-  // See if request is regarding the Sensor2Config Characteristic Value
-  else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_Sensor2ConfigUUID, pAttr->type.len) )
-  {
-    if ( offset + len > STEMMETER_SERVICE_SENSOR2CONFIG_LEN )
-    {
-      status = ATT_ERR_INVALID_OFFSET;
-    }
-    else
-    {
-      // Copy pValue into the variable we point to from the attribute table.
-      memcpy(pAttr->pValue + offset, pValue, len);
-
-      // Only notify application if entire expected value is written
-      if ( offset + len == STEMMETER_SERVICE_SENSOR2CONFIG_LEN)
-        paramID = STEMMETER_SERVICE_SENSOR2CONFIG;
-    }
-  }
-  // See if request is regarding the Sensor3Config Characteristic Value
-  else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_Sensor3ConfigUUID, pAttr->type.len) )
-  {
-    if ( offset + len > STEMMETER_SERVICE_SENSOR3CONFIG_LEN )
-    {
-      status = ATT_ERR_INVALID_OFFSET;
-    }
-    else
-    {
-      // Copy pValue into the variable we point to from the attribute table.
-      memcpy(pAttr->pValue + offset, pValue, len);
-
-      // Only notify application if entire expected value is written
-      if ( offset + len == STEMMETER_SERVICE_SENSOR3CONFIG_LEN)
-        paramID = STEMMETER_SERVICE_SENSOR3CONFIG;
-    }
-  }
-  // See if request is regarding the Sensor4Config Characteristic Value
-  else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_Sensor4ConfigUUID, pAttr->type.len) )
-  {
-    if ( offset + len > STEMMETER_SERVICE_SENSOR4CONFIG_LEN )
-    {
-      status = ATT_ERR_INVALID_OFFSET;
-    }
-    else
-    {
-      // Copy pValue into the variable we point to from the attribute table.
-      memcpy(pAttr->pValue + offset, pValue, len);
-
-      // Only notify application if entire expected value is written
-      if ( offset + len == STEMMETER_SERVICE_SENSOR4CONFIG_LEN)
-        paramID = STEMMETER_SERVICE_SENSOR4CONFIG;
-    }
-  }
-  // See if request is regarding the BatteryData Characteristic Value
-  else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_BatteryDataUUID, pAttr->type.len) )
-  {
-    if ( offset + len > STEMMETER_SERVICE_BATTERYDATA_LEN )
-    {
-      status = ATT_ERR_INVALID_OFFSET;
-    }
-    else
-    {
-      // Copy pValue into the variable we point to from the attribute table.
-      memcpy(pAttr->pValue + offset, pValue, len);
-
-      // Only notify application if entire expected value is written
-      if ( offset + len == STEMMETER_SERVICE_BATTERYDATA_LEN)
-        paramID = STEMMETER_SERVICE_BATTERYDATA;
-    }
-  }
-  // See if request is regarding the GeneralConfig Characteristic Value
-  else if ( ! memcmp(pAttr->type.uuid, STEMMeter_Service_GeneralConfigUUID, pAttr->type.len) )
-  {
-    if ( offset + len > STEMMETER_SERVICE_GENERALCONFIG_LEN )
-    {
-      status = ATT_ERR_INVALID_OFFSET;
-    }
-    else
-    {
-      // Copy pValue into the variable we point to from the attribute table.
-      memcpy(pAttr->pValue + offset, pValue, len);
-
-      // Only notify application if entire expected value is written
-      if ( offset + len == STEMMETER_SERVICE_GENERALCONFIG_LEN)
-        paramID = STEMMETER_SERVICE_GENERALCONFIG;
+      if ( offset + len == STEMMETER_SERVICE_TIME_LEN)
+        paramID = STEMMETER_SERVICE_TIME;
     }
   }
   else

@@ -132,11 +132,6 @@ extern "C" {
 
 
 
-/* Board specific I2C addresses */
-#define Board_TMP006_ADDR           (0x40)
-#define Board_RF430CL330_ADDR       (0x28)
-#define Board_TPL0401_ADDR          (0x40)
-
 #ifdef __cplusplus
 }
 #endif

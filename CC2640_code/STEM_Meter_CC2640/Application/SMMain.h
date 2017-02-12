@@ -64,7 +64,7 @@ typedef enum {
   APP_MSG_SERVICE_CFG,         /* A characteristic configuration has changed  */
   APP_MSG_UPDATE_CHARVAL,      /* Request from ourselves to update a value    */
   APP_MSG_GAP_STATE_CHANGE,    /* The GAP / connection state has changed      */
-  APP_MSG_BUTTON_DEBOUNCED,    /* A button has been debounced with new value  */
+  APP_MSG_TOGGLE_ADVERTISING,
   APP_MSG_SEND_PASSCODE,       /* A pass-code/PIN is requested during pairing */
 } app_msg_types_t;
 
@@ -91,6 +91,7 @@ extern void BatMonitor_createTask(void);
 extern void SPICommands_createTask(void);
 extern void enqueueBatteryCharUpdate(uint8_t *pValue);
 extern void enqueueSensorCharUpdate(uint16_t charUUID, uint8_t *pValue);
+extern void enqueueBLEMainMsg(app_msg_types_t msgType);
 
 /*********************************************************************
 *********************************************************************/

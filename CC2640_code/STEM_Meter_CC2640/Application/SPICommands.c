@@ -44,27 +44,14 @@ static SPI_Handle SPIHandle;
 static SPI_Params SPIParams;
 static SPI_Transaction SPITransaction;
 
-
-//static PIN_Handle spiPinHandle;
-//static PIN_State spiPinState;
-//
-//PIN_Config SPIIntPinTable[] = {
-//	// set SPI interrupt pin as output and init to low
-//	Board_SPIINT | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL | PIN_DRVSTR_MAX,
-//	PIN_TERMINATE
-//};
-
-
 static PIN_Handle intPinHandle;
 static PIN_State intPinState;
-
 
 PIN_Config intPinTable[] = {
 	Board_SPI_CS | PIN_INPUT_EN 	  | PIN_PULLUP   | PIN_IRQ_NEGEDGE, // SPI CS interrupt
 	Board_SPIINT | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL | PIN_DRVSTR_MAX, // SPI data ready interrupt
     PIN_TERMINATE
 };
-
 
 // Enum of message types
 typedef enum {

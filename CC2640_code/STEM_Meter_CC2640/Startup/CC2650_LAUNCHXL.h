@@ -105,6 +105,7 @@ extern const PIN_Config BoardGpioInitTable[];
 
 #define Board_SPI_INT				IOID_0
 #define Board_SPI_CS_Pin			IOID_1
+#define Board_BTN					IOID_14
 
 
 /** ============================================================================

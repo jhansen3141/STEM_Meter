@@ -45,8 +45,7 @@ extern "C" {
 #define 	Board_SPIINT			Board_SPI_INT
 #define 	Board_SPI_CS			Board_SPI_CS_Pin
 
-#define     Board_BUTTON0           Board_BTN1
-#define     Board_BUTTON1           Board_BTN2
+#define     Board_BUTTON            Board_BTN
 
 #define 	Board_BLU_SLED			Board_BLU_LED
 #define 	Board_RED_SLED			Board_RED_LED

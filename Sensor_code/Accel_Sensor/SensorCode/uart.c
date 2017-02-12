@@ -2,12 +2,17 @@
 #include <stdio.h>
 #include <avr/io.h>
 #include <util/delay.h>
+#include <string.h>
 #include "sensor.h"
 #include "sensorCommon.h"
 
 #define FRAME_BYTE_0 0x55
 #define FRAME_BYTE_1 0xAA
 #define FRAME_BYTE_2 0xA5
+
+#define STR_FRAME_BYTE_0 0x81
+#define STR_FRAME_BYTE_1 0x66
+#define STR_FRAME_BYTE_2 0x77
 
 // Used to keep readings in sync. Incremented after every reading
 // Using 24-bits will overflow around 466 hours (19.4 days) at max interval of 10Hz
@@ -35,8 +40,24 @@ void UARTWriteString(char *string) {
 	}
 }
 
+void writeSensorString() {
+	int i;
+	char string[UART_FRAME_SIZE];
+	memset(string,0,UART_FRAME_SIZE);
+	strcpy(string,SENSOR_STRING);
+	
+	for(i=0;i<UART_FRAME_SIZE;i++) {
+		UARTWrite(string[i]);
+	}
+}
+
+
 void writeBaseUnitData(sensorData_t *data) {
 	uint8_t i;
+	char sensorString[SENSOR_STR_LEN];
+	
+	memset(sensorString,0,SENSOR_STR_LEN);
+	strcpy(sensorString,SENSOR_STRING);
 	
 	// Write the three frame sync bytes
 	UARTWrite(FRAME_BYTE_0);
@@ -57,11 +78,15 @@ void writeBaseUnitData(sensorData_t *data) {
 		// Write all of the raw data
 		UARTWrite(data->sensorDataRaw[i]);
 	}	
+	// Write how many data points this sensor has
 	UARTWrite(NUMBER_DATA_POINTS);
-	
-	// Write the size of the string data
-	UARTWrite(STR_DATA_SIZE);
 		
+	// Write the sensor name string
+	for(i=0;i<SENSOR_STR_LEN;i++) {
+		// Write all of the string data
+		UARTWrite(sensorString[i]);
+	}
+			
 	for(i=0;i<STR_DATA_SIZE;i++) {
 		// Write all of the string data
 		UARTWrite(data->sensorDataStr[i]);

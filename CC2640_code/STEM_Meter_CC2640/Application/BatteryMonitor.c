@@ -21,7 +21,9 @@
 
 #define BATMONITOR_TASK_STACK_SIZE	    1024 // BatMonitor task size in bytes
 #define BATMONITOR_TASK_PRIORITY 		3 // BatMonitor Priority
-#define BATT_GAUGE_ADDR				0x70 // I2C slave address for battery gauge
+#define BATT_GAUGE_ADDR				    0x70 // I2C slave address for battery gauge
+#define BUTTON_PRESS					0x01
+#define BUTTON_LONG_PRESS				0x02
 
 Task_Struct batMonitorTask;
 Char batMonitorTaskStack[BATMONITOR_TASK_STACK_SIZE]; // mem allocation for batMonitor task stack
@@ -43,6 +45,15 @@ static I2C_Transaction masterTransaction;
 static Clock_Struct batteryUpdateClock;
 static Clock_Handle hBatteryUpdateClock;
 
+static Clock_Struct connectionStatusClock;
+static Clock_Handle hconnectionStatusClock;
+
+static Clock_Struct buttonDebounceClock;
+static Clock_Handle hButtonDebounceClock;
+
+static Clock_Struct buttonLongPressClock;
+static Clock_Handle hButtonLongPressClock;
+
 static PIN_Handle ledPinHandle;
 static PIN_State ledPinState;
 
@@ -50,6 +61,14 @@ PIN_Config ledPinTable[] = {
 	Board_RED_SLED| PIN_GPIO_OUTPUT_EN | PIN_GPIO_HIGH | PIN_PUSHPULL | PIN_DRVSTR_MAX, // Red Status LED
 	Board_BLU_SLED| PIN_GPIO_OUTPUT_EN | PIN_GPIO_HIGH | PIN_PUSHPULL | PIN_DRVSTR_MAX, // Blue Status LED
 	Board_GRN_SLED| PIN_GPIO_OUTPUT_EN | PIN_GPIO_HIGH | PIN_PUSHPULL | PIN_DRVSTR_MAX, // Green Status LED
+    PIN_TERMINATE
+};
+
+static PIN_Handle btnPinHandle;
+static PIN_State btnPinState;
+
+PIN_Config btnPinTable[] = {
+	Board_BUTTON | PIN_INPUT_EN | PIN_NOPULL | PIN_IRQ_POSEDGE, // Button interrupt pin
     PIN_TERMINATE
 };
 
@@ -66,20 +85,18 @@ typedef struct {
 static void BatMonitor_taskFxn(UArg a0, UArg a1);
 static void BatMonitor_init();
 static void user_processBatMonitorMessage(batMonitor_msg_t *pMsg);
-static void user_enqueueRawBatMonitorMsg(batMonitor_msg_types_t deviceMsgType, uint8_t *pData, uint16_t len);
 static bool I2CWrite(uint8_t address, uint8_t *data, uint8_t len);
-static bool I2CWriteSingle(uint8_t address, uint8_t data);
-static bool I2CRead(uint8_t address, uint8_t *data, uint8_t len);
 static bool I2CWriteRead(uint8_t address, uint8_t *wdata, uint8_t wlen, uint8_t *rdata, uint8_t rlen);
 static void BattGauge_Write_Reg(uint8_t reg, uint8_t data);
 static void BattGauge_On();
-static void BattGauge_Off();
 static float Get_Batt_Voltage();
 static float Get_Tempature();
 static float Get_Batt_Current();
 static void updateBatteryValues();
 static void FiveSecUpdate();
-static void cycleStatusLEDs();
+static void toggleBlueLED();
+static void user_buttonClockCallBack(UArg buttonId);
+static void btnPinCallbackFxn(PIN_Handle handle, PIN_Id pinId);
 
 // Input - None
 // Output - None
@@ -107,6 +124,8 @@ static void BatMonitor_init() {
 	// Configure pins used by this task
 	ledPinHandle = PIN_open(&ledPinState, ledPinTable);
 
+	btnPinHandle = PIN_open(&btnPinState, btnPinTable);
+
 	// Init I2C
 	I2C_init();
 	/* Create I2C for usage */
@@ -126,7 +145,29 @@ static void BatMonitor_init() {
 	Clock_construct(&batteryUpdateClock, FiveSecUpdate, 5, &clockParams);
 	hBatteryUpdateClock = Clock_handle(&batteryUpdateClock);
 
+	clockParams.period = (500 * (1000/Clock_tickPeriod)); // Blue LED Flash rate
+	clockParams.startFlag = FALSE;
+	Clock_construct(&connectionStatusClock, toggleBlueLED, 5, &clockParams);
+	hconnectionStatusClock = Clock_handle(&connectionStatusClock);
+
+	clockParams.period = (200 * (1000/Clock_tickPeriod)); // button debounce of 200mS
+	clockParams.startFlag = FALSE;
+	clockParams.arg = BUTTON_PRESS;
+	Clock_construct(&buttonDebounceClock, user_buttonClockCallBack, 5, &clockParams);
+	hButtonDebounceClock = Clock_handle(&buttonDebounceClock);
+
+	clockParams.period = (4000 * (1000/Clock_tickPeriod)); // 4 second button press
+	clockParams.startFlag = FALSE;
+	clockParams.arg = BUTTON_LONG_PRESS;
+	Clock_construct(&buttonLongPressClock, user_buttonClockCallBack, 5, &clockParams);
+	hButtonLongPressClock = Clock_handle(&buttonLongPressClock);
+
+	// Setup callback for button interrupt
+	PIN_registerIntCb(btnPinHandle, &btnPinCallbackFxn);
+
 	Clock_start(hBatteryUpdateClock);
+	// start blinking blue LED on start (advertising)
+	Clock_start(hconnectionStatusClock);
 }
 
 // Input - Task arguments
@@ -135,7 +176,7 @@ static void BatMonitor_init() {
 static void BatMonitor_taskFxn(UArg a0, UArg a1) {
 	// Allocate and init resources used for this task
 	BatMonitor_init();
-	cycleStatusLEDs();
+
 	while(1) {
 		ICall_Errno errno = ICall_wait(ICALL_TIMEOUT_FOREVER); // waits until semaphore is signaled
 
@@ -145,6 +186,13 @@ static void BatMonitor_taskFxn(UArg a0, UArg a1) {
 			ICall_free(pMsg); // free mem
 		}
 	}
+}
+
+static void btnPinCallbackFxn(PIN_Handle handle, PIN_Id pinId) {
+	// Disable interrupt on that pin for now.
+	PIN_setConfig(handle, PIN_BM_IRQ, pinId | PIN_IRQ_DIS);
+	Clock_start(hButtonDebounceClock);
+	Clock_start(hButtonLongPressClock);
 }
 
 // Input - Device Task Message Struct
@@ -169,6 +217,8 @@ static void user_processBatMonitorMessage(batMonitor_msg_t *pMsg) {
 			PIN_setOutputValue(ledPinHandle, Board_GRN_SLED, 0);
 			break;
 		case BATMONITOR_MSG_BLU_LED_ON:
+			// if the blue toggle clock is going, stop it
+			Clock_stop(hconnectionStatusClock);
 			PIN_setOutputValue(ledPinHandle, Board_BLU_SLED, 0);
 			break;
 		case BATMONITOR_MSG_RED_LED_OFF:
@@ -178,33 +228,30 @@ static void user_processBatMonitorMessage(batMonitor_msg_t *pMsg) {
 			PIN_setOutputValue(ledPinHandle, Board_GRN_SLED, 1);
 			break;
 		case BATMONITOR_MSG_BLU_LED_OFF:
+			// if the blue toggle clock is going, stop it
+			Clock_stop(hconnectionStatusClock);
 			PIN_setOutputValue(ledPinHandle, Board_BLU_SLED, 1);
+			break;
+		case BATMONITOR_MSG_BLE_LEG_TOGGLE:
+			// start the clock to toggle blue LED
+			Clock_start(hconnectionStatusClock);
 			break;
 	}
 }
 
-// Input - Task message type, messge data, message length
-// Output - None
-// Description - Enqueues message for device task
-static void user_enqueueRawBatMonitorMsg(batMonitor_msg_types_t deviceMsgType, uint8_t *pData, uint16_t len) {
-	// Allocate memory for the message.
-	batMonitor_msg_t *pMsg = ICall_malloc( sizeof(batMonitor_msg_t) + len );
+// called when the debounce clock expires
+static void user_buttonClockCallBack(UArg buttonId) {
 
-	if (pMsg != NULL) {
-		// set the message type
-		pMsg->type = deviceMsgType;
-
-		// Copy data into message
-		if(len > 0) {
-			memcpy(pMsg->pdu, pData, len);
-		}
-
-		// Enqueue the message
-		Queue_enqueue(hBatMonitorMsgQ, &pMsg->_elem);
-		// Let application know there's a message.
-		Semaphore_post(batMonitorSem);
+	if(buttonId == BUTTON_PRESS) {
+		// if button is released then do short press action
+		enqueueBLEMainMsg(APP_MSG_TOGGLE_ADVERTISING);
+	}
+	else if(buttonId == BUTTON_LONG_PRESS) {
+		// if button is still pressed then do long press action
 	}
 }
+
+
 
 void enqueueBatMonitortTaskMsg(batMonitor_msg_types_t msgType) {
 	batMonitor_msg_t *pMsg = ICall_malloc(sizeof(batMonitor_msg_t));
@@ -319,17 +366,11 @@ static void updateBatteryValues() {
 	enqueueBatteryCharUpdate((uint8_t *)batteryString);
 }
 
-static void cycleStatusLEDs() {
-	PIN_setOutputValue(ledPinHandle, Board_RED_SLED, 0);
-	Task_sleep(500 * (1000/Clock_tickPeriod));
-	PIN_setOutputValue(ledPinHandle, Board_RED_SLED, 1);
-
-	PIN_setOutputValue(ledPinHandle, Board_BLU_SLED, 0);
-	Task_sleep(500 * (1000/Clock_tickPeriod));
-	PIN_setOutputValue(ledPinHandle, Board_BLU_SLED, 1);
-
-	PIN_setOutputValue(ledPinHandle, Board_GRN_SLED, 0);
-	Task_sleep(500 * (1000/Clock_tickPeriod));
-	PIN_setOutputValue(ledPinHandle, Board_GRN_SLED, 1);
+static void toggleBlueLED() {
+	static uint8_t ledStatus = 0;
+	PIN_setOutputValue(ledPinHandle, Board_BLU_SLED, ledStatus);
+	ledStatus ^= 1;
 }
+
+
 
