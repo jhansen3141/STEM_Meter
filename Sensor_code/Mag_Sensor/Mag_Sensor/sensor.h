@@ -14,7 +14,9 @@
 
 #define SENSOR_NUMBER MAG_MAG3110
 #define SENSOR_DEFAULT_RATE RATE_ONE_HZ
-#define NUMBER_DATA_POINTS	3
+#define NUMBER_DATA_POINTS	(3)
+#define SENSOR_STRING "M:X,M:Y,M:Z"
+#define SENSOR_STR_LEN	(15)
 
 // Sensor Specific Register Addresses
 #define SENSOR_I2C_ADDRESS	0x0E

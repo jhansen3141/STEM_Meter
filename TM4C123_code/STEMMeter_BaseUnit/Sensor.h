@@ -10,7 +10,7 @@
 
 #include <stdbool.h>
 
-#define SENSOR_BAUD_RATE 	250000
+#define SENSOR_BAUD_RATE 	500000
 #define SENSOR_FRAME_LENGTH 69
 #define SENSOR_DATA_LENGTH 	20
 #define FRAME_BYTES_OFFSET 	3

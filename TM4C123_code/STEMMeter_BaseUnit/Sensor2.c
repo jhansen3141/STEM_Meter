@@ -106,8 +106,7 @@ static void Sensor2TaskFxn(UArg arg0, UArg arg1) {
 			// if SD write is enabled for this sensor then enqueue the string data to the SD card task
 			if(Sensor2SDWriteEnabled) {
 				// enqueue only the string data portion of the incomming data, not the raw data
-				// sensor type is held in byte 3
-				enqueueSDTaskMsg(WRITE_S2_TO_SD_MSG,uartBufferRX+STR_BYTES_OFFSET,uartBufferRX[3]);
+				enqueueSDTaskMsg(WRITE_S2_TO_SD_MSG,uartBufferRX+STR_BYTES_OFFSET);
 			}
 		}
 

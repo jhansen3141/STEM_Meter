@@ -12,7 +12,11 @@
 
 #include "sensorCommon.h"
 
-
+#define SENSOR_NUMBER TEMP_SI7021
+#define SENSOR_DEFAULT_RATE RATE_ONE_HZ
+#define NUMBER_DATA_POINTS	(2)
+#define SENSOR_STRING "Temp,Humidity"
+#define SENSOR_STR_LEN	(15)
 
 // Sensor Specific Register Addresses
 #define SENSOR_I2C_ADDRESS 0x40

@@ -14,7 +14,11 @@
 
 #define SENSOR_NUMBER AIR_PRES_MPL3115A2
 #define SENSOR_DEFAULT_RATE RATE_ONE_HZ
-#define NUMBER_DATA_POINTS	1
+#define NUMBER_DATA_POINTS	(1)
+#define SENSOR_STRING "Air Pressure"
+#define SENSOR_STR_LEN	(15)
+
+
 
 // Sensor Specific Register Addresses
 #define SENSOR_I2C_ADDRESS		0x60

@@ -67,6 +67,8 @@ void readSensor(sensorData_t *data) {
 	float multiplier; 
 	float fOpticalPower;
 	char tempStr[6];
+	
+	moduleLED(ON);
 
 	memset(data->sensorDataRaw,0,RAW_DATA_SIZE);
 	memset(data->sensorDataStr,0,STR_DATA_SIZE);
@@ -89,8 +91,10 @@ void readSensor(sensorData_t *data) {
 	// 2^(B15:B12) * (B11:B0) * 1.2 nW/cm^2
 	fOpticalPower = (float)mantissa * multiplier;
 	
-	sprintf(tempStr,"%.1f;",fOpticalPower);
+	sprintf(tempStr,"%.1f\n",fOpticalPower);
 	strcat(data->sensorDataStr,tempStr);
+	
+	moduleLED(OFF);
 }
 
 void moduleLED(ledState_t state) {

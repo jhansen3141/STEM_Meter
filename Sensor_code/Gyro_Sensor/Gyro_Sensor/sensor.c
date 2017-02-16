@@ -13,7 +13,7 @@
 static void MPU6050_Write(uint8_t reg, uint8_t data);
 
 void initBoard(void) {
-	DDRB |= (1<<0); // LED as output
+	DDRC |= (1<<0); // LED as output
 	DDRD &= ~(1<<2); // UART Re-send line as input
 	
 	I2CInit();
@@ -53,6 +53,8 @@ void readSensor(sensorData_t *data) {
 	int16_t gyroX, gyroY, gyroZ;
 	float fGyroX, fGyroY, fGyroZ;
 	
+	moduleLED(ON);
+	
 	memset(data->sensorDataRaw,0,RAW_DATA_SIZE);
 	memset(data->sensorDataStr,0,STR_DATA_SIZE);
 	
@@ -72,22 +74,24 @@ void readSensor(sensorData_t *data) {
 	fGyroZ = (float)gyroZ / GYRO_SENSE;
 	
 	
-	sprintf(tempStr,"%1.2f;",fGyroX);
+	sprintf(tempStr,"%1.2f,",fGyroX);
 	strcat(data->sensorDataStr,tempStr);
 	
-	sprintf(tempStr,"%1.2f;",fGyroY);
+	sprintf(tempStr,"%1.2f,",fGyroY);
 	strcat(data->sensorDataStr,tempStr);
 	
-	sprintf(tempStr,"%1.2f;",fGyroZ);
+	sprintf(tempStr,"%1.2f\n",fGyroZ);
 	strcat(data->sensorDataStr,tempStr);
+	
+	moduleLED(OFF);
 
 }
 
 void moduleLED(ledState_t state) {
 	if(state == OFF) {
-		PORTB |= (1<<0);
+		PORTC |= (1<<0);
 	}
 	else {
-		PORTB &= ~(1<<0);
+		PORTC &= ~(1<<0);
 	}
 }

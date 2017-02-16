@@ -9,16 +9,14 @@
 #ifndef SENSORLIST_H_
 #define SENSORLIST_H_
 
-#define RAW_DATA_SIZE	15
-#define STR_DATA_SIZE	30
-#define UART_FRAME_SIZE 54
-
+#define RAW_DATA_SIZE	(15)
+#define STR_DATA_SIZE	(30)
+#define UART_FRAME_SIZE (54)
 
 #define TIMER_OFF_NUM 0
 #define TIMER_ONE_HZ_NUM 7812
 #define TIMER_FIVE_HZ_NUM 1562
 #define TIMER_TEN_HZ_NUM 781
-
 
 typedef enum sensorType {
 	INVALID = 0,

@@ -58,6 +58,8 @@ void readSensor(sensorData_t *data) {
 	int16_t magX, magY, magZ;
 	float fMagX, fMagY, fMagZ;
 	
+	moduleLED(ON);
+	
 	memset(data->sensorDataRaw,0,RAW_DATA_SIZE);
 	memset(data->sensorDataStr,0,STR_DATA_SIZE);
 	
@@ -79,14 +81,16 @@ void readSensor(sensorData_t *data) {
 	fMagZ = (float)magZ / MAG_SENSE;
 	
 	
-	sprintf(tempStr,"%1.2f;",fMagX);
+	sprintf(tempStr,"%1.2f,",fMagX);
 	strcat(data->sensorDataStr,tempStr);
 	
-	sprintf(tempStr,"%1.2f;",fMagY);
+	sprintf(tempStr,"%1.2f,",fMagY);
 	strcat(data->sensorDataStr,tempStr);
 	
-	sprintf(tempStr,"%1.2f;",fMagZ);
+	sprintf(tempStr,"%1.2f\n",fMagZ);
 	strcat(data->sensorDataStr,tempStr);
+	
+	moduleLED(OFF);
 }
 
 void moduleLED(ledState_t state) {

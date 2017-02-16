@@ -83,10 +83,10 @@ void readSensor(sensorData_t *data) {
 	// copy the raw data into the struct
 	memcpy(data->sensorDataRaw,rawData,RAW_DATA_LOCAL_SIZE);
 
-	sprintf(tempStr,"%.2f;",fTemp);
+	sprintf(tempStr,"%.2f,",fTemp);
 	strcat(data->sensorDataStr,tempStr);
 	
-	sprintf(tempStr,"%.2f;",fHumidity);
+	sprintf(tempStr,"%.2f\n",fHumidity);
 	strcat(data->sensorDataStr,tempStr);
 	
 	PORTC |= (1<<0);

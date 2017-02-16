@@ -6,13 +6,15 @@
 #include "sensor.h"
 #include "sensorCommon.h"
 
-#define FRAME_BYTE_0 0x55
-#define FRAME_BYTE_1 0xAA
-#define FRAME_BYTE_2 0xA5
+#define FRAME_BYTE_0 (0x55)
+#define FRAME_BYTE_1 (0xAA)
+#define FRAME_BYTE_2 (0xA5)
 
-#define STR_FRAME_BYTE_0 0x81
-#define STR_FRAME_BYTE_1 0x66
-#define STR_FRAME_BYTE_2 0x77
+
+#define UARTWrite(data) {									\
+							while (!(UCSR0A & (1<<UDRE0)));	\
+							UDR0 = data;					\
+						}
 
 // Used to keep readings in sync. Incremented after every reading
 // Using 24-bits will overflow around 466 hours (19.4 days) at max interval of 10Hz
@@ -22,13 +24,9 @@ void UARTInit(void) {
 	UCSR0B |= (1<<TXEN0) | (1<<RXEN0);
 	UCSR0C |= (1<<UCSZ01) | (1<<UCSZ00); // 8 bit frame, 1 stop bit, no parity
 	UCSR0B |= (1 << RXCIE0); // enable RX interrupt
-	UBRR0L = 1; // 250k baud
+	UBRR0L = 0; // 500k baud
 }
 
-void UARTWrite(uint8_t data) {
-	while (!(UCSR0A & (1<<UDRE0)));
-	UDR0 = data;
-}
 
 void UARTWriteString(char *string) {
 	uint16_t counter = 0;
@@ -68,15 +66,15 @@ void writeBaseUnitData(sensorData_t *data) {
 	// write the rate readings are being taken
 	UARTWrite(sensorRate);
 	// write the sync number upper byte
-	UARTWrite((syncCount>>16) & 0xFF);
+	UARTWrite(((syncCount>>16) & 0xFF));
 	// write the sync number middle byte
-	UARTWrite((syncCount>>8) & 0xFF);
+	UARTWrite(((syncCount>>8) & 0xFF));
 	//write the sync number lower byte
-	UARTWrite(syncCount & 0xFF);
+	UARTWrite((syncCount & 0xFF));
 	
 	for(i=0;i<RAW_DATA_SIZE;i++) {
 		// Write all of the raw data
-		UARTWrite(data->sensorDataRaw[i]);
+		UARTWrite((data->sensorDataRaw[i]));
 	}	
 	// Write how many data points this sensor has
 	UARTWrite(NUMBER_DATA_POINTS);
@@ -84,12 +82,12 @@ void writeBaseUnitData(sensorData_t *data) {
 	// Write the sensor name string
 	for(i=0;i<SENSOR_STR_LEN;i++) {
 		// Write all of the string data
-		UARTWrite(sensorString[i]);
+		UARTWrite((sensorString[i]));
 	}
 			
 	for(i=0;i<STR_DATA_SIZE;i++) {
 		// Write all of the string data
-		UARTWrite(data->sensorDataStr[i]);
+		UARTWrite((data->sensorDataStr[i]));
 	}
 	
 	// increment sync number because we just sent a reading

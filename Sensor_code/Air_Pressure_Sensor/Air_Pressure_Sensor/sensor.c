@@ -168,6 +168,7 @@ static int8_t startPressureReading() {
 
 
 void readSensor(sensorData_t *data) {
+	moduleLED(ON);
 	uint8_t PressureData[5];
 	char tempStr[6];
 	int32_t pressure;
@@ -207,8 +208,9 @@ void readSensor(sensorData_t *data) {
 	
 	fPressure += (float)pressure;
 	
-	sprintf(tempStr,"%.2f;",fPressure);
+	sprintf(tempStr,"%.2f\n",fPressure);
 	strcat(data->sensorDataStr,tempStr);	
+	moduleLED(OFF);
 }
 
 void moduleLED(ledState_t state) {
