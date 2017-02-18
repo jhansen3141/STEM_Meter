@@ -550,6 +550,7 @@ static void user_processApplicationMessage(app_msg_t *pMsg) {
     {
     	if(isAdvertising) {
     		isAdvertising = FALSE;
+    		enqueueBatMonitortTaskMsg(BATMONITOR_MSG_BLU_LED_OFF);
     	}
     	else {
     		isAdvertising = TRUE;
@@ -616,7 +617,7 @@ static void user_processGapStateChangeEvt(gaprole_States_t newState)
       break;
 
     case GAPROLE_ADVERTISING:
-
+    	enqueueBatMonitortTaskMsg(BATMONITOR_MSG_BLE_LEG_TOGGLE);
       break;
 
     case GAPROLE_CONNECTED:
@@ -624,6 +625,7 @@ static void user_processGapStateChangeEvt(gaprole_States_t newState)
         uint8_t peerAddress[B_ADDR_LEN];
 
         GAPRole_GetParameter(GAPROLE_CONN_BD_ADDR, peerAddress);
+        enqueueBatMonitortTaskMsg(BATMONITOR_MSG_BLU_LED_ON);
 
        }
       break;

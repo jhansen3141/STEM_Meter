@@ -17,9 +17,9 @@
 #include "Board.h"
 #include "BatteryMonitor.h"
 #include "SMMain.h"
+#include "SPICommands.h"
 
-
-#define BATMONITOR_TASK_STACK_SIZE	    1024 // BatMonitor task size in bytes
+#define BATMONITOR_TASK_STACK_SIZE	    1100 // BatMonitor task size in bytes
 #define BATMONITOR_TASK_PRIORITY 		3 // BatMonitor Priority
 #define BATT_GAUGE_ADDR				    0x70 // I2C slave address for battery gauge
 #define BUTTON_PRESS					0x01
@@ -39,7 +39,6 @@ static Queue_Handle hBatMonitorMsgQ;
 static I2C_Handle      I2Chandle;
 static I2C_Params      i2cParams;
 static I2C_Transaction masterTransaction;
-
 
 // Clock objects
 static Clock_Struct batteryUpdateClock;
@@ -138,7 +137,9 @@ static void BatMonitor_init() {
 	BattGauge_On();
 
 	Clock_Params clockParams;
+	Clock_Params buttonClockParams;
 	Clock_Params_init(&clockParams);
+	Clock_Params_init(&buttonClockParams);
 
 	clockParams.period = (5000 * (1000/Clock_tickPeriod)); // 5s battery update rate
 	clockParams.startFlag = FALSE;
@@ -150,22 +151,21 @@ static void BatMonitor_init() {
 	Clock_construct(&connectionStatusClock, toggleBlueLED, 5, &clockParams);
 	hconnectionStatusClock = Clock_handle(&connectionStatusClock);
 
-	clockParams.period = (200 * (1000/Clock_tickPeriod)); // button debounce of 200mS
-	clockParams.startFlag = FALSE;
-	clockParams.arg = BUTTON_PRESS;
-	Clock_construct(&buttonDebounceClock, user_buttonClockCallBack, 5, &clockParams);
+	buttonClockParams.arg = BUTTON_PRESS;
+	Clock_construct(&buttonDebounceClock, user_buttonClockCallBack,
+				    1000 * (1000/Clock_tickPeriod), &buttonClockParams);
 	hButtonDebounceClock = Clock_handle(&buttonDebounceClock);
 
-	clockParams.period = (4000 * (1000/Clock_tickPeriod)); // 4 second button press
-	clockParams.startFlag = FALSE;
-	clockParams.arg = BUTTON_LONG_PRESS;
-	Clock_construct(&buttonLongPressClock, user_buttonClockCallBack, 5, &clockParams);
+	buttonClockParams.arg = BUTTON_LONG_PRESS;
+	Clock_construct(&buttonLongPressClock, user_buttonClockCallBack,
+					5000 * (1000/Clock_tickPeriod), &buttonClockParams);
 	hButtonLongPressClock = Clock_handle(&buttonLongPressClock);
 
 	// Setup callback for button interrupt
 	PIN_registerIntCb(btnPinHandle, &btnPinCallbackFxn);
 
-	Clock_start(hBatteryUpdateClock);
+	//Clock_start(hBatteryUpdateClock);
+
 	// start blinking blue LED on start (advertising)
 	Clock_start(hconnectionStatusClock);
 }
@@ -186,13 +186,6 @@ static void BatMonitor_taskFxn(UArg a0, UArg a1) {
 			ICall_free(pMsg); // free mem
 		}
 	}
-}
-
-static void btnPinCallbackFxn(PIN_Handle handle, PIN_Id pinId) {
-	// Disable interrupt on that pin for now.
-	PIN_setConfig(handle, PIN_BM_IRQ, pinId | PIN_IRQ_DIS);
-	Clock_start(hButtonDebounceClock);
-	Clock_start(hButtonLongPressClock);
 }
 
 // Input - Device Task Message Struct
@@ -239,16 +232,38 @@ static void user_processBatMonitorMessage(batMonitor_msg_t *pMsg) {
 	}
 }
 
+// Button interrupt callback. Called in hardware context
+static void btnPinCallbackFxn(PIN_Handle handle, PIN_Id pinId) {
+	// Disable interrupt on that pin for now.
+	PIN_setConfig(handle, PIN_BM_IRQ, pinId | PIN_IRQ_DIS);
+	// Start the button debounce clock
+	Clock_start(hButtonDebounceClock);
+	// Start the button long clock
+	Clock_start(hButtonLongPressClock);
+}
+
 // called when the debounce clock expires
 static void user_buttonClockCallBack(UArg buttonId) {
 
+	// Get current value of the button pin after the clock timeout
+	uint8_t buttonPinVal = PIN_getInputValue(Board_BUTTON);
+
 	if(buttonId == BUTTON_PRESS) {
-		// if button is released then do short press action
-		enqueueBLEMainMsg(APP_MSG_TOGGLE_ADVERTISING);
+		if(!buttonPinVal) {
+			// button was released after 1s
+			enqueueBLEMainMsg(APP_MSG_TOGGLE_ADVERTISING);
+		}
+
 	}
 	else if(buttonId == BUTTON_LONG_PRESS) {
-		// if button is still pressed then do long press action
+		if(buttonPinVal) {
+			// if button is still pressed then do long press action
+			enqueueSPICommandstTaskMsg(TOGGLE_SD_MOUNT_MSG);
+		}
 	}
+
+	// Enable positive edge interrupts to wait for press
+	PIN_setConfig(btnPinHandle, PIN_BM_IRQ, Board_BUTTON | PIN_IRQ_POSEDGE);
 }
 
 

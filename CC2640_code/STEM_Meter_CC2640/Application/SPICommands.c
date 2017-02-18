@@ -28,7 +28,7 @@
 #define SPI_CONFIG_TRANS				0
 #define SPI_DATA_TRANS					1
 #define SPI_CONFIG_DATA_MARKER			0xA5
-#define CONFIG_RECIEVED_MARKER 			0x55
+#define SPI_SD_TOGGLE_MARKER			0x8A
 
 Task_Struct spiCommandsTask;
 Char spiCommandsTaskStack[SPICOMMANDS_TASK_STACK_SIZE]; // mem allocation for spiCommands task stack
@@ -88,7 +88,6 @@ static uint8_t SPIBufTX[SPI_BUFFER_SIZE];                  // SPI Receive and tr
 static void SPICommands_taskFxn(UArg a0, UArg a1);
 static void SPICommands_init();
 static void user_processSPICommandsMessage(spiCommands_msg_t *pMsg);
-static void enqueueSPICommandsTaskMsg(spiCommands_msg_types_t msgType);
 static void transferCallback(SPI_Handle handle, SPI_Transaction *transaction);
 static void intPinCallbackFxn(PIN_Handle handle, PIN_Id pinId);
 
@@ -174,7 +173,7 @@ static void transferCallback(SPI_Handle handle, SPI_Transaction *transaction) {
 		switch(messageID) {
 		// enqueue an update for the sensor char with the new data
 		case SENSOR_1_ID:
-			// copy the sensor data into array minus the first byte which is s num
+			// copy the sensor data into array minus the first byte which is sen num
 			memcpy(sensorData,SPIBufRX+1,20);
 			enqueueSensorCharUpdate(STEMMETER_SERVICE_SENSOR1DATA_UUID,sensorData);
 			break;
@@ -239,7 +238,7 @@ static void user_processSPICommandsMessage(spiCommands_msg_t *pMsg) {
 			break;
 		// message from BLE task to update sensor config
 		case SENSOR_UPDATE_CONFIG_MSG:
-
+		{
 			// copy the incoming config data to TX buffer
 			memcpy(SPIBufTX,pMsg->pdu,20);
 
@@ -250,7 +249,20 @@ static void user_processSPICommandsMessage(spiCommands_msg_t *pMsg) {
 			// Master will then perform SPI transfer to get config data from TX buffer
 			PIN_setOutputValue(intPinHandle, Board_SPIINT, 1);
 			PIN_setOutputValue(intPinHandle, Board_SPIINT, 0);
+		}
+			break;
 
+		case TOGGLE_SD_MOUNT_MSG:
+		{
+			memset(SPIBufTX,0,20);
+
+			SPIBufTX[20]  = SPI_SD_TOGGLE_MARKER;
+
+			// Toggle interrupt line to let master know data is ready to be recieved
+			// Master will then perform SPI transfer to get config data from TX buffer
+			PIN_setOutputValue(intPinHandle, Board_SPIINT, 1);
+			PIN_setOutputValue(intPinHandle, Board_SPIINT, 0);
+		}
 			break;
 	}
 }
@@ -278,7 +290,7 @@ void user_enqueueRawSPICommandsMsg(spiCommands_msg_types_t deviceMsgType, uint8_
 	}
 }
 
-static void enqueueSPICommandstTaskMsg(spiCommands_msg_types_t msgType) {
+void enqueueSPICommandstTaskMsg(spiCommands_msg_types_t msgType) {
 	spiCommands_msg_t *pMsg = ICall_malloc(sizeof(spiCommands_msg_t));
 	if (pMsg != NULL) {
 		pMsg->type = msgType;

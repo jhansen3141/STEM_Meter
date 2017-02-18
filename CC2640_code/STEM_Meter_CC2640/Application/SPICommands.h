@@ -11,6 +11,7 @@
 typedef enum {
   UPDATE_BAT_VALUES_MSG = 0,
   SENSOR_UPDATE_CONFIG_MSG,
+  TOGGLE_SD_MOUNT_MSG
 
 } spiCommands_msg_types_t;
 
@@ -21,5 +22,6 @@ typedef enum {
 #define STEMMETER_SERVICE_SENSOR4DATA_UUID 0xBEAD
 
 extern void user_enqueueRawSPICommandsMsg(spiCommands_msg_types_t deviceMsgType, uint8_t *pData, uint16_t len);
+extern void enqueueSPICommandstTaskMsg(spiCommands_msg_types_t msgType);
 
 #endif /* SPICOMMANDS_H_ */
