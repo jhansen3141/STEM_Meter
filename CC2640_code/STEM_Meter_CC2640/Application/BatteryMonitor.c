@@ -19,7 +19,7 @@
 #include "SMMain.h"
 #include "SPICommands.h"
 
-#define BATMONITOR_TASK_STACK_SIZE	    1100 // BatMonitor task size in bytes
+#define BATMONITOR_TASK_STACK_SIZE	    950 // BatMonitor task size in bytes
 #define BATMONITOR_TASK_PRIORITY 		3 // BatMonitor Priority
 #define BATT_GAUGE_ADDR				    0x70 // I2C slave address for battery gauge
 #define BUTTON_PRESS					0x01
@@ -158,13 +158,13 @@ static void BatMonitor_init() {
 
 	buttonClockParams.arg = BUTTON_LONG_PRESS;
 	Clock_construct(&buttonLongPressClock, user_buttonClockCallBack,
-					5000 * (1000/Clock_tickPeriod), &buttonClockParams);
+					3000 * (1000/Clock_tickPeriod), &buttonClockParams);
 	hButtonLongPressClock = Clock_handle(&buttonLongPressClock);
 
 	// Setup callback for button interrupt
 	PIN_registerIntCb(btnPinHandle, &btnPinCallbackFxn);
 
-	//Clock_start(hBatteryUpdateClock);
+	Clock_start(hBatteryUpdateClock);
 
 	// start blinking blue LED on start (advertising)
 	Clock_start(hconnectionStatusClock);
@@ -372,13 +372,18 @@ static void FiveSecUpdate() {
 // Description - Retrives current battery data from bat monitor IC
 // then sends that updated data to the BLE task to be read by the Android app
 static void updateBatteryValues() {
-	char batteryString[20] = {0};
+	uint8_t batteryString[20] = {0};
 	float temp = Get_Tempature();
+
 	float voltage = Get_Batt_Voltage();
+
 	float current = Get_Batt_Current();
-	sprintf(batteryString,"%.2f;%.2f;%.2f",voltage,current,temp);
+
+	snprintf((char *)batteryString,20,"%.2f;%.2f;%.2f",voltage,current,temp);
+
 	// send updated values to BLE task
-	enqueueBatteryCharUpdate((uint8_t *)batteryString);
+	enqueueSensorCharUpdate(STEMMETER_SERVICE_BATTERYDATA_UUID, batteryString);
+	//enqueueBatteryCharUpdate((uint8_t *)batteryString);
 }
 
 static void toggleBlueLED() {

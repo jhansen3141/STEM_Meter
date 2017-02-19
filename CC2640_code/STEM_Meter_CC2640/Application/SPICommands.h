@@ -20,6 +20,7 @@ typedef enum {
 #define STEMMETER_SERVICE_SENSOR2DATA_UUID 0xBEAB
 #define STEMMETER_SERVICE_SENSOR3DATA_UUID 0xBEAC
 #define STEMMETER_SERVICE_SENSOR4DATA_UUID 0xBEAD
+#define STEMMETER_SERVICE_BATTERYDATA_UUID 0xBEBC
 
 extern void user_enqueueRawSPICommandsMsg(spiCommands_msg_types_t deviceMsgType, uint8_t *pData, uint16_t len);
 extern void enqueueSPICommandstTaskMsg(spiCommands_msg_types_t msgType);

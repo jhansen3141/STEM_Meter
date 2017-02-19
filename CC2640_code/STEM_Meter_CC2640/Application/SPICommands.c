@@ -20,7 +20,7 @@
 #include "SMMain.h"
 #include "BatteryMonitor.h"
 
-#define SPICOMMANDS_TASK_STACK_SIZE	    1500 // spiCommands task size in bytes
+#define SPICOMMANDS_TASK_STACK_SIZE	    1350 // spiCommands task size in bytes
 #define SPICOMMANDS_TASK_PRIORITY 		2 // spiCommands Priority
 #define SPI_BUFFER_SIZE 				21
 #define MASTER_SEND_ID 					0

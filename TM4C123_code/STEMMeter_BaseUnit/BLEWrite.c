@@ -30,14 +30,14 @@
 /* Example/Board Header files */
 #include "Board.h"
 #include "BLEWrite.h"
-
+#include "FatSD.h"
 #include "Sensor.h"
 
-#define TASKSTACKSIZE       1024
-#define TASK_PRIORITY 		1
-#define SPI_BIT_RATE 		5000000
-#define SPI_CONFIG_DATA_MARKER			0xA5
-#define CONFIG_RECIEVED_MARKER 			0x55
+#define TASKSTACKSIZE       	1024
+#define TASK_PRIORITY 			1
+#define SPI_BIT_RATE 			5000000
+#define SPI_CONFIG_DATA_MARKER	0xA5
+#define SPI_SD_TOGGLE_MARKER	0x8A
 
 typedef enum {
 	INVALID_ID = 0,
@@ -78,7 +78,6 @@ static bool SPISendUpdate(uint8_t *txBuffer, uint8_t *rxBuffer);
 static void user_processBLEWriteMessage(bleWrite_msg_t *pMsg);
 static void sdCardLEDBlink(uint8_t numBlink);
 static void SPISlaveInterrupt(unsigned int index);
-static void enqueueSelfMsg(bleWrite_msg_types_t msgType);
 static void updateSensorConfig();
 static void InputPowerGoodInterrupt(unsigned int index);
 static void ChargeCompleteInterrupt(unsigned int index);
@@ -138,28 +137,28 @@ static void BLEWrite_Init() {
 static void InputPowerGoodInterrupt(unsigned int index) {
 	// if pin is high then charge stopped
 	if(GPIO_read(Board_PG_INT)) {
-		enqueueSelfMsg(CHARGE_STOPPED_MSG);
+		enqueueBLEMsg(CHARGE_STOPPED_MSG);
 	}
 	// otherwise charge started
 	else {
-		enqueueSelfMsg(CHARGE_STARTED_MSG);
+		enqueueBLEMsg(CHARGE_STARTED_MSG);
 	}
 }
 
 static void ChargeCompleteInterrupt(unsigned int index) {
 	// if pin is high then charge not full
 	if(GPIO_read(Board_CHG_INT)) {
-		enqueueSelfMsg(CHARGE_NOT_COMPLETE_MSG);
+		enqueueBLEMsg(CHARGE_NOT_COMPLETE_MSG);
 	}
 	// otherwise charge full
 	else {
-		enqueueSelfMsg(CHARGE_COMPLETE_MSG);
+		enqueueBLEMsg(CHARGE_COMPLETE_MSG);
 	}
 }
 
 static void SPISlaveInterrupt(unsigned int index) {
 	// enqueue a message to tell task that sensor update is requested
-	enqueueSelfMsg(UPDATE_SENSOR_CONFIG_MSG);
+	enqueueBLEMsg(UPDATE_SENSOR_CONFIG_MSG);
 	// disable the interrupt until finished
 	GPIO_disableInt(Board_SPI_SLAVE_INT);
 }
@@ -168,6 +167,7 @@ static bool SPISendUpdate(uint8_t *txBuffer, uint8_t *rxBuffer) {
 	bool returnStatus;
 	// bring the CS line active to tell slave SPI transfer about to start
 	GPIO_write(Board_SPI_CS_INT, Board_CS_ACTIVE);
+	Task_sleep(25);
 
 	SPI_Transaction spiTransaction;
 	spiTransaction.count = 21;
@@ -176,6 +176,7 @@ static bool SPISendUpdate(uint8_t *txBuffer, uint8_t *rxBuffer) {
 	// do the SPI transfer
 	returnStatus = SPI_transfer(SPIHandle, &spiTransaction);
 
+	Task_sleep(25);
 	// deactivate the SPI CS line
 	GPIO_write(Board_SPI_CS_INT, Board_CS_DEACTIVE);
 	return returnStatus;
@@ -254,6 +255,14 @@ static void user_processBLEWriteMessage(bleWrite_msg_t *pMsg) {
 			txBufferUpdate[0] = CHARGE_STOP_ID;
 			oneByteMsg = true;
 			break;
+		case SD_STATUS_LED_OFF_MSG:
+			shouldSendUpdate =  false;
+			GPIO_write(Board_SD_CARD_LED, Board_LED_OFF);
+			break;
+		case SD_STATUS_LED_ON_MSG:
+			shouldSendUpdate = false;
+			GPIO_write(Board_SD_CARD_LED, Board_LED_ON);
+			break;
 	}
 
 	if(shouldSendUpdate) {
@@ -325,6 +334,13 @@ static void updateSensorConfig() {
 				Sensor4SDWriteEnabled = false;
 			}
 		}
+		// if SD card unmount command from CC2640
+		else if(localRXBuffer[20] == SPI_SD_TOGGLE_MARKER &&
+				localRXBuffer[0] == 0)
+		{
+			// toggle SD card mount/unmount
+			enqueueSDToggleTaskMsg();
+		}
 	}
 
 	// Re-Enable interrupt
@@ -341,7 +357,7 @@ void enqueueBLEWritetTaskMsg(bleWrite_msg_types_t msgType, uint8_t *buffer, uint
 	}
 }
 
-static void enqueueSelfMsg(bleWrite_msg_types_t msgType) {
+void enqueueBLEMsg(bleWrite_msg_types_t msgType) {
 	bleWrite_msg_t *pMsg = malloc(sizeof(bleWrite_msg_t));
 	if (pMsg != NULL) {
 		pMsg->type = msgType;
@@ -363,19 +379,19 @@ static void sdCardLEDBlink(uint8_t numBlink) {
 static void checkChargeStatus() {
 	// if pin is high then charge stopped
 	if(GPIO_read(Board_PG_INT)) {
-		enqueueSelfMsg(CHARGE_STOPPED_MSG);
+		enqueueBLEMsg(CHARGE_STOPPED_MSG);
 	}
 	// otherwise charge started
 	else {
-		enqueueSelfMsg(CHARGE_STARTED_MSG);
+		enqueueBLEMsg(CHARGE_STARTED_MSG);
 	}
 
 	// if pin is high then charge not full
 	if(GPIO_read(Board_CHG_INT)) {
-		enqueueSelfMsg(CHARGE_NOT_COMPLETE_MSG);
+		enqueueBLEMsg(CHARGE_NOT_COMPLETE_MSG);
 	}
 	// otherwise charge full
 	else {
-		enqueueSelfMsg(CHARGE_COMPLETE_MSG);
+		enqueueBLEMsg(CHARGE_COMPLETE_MSG);
 	}
 }

@@ -18,9 +18,12 @@ typedef enum {
   CHARGE_COMPLETE_MSG,
   CHARGE_NOT_COMPLETE_MSG,
   CHARGE_STARTED_MSG,
-  CHARGE_STOPPED_MSG
+  CHARGE_STOPPED_MSG,
+  SD_STATUS_LED_OFF_MSG,
+  SD_STATUS_LED_ON_MSG
 } bleWrite_msg_types_t;
 
 void enqueueBLEWritetTaskMsg(bleWrite_msg_types_t msgType, uint8_t *buffer, uint16_t len);
+void enqueueBLEMsg(bleWrite_msg_types_t msgType);
 
 #endif /* BLEWRITE_H_ */

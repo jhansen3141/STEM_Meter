@@ -52,7 +52,7 @@
 #define PRZ_TASK_PRIORITY                     1
 
 #ifndef PRZ_TASK_STACK_SIZE
-#define PRZ_TASK_STACK_SIZE                   1024
+#define PRZ_TASK_STACK_SIZE                   1140
 #endif
 
 // Internal Events for RTOS application
@@ -190,7 +190,7 @@ static void user_updateCharVal(char_data_t *pCharData);
 
 // Utility functions
 static void user_enqueueRawAppMsg(app_msg_types_t appMsgType, uint8_t *pData, uint16_t len );
-void enqueueBatteryCharUpdate(uint8_t *pValue);
+
 
 /*********************************************************************
  * PROFILE CALLBACKS
@@ -970,19 +970,6 @@ static void user_updateCharVal(char_data_t *pCharData) {
   }
 }
 
-void enqueueBatteryCharUpdate(uint8_t *pValue) {
-	app_msg_t *pMsg = ICall_malloc( sizeof(app_msg_t) + sizeof(char_data_t) + STEMMETER_SERVICE_BATTERYDATA_LEN);
-	if (pMsg != NULL) {
-		pMsg->type = APP_MSG_UPDATE_CHARVAL;
-		char_data_t *pCharData = (char_data_t *)pMsg->pdu;
-		pCharData->svcUUID = STEMMETER_SERVICE_BATTERYDATA_UUID;
-		memcpy(pCharData->data, pValue, STEMMETER_SERVICE_BATTERYDATA_LEN);
-		pCharData->dataLen = STEMMETER_SERVICE_BATTERYDATA_LEN;
-
-		Queue_enqueue(hApplicationMsgQ, &pMsg->_elem);
-		Semaphore_post(BLESem);
-	}
-}
 
 void enqueueSensorCharUpdate(uint16_t charUUID, uint8_t *pValue) {
 	app_msg_t *pMsg = ICall_malloc( sizeof(app_msg_t) + sizeof(char_data_t) + 20);
