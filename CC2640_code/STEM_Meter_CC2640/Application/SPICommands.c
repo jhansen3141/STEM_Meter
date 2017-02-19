@@ -29,6 +29,7 @@
 #define SPI_DATA_TRANS					1
 #define SPI_CONFIG_DATA_MARKER			0xA5
 #define SPI_SD_TOGGLE_MARKER			0x8A
+#define SPI_SET_TIME_MARKER				0x6C
 
 Task_Struct spiCommandsTask;
 Char spiCommandsTaskStack[SPICOMMANDS_TASK_STACK_SIZE]; // mem allocation for spiCommands task stack
@@ -260,6 +261,21 @@ static void user_processSPICommandsMessage(spiCommands_msg_t *pMsg) {
 
 			// Toggle interrupt line to let master know data is ready to be recieved
 			// Master will then perform SPI transfer to get config data from TX buffer
+			PIN_setOutputValue(intPinHandle, Board_SPIINT, 1);
+			PIN_setOutputValue(intPinHandle, Board_SPIINT, 0);
+		}
+			break;
+
+		case UPDATE_TIME_MSG:
+		{
+			// copy the incoming config data to TX buffer
+			memcpy(SPIBufTX,pMsg->pdu,20);
+
+			// set last byte to show config data is correct
+			SPIBufTX[20] = SPI_SET_TIME_MARKER;
+
+			// Toggle interrupt line to let master know data is ready to be recieved
+			// Master will then perform SPI transfer to get time data
 			PIN_setOutputValue(intPinHandle, Board_SPIINT, 1);
 			PIN_setOutputValue(intPinHandle, Board_SPIINT, 0);
 		}

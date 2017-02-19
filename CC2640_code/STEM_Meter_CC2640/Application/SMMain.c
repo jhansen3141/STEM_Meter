@@ -455,11 +455,11 @@ void user_STEMMeter_Service_ValueChangeDispatchHandler(server_char_write_t *pWri
 			user_enqueueRawSPICommandsMsg(SENSOR_UPDATE_CONFIG_MSG,pWrite->data,20);
 			break;
         case STEMMETER_SERVICE_TIME:
-		 // Do something useful with pWrite->data here
+        	// Enqueue time data to SPI task to write to TM4C123
+        	user_enqueueRawSPICommandsMsg(UPDATE_TIME_MSG,pWrite->data,20);
         	break;
       }
 }
-
 
 static void user_STEMMeter_ServiceValueChangeCB(uint8_t paramID) {
   // See STEMMeter_Service.h to compare paramID with characteristic value attribute.
@@ -578,7 +578,6 @@ static void user_processApplicationMessage(app_msg_t *pMsg) {
  ****************************************************************************
  *****************************************************************************/
 
-
 /*
  * @brief   Process a pending GAP Role state change event.
  *
@@ -617,6 +616,7 @@ static void user_processGapStateChangeEvt(gaprole_States_t newState)
       break;
 
     case GAPROLE_ADVERTISING:
+    	// Blue LED flashing when advertising
     	enqueueBatMonitortTaskMsg(BATMONITOR_MSG_BLE_LEG_TOGGLE);
       break;
 
@@ -625,6 +625,7 @@ static void user_processGapStateChangeEvt(gaprole_States_t newState)
         uint8_t peerAddress[B_ADDR_LEN];
 
         GAPRole_GetParameter(GAPROLE_CONN_BD_ADDR, peerAddress);
+        // Blue LED Solid when connected
         enqueueBatMonitortTaskMsg(BATMONITOR_MSG_BLU_LED_ON);
 
        }
@@ -747,9 +748,6 @@ static uint8_t ProjectZero_processGATTMsg(gattMsgEvent_t *pMsg)
   // It's safe to free the incoming message
   return (TRUE);
 }
-
-
-
 
 /*
  *  Application error handling functions

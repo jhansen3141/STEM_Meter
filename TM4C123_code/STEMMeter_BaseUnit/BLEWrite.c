@@ -38,6 +38,7 @@
 #define SPI_BIT_RATE 			5000000
 #define SPI_CONFIG_DATA_MARKER	0xA5
 #define SPI_SD_TOGGLE_MARKER	0x8A
+#define SPI_SET_TIME_MARKER		0x6C
 
 typedef enum {
 	INVALID_ID = 0,
@@ -296,50 +297,54 @@ static void updateSensorConfig() {
 	ret = SPISendUpdate(dummyTXBuffer,localRXBuffer);
 
 	if (ret) {
-		// Byte 0 = S1 Freq | Byte 1 = S1 SD Log
-		// Byte 2 = S2 Freq | Byte 3 = S2 SD Log
-		// Byte 4 = S3 Freq | Byte 5 = S3 SD Log
-		// Byte 6 = S4 Freq | Byte 7 = S4 SD Log
+		// Byte 20 is command marker
+		switch(localRXBuffer[20]) {
+			case SPI_CONFIG_DATA_MARKER:
+				// Byte 0 = S1 Freq | Byte 1 = S1 SD Log
+				// Byte 2 = S2 Freq | Byte 3 = S2 SD Log
+				// Byte 4 = S3 Freq | Byte 5 = S3 SD Log
+				// Byte 6 = S4 Freq | Byte 7 = S4 SD Log
+				Sensor1WriteConfig(localRXBuffer[0]);
+				if(localRXBuffer[1]) {
+					Sensor1SDWriteEnabled = true;
+				}
+				else {
+					Sensor1SDWriteEnabled = false;
+				}
 
-		if(localRXBuffer[20] == SPI_CONFIG_DATA_MARKER) {
-			Sensor1WriteConfig(localRXBuffer[0]);
-			if(localRXBuffer[1]) {
-				Sensor1SDWriteEnabled = true;
-			}
-			else {
-				Sensor1SDWriteEnabled = false;
-			}
+				Sensor2WriteConfig(localRXBuffer[2]);
+				if(localRXBuffer[3]) {
+					Sensor2SDWriteEnabled = true;
+				}
+				else {
+					Sensor2SDWriteEnabled = false;
+				}
 
-			Sensor2WriteConfig(localRXBuffer[2]);
-			if(localRXBuffer[3]) {
-				Sensor2SDWriteEnabled = true;
-			}
-			else {
-				Sensor2SDWriteEnabled = false;
-			}
+				Sensor3WriteConfig(localRXBuffer[4]);
+				if(localRXBuffer[5]) {
+					Sensor3SDWriteEnabled = true;
+				}
+				else {
+					Sensor3SDWriteEnabled = false;
+				}
 
-			Sensor3WriteConfig(localRXBuffer[4]);
-			if(localRXBuffer[5]) {
-				Sensor3SDWriteEnabled = true;
-			}
-			else {
-				Sensor3SDWriteEnabled = false;
-			}
+				Sensor4WriteConfig(localRXBuffer[6]);
+				if(localRXBuffer[7]) {
+					Sensor4SDWriteEnabled = true;
+				}
+				else {
+					Sensor4SDWriteEnabled = false;
+				}
+				break;
 
-			Sensor4WriteConfig(localRXBuffer[6]);
-			if(localRXBuffer[7]) {
-				Sensor4SDWriteEnabled = true;
-			}
-			else {
-				Sensor4SDWriteEnabled = false;
-			}
-		}
-		// if SD card unmount command from CC2640
-		else if(localRXBuffer[20] == SPI_SD_TOGGLE_MARKER &&
-				localRXBuffer[0] == 0)
-		{
-			// toggle SD card mount/unmount
-			enqueueSDToggleTaskMsg();
+			case SPI_SD_TOGGLE_MARKER:
+				// toggle SD card mount/unmount
+				enqueueSDToggleTaskMsg();
+				break;
+
+			case SPI_SET_TIME_MARKER:
+				enqueSDTaskTimeSetMsg(localRXBuffer);
+				break;
 		}
 	}
 
