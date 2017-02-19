@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+	android:id="@+id/ll_inflate"
+    android:orientation="horizontal">
+
+	<CheckedTextView
+		android:id="@+id/checkedTextViewSD"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_weight="1"
+		android:textSize="20sp"
+		android:layout_gravity="center"
+		android:layout_marginTop="8dp"
+		android:checkMark="?android:attr/listChoiceIndicatorMultiple"
+		android:checked="false"
+		android:layout_marginStart="8dp"
+		android:layout_marginEnd="16dp"
+		android:text="SD Card" />
+
+<!---<TextView
+            android:id="@+id/SDCard_Logged"
+			android:layout_marginTop="8dp"
+			android:layout_gravity="center"
+			android:textSize="20sp"
+            android:layout_width="wrap_content"
+            android:text="SD Card"
+			android:layout_centerVertical="true"
+            android:layout_height="wrap_content"
+            />
+
+	<CheckBox
+		android:id="@+id/checkbox_SDCARD"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+		android:layout_centerVertical="true"
+        android:layout_gravity="center"
+        />-->
+
+	<TextView
+		android:id="@+id/FrequencyText"
+		android:layout_marginTop="8dp"
+		android:layout_gravity="center"
+		android:textSize="20sp"
+		android:layout_weight="1.2"
+		android:layout_width="wrap_content"
+		android:text="Rate"
+		android:layout_height="wrap_content"
+		/>
+
+	<Spinner
+		android:id="@+id/FrequencySpinner"
+		android:layout_marginTop="8dp"
+		android:layout_gravity="center"
+		android:textSize="20sp"
+		android:layout_weight="1"
+		android:layout_width="wrap_content"
+		android:text="20Hz"
+		android:layout_height="wrap_content"
+		android:clickable="true"
+		/>
+
+<ImageButton
+        android:id="@+id/ListBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+		android:layout_weight="1"
+        android:layout_margin="10dp"
+        android:focusable="false"
+		android:src="@drawable/ic_list_black_24dp"
+        android:focusableInTouchMode="false"
+        android:layout_gravity="center"
+        />
+
+</LinearLayout>

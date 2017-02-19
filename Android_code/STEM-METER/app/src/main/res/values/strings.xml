@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">BoardTestX</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">About</string>
+
+    <string-array name="Sensors">
+        <item>Sensor 1 Disconnected</item>
+        <item>Sensor 2 Disconnected</item>
+        <item>Sensor 3 Disconnected</item>
+        <item>Sensor 4 Disconnected</item>
+
+    </string-array>
+</resources>

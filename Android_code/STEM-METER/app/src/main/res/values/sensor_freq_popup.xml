@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources >
+<string-array name="frequency_array">
+    <item>OFF</item>
+    <item>10 HZ</item>
+    <item>5 HZ</item>
+    <item>1 HZ</item>
+    <item>1 Min</item>
+    <item>10 Min</item>
+    <item>30 Min</item>
+    <item>1 Hour</item>
+</string-array>
+</resources>

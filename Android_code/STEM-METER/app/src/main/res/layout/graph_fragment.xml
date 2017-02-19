@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:orientation="vertical">
+    <!--xmlns:ap="http://schemas.android.com/apk/res-auto"-->
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_weight="20">
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/chart"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
+        <!--ap:title="X Axis Acceleration"
+        ap:rangeTitle="Acceleration (g)"
+        ap:domainTitle="Time (5Hz)"
+        ap:lineLabels="left|bottom"
+        ap:lineLabelRotationBottom="-45"
+        />-->
+</LinearLayout>
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:layout_weight="1">
+
+    <ImageButton
+        android:id="@+id/CamBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:focusable="false"
+        android:src="@drawable/ic_menu_camera"
+        android:focusableInTouchMode="false"
+        android:layout_gravity="center"
+        />
+
+    <ToggleButton
+        android:id="@+id/PlayPauseBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:focusable="false"
+        android:background="@drawable/ic_play_arrow_black_24dp"
+        android:checked="false"
+        android:textOn=""
+        android:textOff=""
+        android:focusableInTouchMode="false"
+        android:layout_gravity="center"
+        />
+
+    <ImageButton
+        android:id="@+id/ZeroBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:focusable="false"
+        android:src="@drawable/ic_exposure_zero_black_24dp"
+        android:focusableInTouchMode="false"
+        android:layout_gravity="center"
+        />
+
+    <!--<com.androidplot.xy.XYPlot
+        style="@style/APDefacto.Light"
+        android:id="@+id/plot"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        ap:title="X Axis Acceleration"
+        ap:rangeTitle="Acceleration (g)"
+        ap:domainTitle="Time (5Hz)"
+        ap:lineLabels="left|bottom"
+        ap:lineLabelRotationBottom="-45"/>-->
+</LinearLayout>
+
+</LinearLayout>
