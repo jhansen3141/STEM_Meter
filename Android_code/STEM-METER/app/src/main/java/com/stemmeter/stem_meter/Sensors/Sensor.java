@@ -1,4 +1,4 @@
-package com.stemmeter.stem_meter;
+package com.stemmeter.stem_meter.Sensors;
 
 /**
  * Created by Josh on 11/28/2016.
@@ -50,7 +50,7 @@ public abstract class Sensor {
         return SDLog;
     }
 
-    abstract String[] calcSensorData();
+    public abstract String[] calcSensorData();
 
-    abstract float getGraphData();
+    public abstract float getGraphData();
 }

@@ -1,4 +1,4 @@
-package com.stemmeter.stem_meter;
+package com.stemmeter.stem_meter.Sensors;
 
 /**
  * Created by Josh on 11/28/2016.
@@ -14,7 +14,7 @@ public class TEMP_MCP9808 extends Sensor {
     }
 
     @Override
-    String[] calcSensorData() {
+    public String[] calcSensorData() {
         double temperature = 0;
         String[] dataStr = new String[2];
         short tempRaw = (short)((data[5]<<8)   | (data[6] & 0xFF));
@@ -35,7 +35,7 @@ public class TEMP_MCP9808 extends Sensor {
     }
 
     @Override
-    float getGraphData() {
+    public float getGraphData() {
         return tempF;
     }
 

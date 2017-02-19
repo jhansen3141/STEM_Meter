@@ -10,10 +10,8 @@ import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
@@ -27,6 +25,11 @@ import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.Toast;
 import android.os.Handler;
+
+import com.stemmeter.stem_meter.Sensors.IMU_MPU6050;
+import com.stemmeter.stem_meter.Sensors.Sensor;
+import com.stemmeter.stem_meter.Sensors.TEMP_MCP9808;
+
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.UUID;
