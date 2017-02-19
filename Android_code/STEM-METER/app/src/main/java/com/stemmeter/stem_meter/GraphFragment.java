@@ -32,6 +32,7 @@ import java.text.Format;
 import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -56,7 +57,9 @@ public class GraphFragment extends Fragment {
     //private XYPlot plot;
     private LineChart mChart;
     private ToggleButton playPauseBtn;
+    private ImageButton saveBtn;
     private long currentIndex = 0;
+    private List<List<LineData>> mainList;
 
 
     @Override
@@ -119,6 +122,17 @@ public class GraphFragment extends Fragment {
         rightAxis.setEnabled(false);
 
         //mChart.setVisibleXRangeMaximum(10);
+
+        saveBtn = (ImageButton) view.findViewById(R.id.SaveBtn);
+        saveBtn.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+                LineData data = mChart.getData();
+            }
+
+        });
+
 
         playPauseBtn = (ToggleButton) view.findViewById(R.id.PlayPauseBtn);
         playPauseBtn.setOnClickListener(new View.OnClickListener() {

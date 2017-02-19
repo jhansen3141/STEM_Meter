@@ -14,6 +14,10 @@
             android:id="@+id/nav_graph"
             android:icon="@drawable/graph_icon"
             android:title="Graph Sensors" />
+        <item
+            android:id="@+id/nav_display"
+            android:icon="@drawable/graph_icon"
+            android:title="Display Saved Data" />
 
     </group>
 

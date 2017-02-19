@@ -522,6 +522,11 @@ public class MainActivity extends AppCompatActivity
             transaction.replace(R.id.fragment_container, graphFragment, GRAPH_FRAG_TAG);
             //transaction.addToBackStack(null);
             transaction.commit();
+        } else if (id == R.id.nav_display) {
+            DisplayFragment displayFragment = new DisplayFragment();
+            transaction.replace(R.id.fragment_container, displayFragment, GRAPH_FRAG_TAG);
+            //transaction.addToBackStack(null);
+            transaction.commit();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
