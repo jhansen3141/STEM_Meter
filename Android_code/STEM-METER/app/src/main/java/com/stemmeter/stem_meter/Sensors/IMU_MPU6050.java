@@ -1,4 +1,4 @@
-package com.stemmeter.stem_meter;
+package com.stemmeter.stem_meter.Sensors;
 
 import android.graphics.Color;
 
@@ -6,7 +6,7 @@ import android.graphics.Color;
  * Created by Josh on 11/28/2016.
  */
 
-public class IMU_MPU6050 extends Sensor{
+public class IMU_MPU6050 extends Sensor {
 
     private float ACCEL_SENSE = 2048.0f; // +-16g
     private float GYRO_SENSE = 16.384f; // +-2000 degress/s
@@ -21,7 +21,7 @@ public class IMU_MPU6050 extends Sensor{
     }
 
     @Override
-    String[] calcSensorData() {
+    public String[] calcSensorData() {
         String[] dataStr = new String[6];
         short xAccel = (short)((data[5]<<8)   | (data[6] & 0xFF));
         short yAccel = (short)((data[7]<<8)   | (data[8] & 0xFF));
@@ -52,7 +52,7 @@ public class IMU_MPU6050 extends Sensor{
     }
 
     @Override
-        float getGraphData() {
+    public float getGraphData() {
             return xAccelF;
     }
 
