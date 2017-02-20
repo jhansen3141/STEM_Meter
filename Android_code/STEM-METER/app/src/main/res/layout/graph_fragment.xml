@@ -75,16 +75,6 @@
         android:layout_gravity="center"
         />
 
-    <!--<com.androidplot.xy.XYPlot
-        style="@style/APDefacto.Light"
-        android:id="@+id/plot"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        ap:title="X Axis Acceleration"
-        ap:rangeTitle="Acceleration (g)"
-        ap:domainTitle="Time (5Hz)"
-        ap:lineLabels="left|bottom"
-        ap:lineLabelRotationBottom="-45"/>-->
 </LinearLayout>
 
 </LinearLayout>

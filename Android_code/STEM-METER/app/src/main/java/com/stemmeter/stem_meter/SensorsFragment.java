@@ -39,7 +39,7 @@ public class SensorsFragment extends ListFragment {
     private String TAG = "SensorFrag";
     private SensorListAdapter sensorListAdapter;
 
-    private SensorConfig s1Config = new SensorConfig();
+    //private SensorConfig s1Config = new SensorConfig();
 
 
 
@@ -158,7 +158,7 @@ public class SensorsFragment extends ListFragment {
         private LayoutInflater mInflater;
         private final ArrayList<SetBoolean> setBooleanList = new ArrayList<SetBoolean>();
         private String TAG = "CustomAdapter";
-        private int currentSelectedPosition;
+        //private int currentSelectedPosition;
 
         public SensorListAdapter() {
             setBooleanList.add(new SetBoolean());
