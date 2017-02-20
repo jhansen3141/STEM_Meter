@@ -39,13 +39,11 @@ public class SensorsFragment extends ListFragment {
     private String TAG = "SensorFrag";
     private SensorListAdapter sensorListAdapter;
 
-    private SensorConfig s1Config = new SensorConfig();
-
 
 
     // Container Activity must implement this interface
     public interface SensorFragInterface {
-        public void sensorConfigWrite(int sensorNumber, int sensorRate);
+        public boolean sensorConfigWrite(SensorConfig config);
         public SensorConfig getSensorConfig(int sensorNumber);
         public GraphConfig getGraphConfig();
     }
@@ -259,8 +257,9 @@ public class SensorsFragment extends ListFragment {
                     }
                     });
 
-                if (position == sensorFragInterface.getGraphConfig().getSelectedSensor())
+                if (position == sensorFragInterface.getGraphConfig().getSelectedSensor()) {
                     altView.setBackgroundColor(Color.BLUE);
+                }
 
                 sdCheck.setChecked(sensorFragInterface.getSensorConfig(position+1).isSDLogging());
 
@@ -275,8 +274,17 @@ public class SensorsFragment extends ListFragment {
                 frequencySpinner.setSelection(sensorFragInterface.getSensorConfig(position+1).getFreq());
                 frequencySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     public void onItemSelected(AdapterView<?> parent, View view,
-                                               int position, long id) {
-                        Log.i(TAG,"P:" + position);
+                                               int freqSelected, long id)
+                    {
+                        // Create a new config object
+                        SensorConfig config = new SensorConfig(finalPosition+1);
+                        // Set the freq to the one just selected
+                        config.setFreq(freqSelected);
+                        // Set the SD logging boolean to whatever it was before
+                        config.setSDLogging(sensorFragInterface.getSensorConfig(finalPosition+1).isSDLogging());
+                        // Write the new config to the base unit over BLE
+                        sensorFragInterface.sensorConfigWrite(config);
+                        Log.i(TAG,"FS:" + freqSelected);
                     }
 
                     @Override
@@ -292,10 +300,25 @@ public class SensorsFragment extends ListFragment {
                     @Override
                     public void onClick(View arg0) {
                         Log.i(TAG, "SD Checkbox clicked");
-                        if (sdCheck.isChecked())
+                        // Create a new config object
+                        SensorConfig config = new SensorConfig(finalPosition+1);
+                        // Set the freq to what it was before
+                        config.setFreq(sensorFragInterface.getSensorConfig(finalPosition+1).getFreq());
+
+                        if (sdCheck.isChecked()) {
                             sdCheck.setChecked(false);
-                        else
+                            // Set the SD logging boolean to false
+                            config.setSDLogging(false);
+
+                        }
+                        else {
                             sdCheck.setChecked(true);
+                            // Set the SD logging boolean to false
+                            config.setSDLogging(true);
+                        }
+
+                        // Write the new config to the base unit over BLE
+                        sensorFragInterface.sensorConfigWrite(config);
                     }
                     });
 

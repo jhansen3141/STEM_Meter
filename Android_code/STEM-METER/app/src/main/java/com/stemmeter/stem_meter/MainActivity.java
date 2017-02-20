@@ -30,6 +30,8 @@ import com.stemmeter.stem_meter.Sensors.IMU_MPU6050;
 import com.stemmeter.stem_meter.Sensors.Sensor;
 import com.stemmeter.stem_meter.Sensors.TEMP_MCP9808;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.UUID;
@@ -54,14 +56,19 @@ public class MainActivity extends AppCompatActivity
     public final static UUID SENSOR_2_DATA_UUID = UUID.fromString("F000BEAB-0451-4000-B000-000000000000");
     public final static UUID SENSOR_3_DATA_UUID = UUID.fromString("F000BEAC-0451-4000-B000-000000000000");
     public final static UUID SENSOR_4_DATA_UUID = UUID.fromString("F000BEAD-0451-4000-B000-000000000000");
-    public final static UUID SENSOR_1_CONFIG_UUID = UUID.fromString("F000BEAE-0451-4000-B000-000000000000");
+    public final static UUID SENSOR_CONFIG_UUID = UUID.fromString("F000BEAF-0451-4000-B000-000000000000");
+    public final static UUID BATTERY_INFO_UUID = UUID.fromString("F000BEBC-0451-4000-B000-000000000000");
+    public final static UUID TIME_CONFIG_UUID = UUID.fromString("F000BEBD-0451-4000-B000-000000000000");
     public static final UUID CHARACTERISTIC_UPDATE_NOTIFICATION_DESCRIPTOR_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
 
     private BluetoothGattCharacteristic BoardSensor1DataChar;
     private BluetoothGattCharacteristic BoardSensor2DataChar;
     private BluetoothGattCharacteristic BoardSensor3DataChar;
     private BluetoothGattCharacteristic BoardSensor4DataChar;
-    private BluetoothGattCharacteristic BoardSensor1ConfigChar;
+
+    private BluetoothGattCharacteristic BoardBatteryInfoChar;
+    private BluetoothGattCharacteristic BoardSensorConfigChar;
+    private BluetoothGattCharacteristic BoardTimeConfigChar;
     private BluetoothGattService BoardService;
 
     private BluetoothDevice boardDevice;
@@ -109,17 +116,12 @@ public class MainActivity extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        sensorConfig1 = new SensorConfig();
-        sensorConfig2 = new SensorConfig();
-        sensorConfig3 = new SensorConfig();
-        sensorConfig4 = new SensorConfig();
+        sensorConfig1 = new SensorConfig(1);
+        sensorConfig2 = new SensorConfig(2);
+        sensorConfig3 = new SensorConfig(3);
+        sensorConfig4 = new SensorConfig(4);
 
         graphConfig = new GraphConfig();
-
-        sensorConfig2.setSDLogging(true);
-
-        sensorConfig1.setFreq(SensorList.RATE_ONE_MIN);
-
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         //noinspection RestrictedApi
@@ -148,6 +150,7 @@ public class MainActivity extends AppCompatActivity
             startActivityForResult(enableBtIntent, 0);
             printConnectionStat("Disconnected");
         } else {
+            // TODO change this from hard-coded MAC address to name of BLE device or let user choose from list
             boardDevice = mBluetoothAdapter.getRemoteDevice(DEVICE_MAC_STR);
             if (boardDevice == null) {
                 printConnectionStat("Scanning for board...");
@@ -236,11 +239,12 @@ public class MainActivity extends AppCompatActivity
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                        BoardSensor1DataChar = BoardService.getCharacteristic(SENSOR_1_DATA_UUID); // get the SMS characteristic
-                        BoardSensor2DataChar = BoardService.getCharacteristic(SENSOR_2_DATA_UUID); // get the SMS characteristic
-                        BoardSensor3DataChar = BoardService.getCharacteristic(SENSOR_3_DATA_UUID); // get the SMS characteristic
-                        BoardSensor4DataChar = BoardService.getCharacteristic(SENSOR_4_DATA_UUID); // get the Time characteristic
-                        BoardSensor1ConfigChar = BoardService.getCharacteristic(SENSOR_1_CONFIG_UUID);
+                        BoardSensor1DataChar = BoardService.getCharacteristic(SENSOR_1_DATA_UUID); // get sensor 1 char
+                        BoardSensor2DataChar = BoardService.getCharacteristic(SENSOR_2_DATA_UUID);// get sensor 2 char
+                        BoardSensor3DataChar = BoardService.getCharacteristic(SENSOR_3_DATA_UUID); /// get sensor 3 char
+                        BoardSensor4DataChar = BoardService.getCharacteristic(SENSOR_4_DATA_UUID); // get sensor 4 char
+                        BoardSensorConfigChar = BoardService.getCharacteristic(SENSOR_CONFIG_UUID); // get the sensor config char
+                        BoardBatteryInfoChar = BoardService.getCharacteristic(BATTERY_INFO_UUID); // get the battery info char
 
                         // Enable Sensor 1 Char Notifications
                         gatt.setCharacteristicNotification(BoardSensor1DataChar, true);
@@ -269,12 +273,14 @@ public class MainActivity extends AppCompatActivity
                         serviceDiscovered = true;
                         printConnectionStat("Connected");
 
-                        // TODO This doesnt work now that fragment is list fragment
-//                        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-//                        SensorsFragment sensorsFragment = new SensorsFragment();
-//                        transaction.replace(R.id.fragment_container, sensorsFragment, SENSOR_FRAG_TAG);
-//                        // transaction.addToBackStack(null);
-//                        transaction.commit();
+                        // At this point we are connected and all chars have been assigned
+                        // Set the time:
+                        setBaseUnitTime();
+
+                        // Read the current config values from base unit
+                        // Once read callback will update config objects
+                        mBluetoothGatt.readCharacteristic(BoardSensorConfigChar);
+
                     } else {
                         Log.w(TAG, "onServicesDiscovered received: " + status);
                     }
@@ -284,7 +290,10 @@ public class MainActivity extends AppCompatActivity
                 // Result of a characteristic read operation
                 public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
                     if (status == BluetoothGatt.GATT_SUCCESS) {
-                        // Not currently reading characteristics. Using notify on change.
+                        if(characteristic.equals(BoardSensorConfigChar)) {
+                            // Sensor config was read from base unit so update the config objects
+                            updateSensorConfigData(characteristic.getValue());
+                        }
                     }
                 }
 
@@ -325,8 +334,58 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    // method to update sensor config objects using byte array data read from base unit
+    public void updateSensorConfigData(byte configData[]) {
+        // Byte 0 = S1 Freq | Byte 1 = S1 SD Log
+        // Byte 2 = S2 Freq | Byte 3 = S2 SD Log
+        // Byte 4 = S3 Freq | Byte 5 = S3 SD Log
+        // Byte 6 = S4 Freq | Byte 7 = S4 SD Log
+
+        sensorConfig1.setFreq((int)configData[0]);
+        sensorConfig1.setSDLogging(configData[1] == 1);
+
+        sensorConfig2.setFreq((int)configData[1]);
+        sensorConfig2.setSDLogging(configData[2] == 1);
+
+        sensorConfig3.setFreq((int)configData[3]);
+        sensorConfig3.setSDLogging(configData[4] == 1);
+
+        sensorConfig4.setFreq((int)configData[5]);
+        sensorConfig4.setSDLogging(configData[6] == 1);
+    }
+
+    public void setBaseUnitTime() {
+        Calendar calendar = new GregorianCalendar();
+        byte month = (byte)calendar.get(Calendar.MONTH);
+        byte day = (byte)calendar.get(Calendar.DAY_OF_MONTH);
+        byte year = (byte)(calendar.get(Calendar.YEAR)-200);
+        byte dow = (byte)(calendar.get(Calendar.DAY_OF_WEEK) - 1);
+        byte hour = (byte)calendar.get(Calendar.HOUR_OF_DAY);
+        byte minutes = (byte)calendar.get(Calendar.MINUTE);
+        byte seconds = (byte)calendar.get(Calendar.SECOND);
+
+        // Byte[0] = dow
+        // Byte[1] = day
+        // Byte[2] = month
+        // Byte[3] = year
+        // Byte[4] = hour
+        // Byte[5] = min
+        // Byte[6] = sec
+
+        byte[] timeData = new byte[7];
+        timeData[0] = dow;
+        timeData[1] = day;
+        timeData[2] = month;
+        timeData[3] = year;
+        timeData[4] = hour;
+        timeData[5] = minutes;
+        timeData[6] = seconds;
+
+        writeCharacteristic(BoardSensorConfigChar, timeData);
+    }
+
     void handleSensor1Data(byte sensor1Data[]) {
-        Log.i(TAG,"HANDLE S1");
+        Log.i(TAG, "HANDLE S1");
         if (sensor1Data[0] == SensorList.INVALID_SENSOR) {
             return;
         } else {
@@ -538,18 +597,47 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void sensorConfigWrite(int sensorNumber, int sensorRate) {
-        // Byte 0 = Sensor Position Number
-        // Byte 1 = Sensor Freq
-        // Byte 2 = Sensor SD Log
-        byte[] configData = new byte[3];
-        configData[0] = (byte)sensorNumber;
-        configData[1] = (byte)sensorRate;
-        configData[2] = (byte)0;
+    public boolean sensorConfigWrite(SensorConfig config) {
 
-        writeCharacteristic(BoardSensor1ConfigChar, configData);
-        // write the config twice to solve bug on embedded side
-        writeCharacteristic(BoardSensor1ConfigChar, configData);
+        switch(config.getSensorNumber()) {
+            case SensorList.SENSOR_1:
+                sensorConfig1.setFreq(config.getFreq());
+                sensorConfig1.setSDLogging(config.isSDLogging());
+                break;
+            case SensorList.SENSOR_2:
+                sensorConfig2.setFreq(config.getFreq());
+                sensorConfig2.setSDLogging(config.isSDLogging());
+                break;
+            case SensorList.SENSOR_3:
+                sensorConfig3.setFreq(config.getFreq());
+                sensorConfig3.setSDLogging(config.isSDLogging());
+                break;
+            case SensorList.SENSOR_4:
+                sensorConfig4.setFreq(config.getFreq());
+                sensorConfig4.setSDLogging(config.isSDLogging());
+                break;
+        }
+
+        // Byte 0 = S1 Freq | Byte 1 = S1 SD Log
+        // Byte 2 = S2 Freq | Byte 3 = S2 SD Log
+        // Byte 4 = S3 Freq | Byte 5 = S3 SD Log
+        // Byte 6 = S4 Freq | Byte 7 = S4 SD Log
+
+        byte[] configData = new byte[8];
+
+        configData[0] = (byte)sensorConfig1.getFreq();
+        configData[1] = (byte)((sensorConfig1.isSDLogging()) ? 1 : 0);
+
+        configData[2] = (byte)sensorConfig2.getFreq();
+        configData[3] = (byte)((sensorConfig2.isSDLogging()) ? 1 : 0);
+
+        configData[4] = (byte)sensorConfig3.getFreq();
+        configData[5] = (byte)((sensorConfig3.isSDLogging()) ? 1 : 0);
+
+        configData[6] = (byte)sensorConfig4.getFreq();
+        configData[5] = (byte)((sensorConfig4.isSDLogging()) ? 1 : 0);
+
+        return writeCharacteristic(BoardSensorConfigChar, configData);
     }
 
     @Override
@@ -564,6 +652,7 @@ public class MainActivity extends AppCompatActivity
             break;
             case 3:
                 config = sensorConfig3;
+                break;
             case 4:
                 config = sensorConfig4;
             break;
@@ -579,13 +668,13 @@ public class MainActivity extends AppCompatActivity
         return graphConfig;
     }
 
-
-    public int writeCharacteristic(BluetoothGattCharacteristic characteristic, byte[] data) {
+    // Overloaded method to write char data in byte array form
+    public boolean writeCharacteristic(BluetoothGattCharacteristic characteristic, byte[] data) {
         byte[] dataToSend = new byte[20];
 
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
             Log.w(TAG, "BluetoothAdapter not initialized");
-            return FAILURE;
+            return false;
         }
 
         for(int i=0;i<20;i++) {
@@ -601,15 +690,16 @@ public class MainActivity extends AppCompatActivity
             characteristic.setValue(dataToSend);
             mBluetoothGatt.writeCharacteristic(characteristic);
         } catch (NullPointerException npe) {
-            return FAILURE;
+            return false;
         }
         return waitForWrite();
     }
 
-    public int writeCharacteristic(BluetoothGattCharacteristic characteristic, String data) {
+    // Overloaded method to write char data in string (ASCII) form
+    public boolean writeCharacteristic(BluetoothGattCharacteristic characteristic, String data) {
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
             Log.w(TAG, "BluetoothAdapter not initialized");
-            return FAILURE;
+            return false;
         }
 
         if ((data.length() != 20)) {
@@ -621,7 +711,7 @@ public class MainActivity extends AppCompatActivity
             characteristic.setValue(data);
             mBluetoothGatt.writeCharacteristic(characteristic);
         } catch (NullPointerException npe) {
-            return FAILURE;
+            return false;
         }
 
         return waitForWrite();
@@ -631,13 +721,13 @@ public class MainActivity extends AppCompatActivity
         return String.format("%1$-" + n + "s", s);
     }
 
-    int waitForWrite() {
+    boolean waitForWrite() {
         long end = System.currentTimeMillis() + 5 * 1000; // 2 second timeout
         Log.i(TAG, "Waiting for write to complete");
         while (!writeFinished) {
             if (System.currentTimeMillis() > end) {
                 Log.e(TAG, "Write Timeout");
-                return FAILURE;
+                return false;
             }
             try {
                 Thread.sleep(100);
@@ -648,6 +738,6 @@ public class MainActivity extends AppCompatActivity
         writeFinished = false;
         Log.i(TAG, "Write complete");
 
-        return SUCCESS;
+        return true;
     }
 }
