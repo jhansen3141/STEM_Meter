@@ -7,19 +7,26 @@ package com.stemmeter.stem_meter;
 public class SensorConfig {
 
     private int freq;
+    private int sensorNumber;
     private boolean isSDLogging;
     private boolean selected;
 
-    public SensorConfig(int freq, boolean isSDLogging) {
+    public SensorConfig(int sensorNumber, int freq, boolean isSDLogging) {
+        this.sensorNumber = sensorNumber;
         this.freq = freq;
         this.isSDLogging = isSDLogging;
         selected = false;
     }
 
-    public SensorConfig() {
+    public SensorConfig(int sensorNumber) {
+        this.sensorNumber = sensorNumber;
         this.freq = SensorList.RATE_OFF;
         this.isSDLogging = false;
         selected = false;
+    }
+
+    public int getSensorNumber() {
+        return sensorNumber;
     }
 
     public int getFreq() {

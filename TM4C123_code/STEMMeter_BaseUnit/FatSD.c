@@ -254,6 +254,40 @@ static void user_processSDMessage(SD_msg_t *pMsg) {
 			}
 		}
 			break;
+		case SET_TIME_MSG:
+		{
+			// Byte[0] = dow
+			// Byte[1] = day
+			// Byte[2] = month
+			// Byte[3] = year
+			// Byte[4] = hour
+			// Byte[5] = min
+			// Byte[6] = sec
+			UTCTimeStruct setTime;
+
+			setTime.dow = pMsg->pdu[0];
+			setTime.day = pMsg->pdu[1];
+			setTime.month = pMsg->pdu[2];
+			setTime.year = (pMsg->pdu[3]) + 2000;
+			setTime.hour = pMsg->pdu[4];
+			setTime.minutes = pMsg->pdu[5];
+			setTime.seconds = pMsg->pdu[6];
+
+			// set current time
+			Time_clockSetTimeStruct(setTime);
+		}
+			break;
+	}
+}
+
+void enqueSDTaskTimeSetMsg(uint8_t *timeBuffer) {
+	// create a new message for the queue
+	SD_msg_t *pMsg = malloc(sizeof(SD_msg_t) + 20);
+	if (pMsg != NULL) {
+		pMsg->type = SET_TIME_MSG;
+		memcpy(pMsg->pdu,timeBuffer,20); // copy the data into the message
+		Queue_enqueue(hSDMsgQ, &pMsg->_elem); // enqueue the message
+		Semaphore_post(semSDHandle);
 	}
 }
 

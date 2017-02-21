@@ -11,8 +11,8 @@
 typedef enum {
   UPDATE_BAT_VALUES_MSG = 0,
   SENSOR_UPDATE_CONFIG_MSG,
-  TOGGLE_SD_MOUNT_MSG
-
+  TOGGLE_SD_MOUNT_MSG,
+  UPDATE_TIME_MSG
 } spiCommands_msg_types_t;
 
 
