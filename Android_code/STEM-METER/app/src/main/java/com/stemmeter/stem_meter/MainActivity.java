@@ -27,9 +27,10 @@ import android.widget.Toast;
 import android.os.Handler;
 
 import com.stemmeter.stem_meter.Sensors.Accel_MPU6050;
+import com.github.mikephil.charting.data.LineData;
 import com.stemmeter.stem_meter.Sensors.Sensor;
 import com.stemmeter.stem_meter.Sensors.Temp_MCP9808;
-
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
@@ -37,7 +38,7 @@ import java.util.Queue;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, ConnectFragment.ConnectFragInterface, SensorsFragment.SensorFragInterface, GraphFragment.GraphFragInterface {
+        implements NavigationView.OnNavigationItemSelectedListener, ConnectFragment.ConnectFragInterface, SensorsFragment.SensorFragInterface, GraphFragment.GraphFragInterface, DisplayFragment.DisplayFragInterface {
 
     private String TAG = "MainActivity";
     private static final int STATE_DISCONNECTED = 0;
@@ -101,6 +102,9 @@ public class MainActivity extends AppCompatActivity
     private SensorConfig sensorConfig3;
     private SensorConfig sensorConfig4;
 
+    private ArrayList<LineData> savedDataList;
+    private ArrayList<String> savedNameList;
+
     private GraphConfig graphConfig;
 
     @Override
@@ -120,6 +124,9 @@ public class MainActivity extends AppCompatActivity
         sensorConfig2 = new SensorConfig(2);
         sensorConfig3 = new SensorConfig(3);
         sensorConfig4 = new SensorConfig(4);
+
+        savedDataList = new ArrayList<LineData>();
+        savedNameList = new ArrayList<String>();
 
         graphConfig = new GraphConfig();
 
@@ -657,6 +664,18 @@ public class MainActivity extends AppCompatActivity
         }
 
         return config;
+    }
+
+    @Override
+    public ArrayList<LineData> getSavedList(){
+
+        return savedDataList;
+    }
+
+    @Override
+    public ArrayList<String> getSavedNameList(){
+
+        return savedNameList;
     }
 
     @Override

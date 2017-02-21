@@ -1,6 +1,8 @@
 package com.stemmeter.stem_meter;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
@@ -11,7 +13,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -49,7 +53,8 @@ public class GraphFragment extends Fragment {
 
     // Container Activity must implement this interface
     public interface GraphFragInterface {
-
+        public ArrayList<LineData> getSavedList();
+        public ArrayList<String> getSavedNameList();
     }
 
     GraphFragInterface graphFragInterface;
@@ -59,7 +64,7 @@ public class GraphFragment extends Fragment {
     private ToggleButton playPauseBtn;
     private ImageButton saveBtn;
     private long currentIndex = 0;
-    private List<List<LineData>> mainList;
+
 
 
     @Override
@@ -128,6 +133,44 @@ public class GraphFragment extends Fragment {
 
             @Override
             public void onClick(View arg0) {
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                        getActivity());
+
+                // set title
+                alertDialogBuilder.setTitle("Graph Name");
+
+                final EditText input = new EditText(getActivity());
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.MATCH_PARENT);
+                input.setLayoutParams(lp);
+                alertDialogBuilder.setView(input);
+
+                // set dialog message
+                alertDialogBuilder
+                        .setMessage("Enter Graph Name")
+                        .setCancelable(false)
+                        .setPositiveButton("OK",new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,int id) {
+
+                                graphFragInterface.getSavedList().add(mChart.getData());
+                                graphFragInterface.getSavedNameList().add(input.getText().toString());
+                                dialog.cancel();
+                            }
+                        })
+                        .setNegativeButton("Cancel",new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,int id) {
+                                // if this button is clicked, just close
+                                // the dialog box and do nothing
+                                dialog.cancel();
+                            }
+                        });
+
+                // create alert dialog
+                AlertDialog alertDialog = alertDialogBuilder.create();
+
+                // show it
+                alertDialog.show();
                 LineData data = mChart.getData();
             }
 
@@ -234,7 +277,7 @@ public class GraphFragment extends Fragment {
 
             @Override
             public void run() {
-                for (int i = 0; i < 1000; i++) {
+                for (int i = 0; i < 100; i++) {
 
                     // Don't generate garbage runnables inside the loop.
                     getActivity().runOnUiThread(runnable);
