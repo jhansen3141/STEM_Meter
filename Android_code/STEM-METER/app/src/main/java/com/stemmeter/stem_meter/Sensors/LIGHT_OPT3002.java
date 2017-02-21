@@ -5,12 +5,11 @@ import java.util.ArrayList;
 /**
  * Created by Josh on 2/19/2017.
  */
-public class Light_OPT3002 extends Sensor {
-    // HI MONROE
+public class LIGHT_OPT3002 extends Sensor {
     private String[] sensorStringArray;
     private float opticalPower;
 
-    public Light_OPT3002(byte[] data, int sensorPosition) {
+    public LIGHT_OPT3002(byte[] data, int sensorPosition) {
         super(data, sensorPosition,1);
     }
 
@@ -22,7 +21,7 @@ public class Light_OPT3002 extends Sensor {
         short mantissa;
         float multiplier;
 
-        rawData = (short)((data[5]<<8)   | (data[6] & 0xFF));
+        rawData = (short)((short)(data[5]<<8)   | (data[6] & 0xFF));
 
         // Exponent is held in B15:B12
         exponent = (short)((rawData >> 12) & 0x000F);

@@ -47,6 +47,8 @@ public class SensorsFragment extends ListFragment {
         public boolean sensorConfigWrite(SensorConfig config);
         public SensorConfig getSensorConfig(int sensorNumber);
         public GraphConfig getGraphConfig();
+        public boolean updateBaseUnitTime();
+        public void readSensorConfigData();
     }
 
     @Override
@@ -72,58 +74,6 @@ public class SensorsFragment extends ListFragment {
         return view;
     }
 
-//    @Override
-//    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-//        super.onCreateContextMenu(menu, v, menuInfo);
-//        MenuInflater inflater = getActivity().getMenuInflater();
-//        inflater.inflate(R.menu.sensor_freq_popup, menu);
-//    }
-//
-//    @Override
-//    public boolean onContextItemSelected(MenuItem item) {
-//        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-//        // get the sensor number (sensors 1 is added first, then sensor 2...)
-//        int sensorNumber = (int)info.id + 1; // Sensor 1 ID = 1 so add one to offset base 0
-//        int sensorRate;
-//        boolean returnState = true;
-//        // set the rate to write to the base unit
-//        switch (item.getItemId()) {
-//            case R.id.off:
-//                sensorRate = SensorList.RATE_OFF;
-//                break;
-//            case R.id.tenhz:
-//                sensorRate = SensorList.RATE_TEN_HZ;
-//                break;
-//            case R.id.fivehz:
-//                sensorRate = SensorList.RATE_FIVE_HZ;
-//                break;
-//            case R.id.onehz:
-//                sensorRate = SensorList.RATE_ONE_HZ;
-//                break;
-//            case R.id.onemin:
-//                sensorRate = SensorList.RATE_ONE_MIN;
-//                break;
-//            case R.id.tenmin:
-//                sensorRate = SensorList.RATE_TEN_MIN;
-//                break;
-//            case R.id.thirtymin:
-//                sensorRate = SensorList.RATE_THRITY_MIN;
-//                break;
-//            case R.id.onehour:
-//                sensorRate = SensorList.RATE_ONE_HOUR;
-//                break;
-//            default:
-//               sensorRate = -1;
-//                returnState =  super.onContextItemSelected(item);
-//        }
-//        if(sensorRate >= 0) {
-//            // if a valid rate was assigned then write it to the base station
-//            // BLE ops happen in the main activity so use the interface
-//            sensorFragInterface.sensorConfigWrite(sensorNumber,sensorRate);
-//        }
-//        return returnState;
-//    }
-
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -142,13 +92,19 @@ public class SensorsFragment extends ListFragment {
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                sensorListAdapter.updateItem(dataStr,sensorNum-1);
+                sensorListAdapter.updateItem(dataStr, sensorNum - 1);
                 sensorListAdapter.notifyDataSetChanged();
             }
         });
 
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        sensorFragInterface.updateBaseUnitTime();
+        sensorFragInterface.readSensorConfigData();
+    }
     private class SensorListAdapter extends BaseAdapter {
 
         private ArrayList<String> sensorData = new ArrayList<String>();
@@ -175,6 +131,8 @@ public class SensorsFragment extends ListFragment {
             sensorData.set(position,item);
 
         }
+
+
 
         @Override
         public int getCount() {

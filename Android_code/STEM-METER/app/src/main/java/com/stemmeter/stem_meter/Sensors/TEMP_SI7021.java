@@ -5,11 +5,11 @@ import java.util.ArrayList;
 /**
  * Created by Josh on 2/19/2017.
  */
-public class Temp_SI7021 extends Sensor {
+public class TEMP_SI7021 extends Sensor {
     private String[] sensorStringArray;
     private float tempF, tempC, humidity;
-    // HI MONROE
-    public Temp_SI7021(byte[] data, int sensorPosition) {
+
+    public TEMP_SI7021(byte[] data, int sensorPosition) {
         super(data, sensorPosition,3);
     }
 
