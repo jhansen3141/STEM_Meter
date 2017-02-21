@@ -456,7 +456,7 @@ public class MainActivity extends AppCompatActivity
         if (sensor3Data[0] == SensorConst.INVALID_SENSOR) {
             return;
         } else {
-            // check to see which sensor is connected
+            // check to see which sensor is connected HI JOSH
             switch (sensor3Data[0]) {
                 case SensorConst.ACCEL_MPU6050:
                     // check to see if sensor is already "installed"
