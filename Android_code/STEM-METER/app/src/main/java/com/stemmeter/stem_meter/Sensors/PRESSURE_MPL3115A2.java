@@ -6,17 +6,18 @@ import java.util.ArrayList;
  * Created by Josh on 2/19/2017.
  */
 public class Pressure_MPL3115A2 extends Sensor {
-    // HI MONROE
+
     private String[] sensorStringArray;
     private float airPressure;
+    private double altitude;
 
     public Pressure_MPL3115A2(byte[] data, int sensorPosition) {
-        super(data, sensorPosition,1);
+        super(data, sensorPosition,2);
     }
 
     @Override
     public String[] calcSensorData() {
-        String[] dataStr = new String[1];
+        String[] dataStr = new String[2];
         int pressure;
 
         // Combine the bytes together
@@ -35,7 +36,12 @@ public class Pressure_MPL3115A2 extends Sensor {
 
         airPressure += (float)pressure;
 
+        altitude = 7000.0f * Math.log(101325.0f/airPressure);
+
+        altitude *= 3.28084;
+
         dataStr[0] = String.format(java.util.Locale.US,"%.2f",airPressure);
+        dataStr[1] = String.format(java.util.Locale.US,"%.2f",altitude);
         sensorStringArray = dataStr;
 
         return dataStr;
@@ -46,7 +52,8 @@ public class Pressure_MPL3115A2 extends Sensor {
         if(sensorStringArray != null) {
             // TODO add units
             return "Air Pressure\n" +
-                    sensorStringArray[0] + "\n";
+                    sensorStringArray[0] + " Pa\n" +
+                    sensorStringArray[1] + " Ft";
         }
         else {
             return "NULL";
@@ -57,6 +64,7 @@ public class Pressure_MPL3115A2 extends Sensor {
     public ArrayList<Float> getGraphData() {
         ArrayList<Float> graphData = new ArrayList<>();
         graphData.add(airPressure);
+        graphData.add((float)altitude);
         return graphData;
     }
 }

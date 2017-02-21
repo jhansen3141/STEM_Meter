@@ -6,7 +6,6 @@ import java.util.ArrayList;
  * Created by Josh on 2/19/2017.
  */
 public class Light_OPT3002 extends Sensor {
-    // HI MONROE
     private String[] sensorStringArray;
     private float opticalPower;
 
@@ -22,7 +21,7 @@ public class Light_OPT3002 extends Sensor {
         short mantissa;
         float multiplier;
 
-        rawData = (short)((data[5]<<8)   | (data[6] & 0xFF));
+        rawData = (short)((short)(data[5]<<8)   | (data[6] & 0xFF));
 
         // Exponent is held in B15:B12
         exponent = (short)((rawData >> 12) & 0x000F);

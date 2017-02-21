@@ -28,8 +28,14 @@ import android.os.Handler;
 
 import com.stemmeter.stem_meter.Sensors.Accel_MPU6050;
 import com.github.mikephil.charting.data.LineData;
+import com.stemmeter.stem_meter.Sensors.Gyro_MPU6050;
+import com.stemmeter.stem_meter.Sensors.Light_OPT3002;
+import com.stemmeter.stem_meter.Sensors.Mag_MAG3110;
+import com.stemmeter.stem_meter.Sensors.Pressure_MPL3115A2;
 import com.stemmeter.stem_meter.Sensors.Sensor;
 import com.stemmeter.stem_meter.Sensors.Temp_MCP9808;
+import com.stemmeter.stem_meter.Sensors.Temp_SI7021;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -45,21 +51,17 @@ public class MainActivity extends AppCompatActivity
     private static final int STATE_CONNECTING = 1;
     private static final int STATE_CONNECTED = 2;
 
-    public final static String ACTION_GATT_CONNECTED = "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
-    public final static String ACTION_GATT_DISCONNECTED = "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED";
-    public final static String ACTION_GATT_SERVICES_DISCOVERED = "com.example.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
-    public final static String ACTION_DATA_AVAILABLE = "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
-    public final static String EXTRA_DATA = "com.example.bluetooth.le.EXTRA_DATA";
     public final static String DEVICE_MAC_STR = "CC:78:AB:19:9A:21";
 
-    public final static UUID BOARD_UUID = UUID.fromString("0000ABAE-0000-1000-8000-00805F9B34FB");
-    public final static UUID SENSOR_1_DATA_UUID = UUID.fromString("F000BEAA-0451-4000-B000-000000000000");
-    public final static UUID SENSOR_2_DATA_UUID = UUID.fromString("F000BEAB-0451-4000-B000-000000000000");
-    public final static UUID SENSOR_3_DATA_UUID = UUID.fromString("F000BEAC-0451-4000-B000-000000000000");
-    public final static UUID SENSOR_4_DATA_UUID = UUID.fromString("F000BEAD-0451-4000-B000-000000000000");
-    public final static UUID SENSOR_CONFIG_UUID = UUID.fromString("F000BEAF-0451-4000-B000-000000000000");
-    public final static UUID BATTERY_INFO_UUID = UUID.fromString("F000BEBC-0451-4000-B000-000000000000");
-    public final static UUID TIME_CONFIG_UUID = UUID.fromString("F000BEBD-0451-4000-B000-000000000000");
+    //public final static UUID BOARD_UUID = UUID.fromString("0000ABAE-0000-1000-8000-00805F9B34FB");
+    public final static UUID SM_SERVICE_UUID =      UUID.fromString("F000ABAE-0451-4000-B000-000000000000");
+    public final static UUID SENSOR_1_DATA_UUID =   UUID.fromString("F000BEAA-0451-4000-B000-000000000000");
+    public final static UUID SENSOR_2_DATA_UUID =   UUID.fromString("F000BEAB-0451-4000-B000-000000000000");
+    public final static UUID SENSOR_3_DATA_UUID =   UUID.fromString("F000BEAC-0451-4000-B000-000000000000");
+    public final static UUID SENSOR_4_DATA_UUID =   UUID.fromString("F000BEAD-0451-4000-B000-000000000000");
+    public final static UUID SENSOR_CONFIG_UUID =   UUID.fromString("F000BEAF-0451-4000-B000-000000000000");
+    public final static UUID BATTERY_INFO_UUID =    UUID.fromString("F000BEBC-0451-4000-B000-000000000000");
+    public final static UUID TIME_CONFIG_UUID =     UUID.fromString("F000BEBD-0451-4000-B000-000000000000");
     public static final UUID CHARACTERISTIC_UPDATE_NOTIFICATION_DESCRIPTOR_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
 
     private BluetoothGattCharacteristic BoardSensor1DataChar;
@@ -240,7 +242,7 @@ public class MainActivity extends AppCompatActivity
                     if (status == BluetoothGatt.GATT_SUCCESS) {
                         Log.i(TAG, "Services Discovered");
                         printConnectionStat("Services Discovered");
-                        BoardService = mBluetoothGatt.getService(BOARD_UUID);
+                        BoardService = mBluetoothGatt.getService(SM_SERVICE_UUID);
                         try {
                             Thread.sleep(500);
                         } catch (InterruptedException e) {
@@ -281,13 +283,6 @@ public class MainActivity extends AppCompatActivity
                         serviceDiscovered = true;
                         printConnectionStat("Connected");
 
-                        // At this point we are connected and all chars have been assigned
-                        // Set the time:
-                        setBaseUnitTime();
-
-                        // Read the current config values from base unit
-                        // Once read callback will update config objects
-                        mBluetoothGatt.readCharacteristic(BoardSensorConfigChar);
 
                     } else {
                         Log.w(TAG, "onServicesDiscovered received: " + status);
@@ -340,6 +335,7 @@ public class MainActivity extends AppCompatActivity
         // Byte 2 = S2 Freq | Byte 3 = S2 SD Log
         // Byte 4 = S3 Freq | Byte 5 = S3 SD Log
         // Byte 6 = S4 Freq | Byte 7 = S4 SD Log
+        Log.i(TAG,"Updating sensor config objects");
 
         sensorConfig1.setFreq((int)configData[0]);
         sensorConfig1.setSDLogging(configData[1] == 1);
@@ -354,11 +350,12 @@ public class MainActivity extends AppCompatActivity
         sensorConfig4.setSDLogging(configData[6] == 1);
     }
 
-    public void setBaseUnitTime() {
+    @Override
+    public boolean updateBaseUnitTime() {
         Calendar calendar = new GregorianCalendar();
         byte month = (byte)calendar.get(Calendar.MONTH);
         byte day = (byte)calendar.get(Calendar.DAY_OF_MONTH);
-        byte year = (byte)(calendar.get(Calendar.YEAR)-200);
+        byte year = (byte)(calendar.get(Calendar.YEAR)-2000);
         byte dow = (byte)(calendar.get(Calendar.DAY_OF_WEEK) - 1);
         byte hour = (byte)calendar.get(Calendar.HOUR_OF_DAY);
         byte minutes = (byte)calendar.get(Calendar.MINUTE);
@@ -375,14 +372,22 @@ public class MainActivity extends AppCompatActivity
         byte[] timeData = new byte[7];
         timeData[0] = dow;
         timeData[1] = day;
-        timeData[2] = month;
+        timeData[2] = (byte)(month+1);
         timeData[3] = year;
         timeData[4] = hour;
         timeData[5] = minutes;
         timeData[6] = seconds;
-
+        Log.i(TAG,"Year:" + year);
         Log.i(TAG,"Setting Base Unit Time...");
-        writeCharacteristic(BoardTimeConfigChar, timeData);
+        return writeCharacteristic(BoardTimeConfigChar, timeData);
+    }
+
+    @Override
+    public void readSensorConfigData() {
+        // Read the current config values from base unit
+        // Once read callback will update config objects
+        Log.i(TAG,"Reading Sensor Config");
+        mBluetoothGatt.readCharacteristic(BoardSensorConfigChar);
     }
 
 
@@ -392,6 +397,7 @@ public class MainActivity extends AppCompatActivity
             return;
         } else {
             // check to see which sensor is connected
+            // sensor data type is held in first byte of sensor data
             switch (sensor1Data[0]) {
                 case SensorConst.ACCEL_MPU6050:
                     // check to see if sensor is already "installed"
@@ -405,8 +411,38 @@ public class MainActivity extends AppCompatActivity
                         sensor1 = new Temp_MCP9808(sensor1Data, 1);
                     }
                     break;
+                case SensorConst.GYRO_MPU6050:
+                    // check to see if sensor is already "installed"
+                    if(sensor1 == null || !(sensor1 instanceof Gyro_MPU6050)) {
+                        sensor1 = new Gyro_MPU6050(sensor1Data, 1);
+                    }
+                    break;
+                case SensorConst.LIGHT_OPT3002:
+                    // check to see if sensor is already "installed"
+                    if(sensor1 == null || !(sensor1 instanceof Light_OPT3002)) {
+                        sensor1 = new Light_OPT3002(sensor1Data, 1);
+                    }
+                    break;
+                case SensorConst.MAG_MAG3110:
+                    // check to see if sensor is already "installed"
+                    if(sensor1 == null || !(sensor1 instanceof Mag_MAG3110)) {
+                        sensor1 = new Mag_MAG3110(sensor1Data, 1);
+                    }
+                    break;
+                case SensorConst.PRESSURE_MPL3115A2:
+                    // check to see if sensor is already "installed"
+                    if(sensor1 == null || !(sensor1 instanceof Pressure_MPL3115A2)) {
+                        sensor1 = new Pressure_MPL3115A2(sensor1Data, 1);
+                    }
+                    break;
+                case SensorConst.TEMP_SI7021:
+                    // check to see if sensor is already "installed"
+                    if(sensor1 == null || !(sensor1 instanceof Temp_SI7021)) {
+                        sensor1 = new Temp_SI7021(sensor1Data, 1);
+                    }
+                    break;
                 default:
-                    // if invalid sensor type then return
+                    Log.i(TAG,"Invalid sensor type detected");
                     return;
             }
         }
@@ -419,11 +455,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     void handleSensor2Data(byte sensor2Data[]) {
-        Log.i(TAG,"HANDLE S2");
+        Log.i(TAG, "HANDLE S2");
         if (sensor2Data[0] == SensorConst.INVALID_SENSOR) {
             return;
         } else {
             // check to see which sensor is connected
+            // sensor data type is held in first byte of sensor data
             switch (sensor2Data[0]) {
                 case SensorConst.ACCEL_MPU6050:
                     // check to see if sensor is already "installed"
@@ -434,11 +471,41 @@ public class MainActivity extends AppCompatActivity
                 case SensorConst.TEMP_MCP9808:
                     // check to see if sensor is already "installed"
                     if(sensor2 == null || !(sensor2 instanceof Temp_MCP9808)) {
-                        sensor2 = new Temp_MCP9808(sensor2Data, 1);
+                        sensor2 = new Temp_MCP9808(sensor2Data, 2);
+                    }
+                    break;
+                case SensorConst.GYRO_MPU6050:
+                    // check to see if sensor is already "installed"
+                    if(sensor2 == null || !(sensor2 instanceof Gyro_MPU6050)) {
+                        sensor2 = new Gyro_MPU6050(sensor2Data, 2);
+                    }
+                    break;
+                case SensorConst.LIGHT_OPT3002:
+                    // check to see if sensor is already "installed"
+                    if(sensor2 == null || !(sensor2 instanceof Light_OPT3002)) {
+                        sensor2 = new Light_OPT3002(sensor2Data, 2);
+                    }
+                    break;
+                case SensorConst.MAG_MAG3110:
+                    // check to see if sensor is already "installed"
+                    if(sensor2 == null || !(sensor2 instanceof Mag_MAG3110)) {
+                        sensor2 = new Mag_MAG3110(sensor2Data, 2);
+                    }
+                    break;
+                case SensorConst.PRESSURE_MPL3115A2:
+                    // check to see if sensor is already "installed"
+                    if(sensor2 == null || !(sensor2 instanceof Pressure_MPL3115A2)) {
+                        sensor2 = new Pressure_MPL3115A2(sensor2Data, 2);
+                    }
+                    break;
+                case SensorConst.TEMP_SI7021:
+                    // check to see if sensor is already "installed"
+                    if(sensor2 == null || !(sensor2 instanceof Temp_SI7021)) {
+                        sensor2 = new Temp_SI7021(sensor2Data, 2);
                     }
                     break;
                 default:
-                    // if invalid sensor type then return
+                    Log.i(TAG,"Invalid sensor type detected");
                     return;
             }
         }
@@ -448,15 +515,15 @@ public class MainActivity extends AppCompatActivity
         sensor2.calcSensorData();
         // post the data to the screen
         postSensorData(sensor2);
-
     }
 
     void handleSensor3Data(byte sensor3Data[]) {
-        Log.i(TAG,"HANDLE S3");
+        Log.i(TAG, "HANDLE S3");
         if (sensor3Data[0] == SensorConst.INVALID_SENSOR) {
             return;
         } else {
-            // check to see which sensor is connected HI JOSH
+            // check to see which sensor is connected
+            // sensor data type is held in first byte of sensor data
             switch (sensor3Data[0]) {
                 case SensorConst.ACCEL_MPU6050:
                     // check to see if sensor is already "installed"
@@ -470,8 +537,38 @@ public class MainActivity extends AppCompatActivity
                         sensor3 = new Temp_MCP9808(sensor3Data, 3);
                     }
                     break;
+                case SensorConst.GYRO_MPU6050:
+                    // check to see if sensor is already "installed"
+                    if(sensor3 == null || !(sensor3 instanceof Gyro_MPU6050)) {
+                        sensor3 = new Gyro_MPU6050(sensor3Data, 3);
+                    }
+                    break;
+                case SensorConst.LIGHT_OPT3002:
+                    // check to see if sensor is already "installed"
+                    if(sensor3 == null || !(sensor3 instanceof Light_OPT3002)) {
+                        sensor3 = new Light_OPT3002(sensor3Data, 3);
+                    }
+                    break;
+                case SensorConst.MAG_MAG3110:
+                    // check to see if sensor is already "installed"
+                    if(sensor3 == null || !(sensor3 instanceof Mag_MAG3110)) {
+                        sensor3 = new Mag_MAG3110(sensor3Data, 3);
+                    }
+                    break;
+                case SensorConst.PRESSURE_MPL3115A2:
+                    // check to see if sensor is already "installed"
+                    if(sensor3 == null || !(sensor3 instanceof Pressure_MPL3115A2)) {
+                        sensor3 = new Pressure_MPL3115A2(sensor3Data, 3);
+                    }
+                    break;
+                case SensorConst.TEMP_SI7021:
+                    // check to see if sensor is already "installed"
+                    if(sensor3 == null || !(sensor3 instanceof Temp_SI7021)) {
+                        sensor3 = new Temp_SI7021(sensor3Data, 3);
+                    }
+                    break;
                 default:
-                    // if invalid sensor type then return
+                    Log.i(TAG,"Invalid sensor type detected");
                     return;
             }
         }
@@ -484,11 +581,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     void handleSensor4Data(byte sensor4Data[]) {
-        Log.i(TAG,"HANDLE S4");
+        Log.i(TAG, "HANDLE S4");
         if (sensor4Data[0] == SensorConst.INVALID_SENSOR) {
             return;
         } else {
             // check to see which sensor is connected
+            // sensor data type is held in first byte of sensor data
             switch (sensor4Data[0]) {
                 case SensorConst.ACCEL_MPU6050:
                     // check to see if sensor is already "installed"
@@ -502,8 +600,38 @@ public class MainActivity extends AppCompatActivity
                         sensor4 = new Temp_MCP9808(sensor4Data, 4);
                     }
                     break;
+                case SensorConst.GYRO_MPU6050:
+                    // check to see if sensor is already "installed"
+                    if(sensor4 == null || !(sensor4 instanceof Gyro_MPU6050)) {
+                        sensor4 = new Gyro_MPU6050(sensor4Data, 4);
+                    }
+                    break;
+                case SensorConst.LIGHT_OPT3002:
+                    // check to see if sensor is already "installed"
+                    if(sensor4 == null || !(sensor4 instanceof Light_OPT3002)) {
+                        sensor4 = new Light_OPT3002(sensor4Data, 4);
+                    }
+                    break;
+                case SensorConst.MAG_MAG3110:
+                    // check to see if sensor is already "installed"
+                    if(sensor4 == null || !(sensor4 instanceof Mag_MAG3110)) {
+                        sensor4 = new Mag_MAG3110(sensor4Data, 4);
+                    }
+                    break;
+                case SensorConst.PRESSURE_MPL3115A2:
+                    // check to see if sensor is already "installed"
+                    if(sensor4 == null || !(sensor4 instanceof Pressure_MPL3115A2)) {
+                        sensor4 = new Pressure_MPL3115A2(sensor4Data, 4);
+                    }
+                    break;
+                case SensorConst.TEMP_SI7021:
+                    // check to see if sensor is already "installed"
+                    if(sensor4 == null || !(sensor4 instanceof Temp_SI7021)) {
+                        sensor4 = new Temp_SI7021(sensor4Data, 4);
+                    }
+                    break;
                 default:
-                    // if invalid sensor type then return
+                    Log.i(TAG,"Invalid sensor type detected");
                     return;
             }
         }
@@ -683,6 +811,8 @@ public class MainActivity extends AppCompatActivity
 
         return graphConfig;
     }
+
+
 
     // Overloaded method to write char data in byte array form
     public boolean writeCharacteristic(BluetoothGattCharacteristic characteristic, byte[] data) {

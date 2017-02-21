@@ -6,7 +6,7 @@ import java.util.ArrayList;
  * Created by Josh on 2/19/2017.
  */
 public class Mag_MAG3110 extends Sensor {
-    // HI MONROE
+
     private String[] sensorStringArray;
     private float xMagF,yMagF,zMagF;
     private final float MAG_SENSE = 10.0f;
