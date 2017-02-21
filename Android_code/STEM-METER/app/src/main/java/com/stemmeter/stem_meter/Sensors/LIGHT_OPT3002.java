@@ -6,7 +6,7 @@ import java.util.ArrayList;
  * Created by Josh on 2/19/2017.
  */
 public class Light_OPT3002 extends Sensor {
-
+    // HI MONROE
     private String[] sensorStringArray;
     private float opticalPower;
 

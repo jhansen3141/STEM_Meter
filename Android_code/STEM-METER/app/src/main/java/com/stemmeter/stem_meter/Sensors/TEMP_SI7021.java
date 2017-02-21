@@ -8,7 +8,7 @@ import java.util.ArrayList;
 public class Temp_SI7021 extends Sensor {
     private String[] sensorStringArray;
     private float tempF, tempC, humidity;
-
+    // HI MONROE
     public Temp_SI7021(byte[] data, int sensorPosition) {
         super(data, sensorPosition,3);
     }

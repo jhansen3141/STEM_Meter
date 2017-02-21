@@ -7,7 +7,7 @@ import java.util.ArrayList;
  */
 
 public class Temp_MCP9808 extends Sensor {
-
+    // HI MONROE
     private String[] sensorStringArray;
     private float tempF, tempC;
 
