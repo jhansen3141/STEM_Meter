@@ -29,12 +29,12 @@ import android.os.Handler;
 import com.stemmeter.stem_meter.Sensors.Accel_MPU6050;
 import com.github.mikephil.charting.data.LineData;
 import com.stemmeter.stem_meter.Sensors.Gyro_MPU6050;
-import com.stemmeter.stem_meter.Sensors.Light_OPT3002;
-import com.stemmeter.stem_meter.Sensors.Mag_MAG3110;
-import com.stemmeter.stem_meter.Sensors.Pressure_MPL3115A2;
+import com.stemmeter.stem_meter.Sensors.LIGHT_OPT3002;
+import com.stemmeter.stem_meter.Sensors.MAG_MAG3110;
+import com.stemmeter.stem_meter.Sensors.PRESSURE_MPL3115A2;
 import com.stemmeter.stem_meter.Sensors.Sensor;
 import com.stemmeter.stem_meter.Sensors.Temp_MCP9808;
-import com.stemmeter.stem_meter.Sensors.Temp_SI7021;
+import com.stemmeter.stem_meter.Sensors.TEMP_SI7021;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -419,26 +419,26 @@ public class MainActivity extends AppCompatActivity
                     break;
                 case SensorConst.LIGHT_OPT3002:
                     // check to see if sensor is already "installed"
-                    if(sensor1 == null || !(sensor1 instanceof Light_OPT3002)) {
-                        sensor1 = new Light_OPT3002(sensor1Data, 1);
+                    if(sensor1 == null || !(sensor1 instanceof LIGHT_OPT3002)) {
+                        sensor1 = new LIGHT_OPT3002(sensor1Data, 1);
                     }
                     break;
                 case SensorConst.MAG_MAG3110:
                     // check to see if sensor is already "installed"
-                    if(sensor1 == null || !(sensor1 instanceof Mag_MAG3110)) {
-                        sensor1 = new Mag_MAG3110(sensor1Data, 1);
+                    if(sensor1 == null || !(sensor1 instanceof MAG_MAG3110)) {
+                        sensor1 = new MAG_MAG3110(sensor1Data, 1);
                     }
                     break;
                 case SensorConst.PRESSURE_MPL3115A2:
                     // check to see if sensor is already "installed"
-                    if(sensor1 == null || !(sensor1 instanceof Pressure_MPL3115A2)) {
-                        sensor1 = new Pressure_MPL3115A2(sensor1Data, 1);
+                    if(sensor1 == null || !(sensor1 instanceof PRESSURE_MPL3115A2)) {
+                        sensor1 = new PRESSURE_MPL3115A2(sensor1Data, 1);
                     }
                     break;
                 case SensorConst.TEMP_SI7021:
                     // check to see if sensor is already "installed"
-                    if(sensor1 == null || !(sensor1 instanceof Temp_SI7021)) {
-                        sensor1 = new Temp_SI7021(sensor1Data, 1);
+                    if(sensor1 == null || !(sensor1 instanceof TEMP_SI7021)) {
+                        sensor1 = new TEMP_SI7021(sensor1Data, 1);
                     }
                     break;
                 default:
@@ -482,26 +482,26 @@ public class MainActivity extends AppCompatActivity
                     break;
                 case SensorConst.LIGHT_OPT3002:
                     // check to see if sensor is already "installed"
-                    if(sensor2 == null || !(sensor2 instanceof Light_OPT3002)) {
-                        sensor2 = new Light_OPT3002(sensor2Data, 2);
+                    if(sensor2 == null || !(sensor2 instanceof LIGHT_OPT3002)) {
+                        sensor2 = new LIGHT_OPT3002(sensor2Data, 2);
                     }
                     break;
                 case SensorConst.MAG_MAG3110:
                     // check to see if sensor is already "installed"
-                    if(sensor2 == null || !(sensor2 instanceof Mag_MAG3110)) {
-                        sensor2 = new Mag_MAG3110(sensor2Data, 2);
+                    if(sensor2 == null || !(sensor2 instanceof MAG_MAG3110)) {
+                        sensor2 = new MAG_MAG3110(sensor2Data, 2);
                     }
                     break;
                 case SensorConst.PRESSURE_MPL3115A2:
                     // check to see if sensor is already "installed"
-                    if(sensor2 == null || !(sensor2 instanceof Pressure_MPL3115A2)) {
-                        sensor2 = new Pressure_MPL3115A2(sensor2Data, 2);
+                    if(sensor2 == null || !(sensor2 instanceof PRESSURE_MPL3115A2)) {
+                        sensor2 = new PRESSURE_MPL3115A2(sensor2Data, 2);
                     }
                     break;
                 case SensorConst.TEMP_SI7021:
                     // check to see if sensor is already "installed"
-                    if(sensor2 == null || !(sensor2 instanceof Temp_SI7021)) {
-                        sensor2 = new Temp_SI7021(sensor2Data, 2);
+                    if(sensor2 == null || !(sensor2 instanceof TEMP_SI7021)) {
+                        sensor2 = new TEMP_SI7021(sensor2Data, 2);
                     }
                     break;
                 default:
@@ -545,26 +545,26 @@ public class MainActivity extends AppCompatActivity
                     break;
                 case SensorConst.LIGHT_OPT3002:
                     // check to see if sensor is already "installed"
-                    if(sensor3 == null || !(sensor3 instanceof Light_OPT3002)) {
-                        sensor3 = new Light_OPT3002(sensor3Data, 3);
+                    if(sensor3 == null || !(sensor3 instanceof LIGHT_OPT3002)) {
+                        sensor3 = new LIGHT_OPT3002(sensor3Data, 3);
                     }
                     break;
                 case SensorConst.MAG_MAG3110:
                     // check to see if sensor is already "installed"
-                    if(sensor3 == null || !(sensor3 instanceof Mag_MAG3110)) {
-                        sensor3 = new Mag_MAG3110(sensor3Data, 3);
+                    if(sensor3 == null || !(sensor3 instanceof MAG_MAG3110)) {
+                        sensor3 = new MAG_MAG3110(sensor3Data, 3);
                     }
                     break;
                 case SensorConst.PRESSURE_MPL3115A2:
                     // check to see if sensor is already "installed"
-                    if(sensor3 == null || !(sensor3 instanceof Pressure_MPL3115A2)) {
-                        sensor3 = new Pressure_MPL3115A2(sensor3Data, 3);
+                    if(sensor3 == null || !(sensor3 instanceof PRESSURE_MPL3115A2)) {
+                        sensor3 = new PRESSURE_MPL3115A2(sensor3Data, 3);
                     }
                     break;
                 case SensorConst.TEMP_SI7021:
                     // check to see if sensor is already "installed"
-                    if(sensor3 == null || !(sensor3 instanceof Temp_SI7021)) {
-                        sensor3 = new Temp_SI7021(sensor3Data, 3);
+                    if(sensor3 == null || !(sensor3 instanceof TEMP_SI7021)) {
+                        sensor3 = new TEMP_SI7021(sensor3Data, 3);
                     }
                     break;
                 default:
@@ -608,26 +608,26 @@ public class MainActivity extends AppCompatActivity
                     break;
                 case SensorConst.LIGHT_OPT3002:
                     // check to see if sensor is already "installed"
-                    if(sensor4 == null || !(sensor4 instanceof Light_OPT3002)) {
-                        sensor4 = new Light_OPT3002(sensor4Data, 4);
+                    if(sensor4 == null || !(sensor4 instanceof LIGHT_OPT3002)) {
+                        sensor4 = new LIGHT_OPT3002(sensor4Data, 4);
                     }
                     break;
                 case SensorConst.MAG_MAG3110:
                     // check to see if sensor is already "installed"
-                    if(sensor4 == null || !(sensor4 instanceof Mag_MAG3110)) {
-                        sensor4 = new Mag_MAG3110(sensor4Data, 4);
+                    if(sensor4 == null || !(sensor4 instanceof MAG_MAG3110)) {
+                        sensor4 = new MAG_MAG3110(sensor4Data, 4);
                     }
                     break;
                 case SensorConst.PRESSURE_MPL3115A2:
                     // check to see if sensor is already "installed"
-                    if(sensor4 == null || !(sensor4 instanceof Pressure_MPL3115A2)) {
-                        sensor4 = new Pressure_MPL3115A2(sensor4Data, 4);
+                    if(sensor4 == null || !(sensor4 instanceof PRESSURE_MPL3115A2)) {
+                        sensor4 = new PRESSURE_MPL3115A2(sensor4Data, 4);
                     }
                     break;
                 case SensorConst.TEMP_SI7021:
                     // check to see if sensor is already "installed"
-                    if(sensor4 == null || !(sensor4 instanceof Temp_SI7021)) {
-                        sensor4 = new Temp_SI7021(sensor4Data, 4);
+                    if(sensor4 == null || !(sensor4 instanceof TEMP_SI7021)) {
+                        sensor4 = new TEMP_SI7021(sensor4Data, 4);
                     }
                     break;
                 default:

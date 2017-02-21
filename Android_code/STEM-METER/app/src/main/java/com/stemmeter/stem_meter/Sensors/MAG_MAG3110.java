@@ -5,13 +5,13 @@ import java.util.ArrayList;
 /**
  * Created by Josh on 2/19/2017.
  */
-public class Mag_MAG3110 extends Sensor {
+public class MAG_MAG3110 extends Sensor {
 
     private String[] sensorStringArray;
     private float xMagF,yMagF,zMagF;
     private final float MAG_SENSE = 10.0f;
 
-    public Mag_MAG3110(byte[] data, int sensorPosition) {
+    public MAG_MAG3110(byte[] data, int sensorPosition) {
         super(data, sensorPosition,3);
     }
 

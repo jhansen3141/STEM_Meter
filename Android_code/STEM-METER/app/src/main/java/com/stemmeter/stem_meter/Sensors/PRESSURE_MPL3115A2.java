@@ -5,13 +5,13 @@ import java.util.ArrayList;
 /**
  * Created by Josh on 2/19/2017.
  */
-public class Pressure_MPL3115A2 extends Sensor {
+public class PRESSURE_MPL3115A2 extends Sensor {
 
     private String[] sensorStringArray;
     private float airPressure;
     private double altitude;
 
-    public Pressure_MPL3115A2(byte[] data, int sensorPosition) {
+    public PRESSURE_MPL3115A2(byte[] data, int sensorPosition) {
         super(data, sensorPosition,2);
     }
 
