@@ -39,8 +39,6 @@ public class SensorsFragment extends ListFragment {
     private String TAG = "SensorFrag";
     private SensorListAdapter sensorListAdapter;
 
-
-
     // Container Activity must implement this interface
     public interface SensorFragInterface {
         public boolean sensorConfigWrite(SensorConfig config);
@@ -61,8 +59,6 @@ public class SensorsFragment extends ListFragment {
 
         //getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         //registerForContextMenu(getListView());
-
-
     }
 
     @Override

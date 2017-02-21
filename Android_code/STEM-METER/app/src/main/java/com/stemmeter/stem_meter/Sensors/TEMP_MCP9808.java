@@ -1,16 +1,18 @@
 package com.stemmeter.stem_meter.Sensors;
 
+import java.util.ArrayList;
+
 /**
  * Created by Josh on 11/28/2016.
  */
 
-public class TEMP_MCP9808 extends Sensor {
+public class Temp_MCP9808 extends Sensor {
 
     private String[] sensorStringArray;
     private float tempF, tempC;
 
-    public TEMP_MCP9808(byte[] data, int sensorPosition) {
-        super(data, sensorPosition);
+    public Temp_MCP9808(byte[] data, int sensorPosition) {
+        super(data, sensorPosition,2);
     }
 
     @Override
@@ -35,8 +37,11 @@ public class TEMP_MCP9808 extends Sensor {
     }
 
     @Override
-    public float getGraphData() {
-        return tempF;
+    public ArrayList<Float> getGraphData() {
+        ArrayList<Float> graphData = new ArrayList<>();
+        graphData.add(tempF);
+        graphData.add(tempC);
+        return graphData;
     }
 
     @Override
@@ -44,12 +49,6 @@ public class TEMP_MCP9808 extends Sensor {
         return "Temperature: " + sensorStringArray[1] + "\u00b0F";
     }
 
-    public float getTempF() {
-        return tempF;
-    }
 
-    public float getTempC() {
-        return tempC;
-    }
 
 }

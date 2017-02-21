@@ -26,9 +26,9 @@ import android.view.WindowManager;
 import android.widget.Toast;
 import android.os.Handler;
 
-import com.stemmeter.stem_meter.Sensors.IMU_MPU6050;
+import com.stemmeter.stem_meter.Sensors.Accel_MPU6050;
 import com.stemmeter.stem_meter.Sensors.Sensor;
-import com.stemmeter.stem_meter.Sensors.TEMP_MCP9808;
+import com.stemmeter.stem_meter.Sensors.Temp_MCP9808;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity
     public final static String ACTION_GATT_SERVICES_DISCOVERED = "com.example.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
     public final static String ACTION_DATA_AVAILABLE = "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
     public final static String EXTRA_DATA = "com.example.bluetooth.le.EXTRA_DATA";
-    public final static String DEVICE_MAC_STR = "CC:78:AB:19:9A:31";
+    public final static String DEVICE_MAC_STR = "CC:78:AB:19:9A:21";
 
     public final static UUID BOARD_UUID = UUID.fromString("0000ABAE-0000-1000-8000-00805F9B34FB");
     public final static UUID SENSOR_1_DATA_UUID = UUID.fromString("F000BEAA-0451-4000-B000-000000000000");
@@ -244,6 +244,7 @@ public class MainActivity extends AppCompatActivity
                         BoardSensor3DataChar = BoardService.getCharacteristic(SENSOR_3_DATA_UUID); /// get sensor 3 char
                         BoardSensor4DataChar = BoardService.getCharacteristic(SENSOR_4_DATA_UUID); // get sensor 4 char
                         BoardSensorConfigChar = BoardService.getCharacteristic(SENSOR_CONFIG_UUID); // get the sensor config char
+                        BoardTimeConfigChar = BoardService.getCharacteristic(TIME_CONFIG_UUID);
                         BoardBatteryInfoChar = BoardService.getCharacteristic(BATTERY_INFO_UUID); // get the battery info char
 
                         // Enable Sensor 1 Char Notifications
@@ -326,14 +327,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public void addToGraph(float data) {
-        GraphFragment graphFragment = (GraphFragment)
-                getSupportFragmentManager().findFragmentByTag(GRAPH_FRAG_TAG);
-        if (graphFragment != null) {
-            graphFragment.addPlot(data);
-        }
-    }
-
     // method to update sensor config objects using byte array data read from base unit
     public void updateSensorConfigData(byte configData[]) {
         // Byte 0 = S1 Freq | Byte 1 = S1 SD Log
@@ -381,26 +374,28 @@ public class MainActivity extends AppCompatActivity
         timeData[5] = minutes;
         timeData[6] = seconds;
 
-        writeCharacteristic(BoardSensorConfigChar, timeData);
+        Log.i(TAG,"Setting Base Unit Time...");
+        writeCharacteristic(BoardTimeConfigChar, timeData);
     }
+
 
     void handleSensor1Data(byte sensor1Data[]) {
         Log.i(TAG, "HANDLE S1");
-        if (sensor1Data[0] == SensorList.INVALID_SENSOR) {
+        if (sensor1Data[0] == SensorConst.INVALID_SENSOR) {
             return;
         } else {
             // check to see which sensor is connected
             switch (sensor1Data[0]) {
-                case SensorList.IMU_MPU6050:
+                case SensorConst.ACCEL_MPU6050:
                     // check to see if sensor is already "installed"
-                    if(sensor1 == null || !(sensor1 instanceof IMU_MPU6050)) {
-                        sensor1 = new IMU_MPU6050(sensor1Data, 1);
+                    if(sensor1 == null || !(sensor1 instanceof Accel_MPU6050)) {
+                        sensor1 = new Accel_MPU6050(sensor1Data, 1);
                     }
                     break;
-                case SensorList.TEMP_MCP9808:
+                case SensorConst.TEMP_MCP9808:
                     // check to see if sensor is already "installed"
-                    if(sensor1 == null || !(sensor1 instanceof TEMP_MCP9808)) {
-                        sensor1 = new TEMP_MCP9808(sensor1Data, 1);
+                    if(sensor1 == null || !(sensor1 instanceof Temp_MCP9808)) {
+                        sensor1 = new Temp_MCP9808(sensor1Data, 1);
                     }
                     break;
                 default:
@@ -418,21 +413,21 @@ public class MainActivity extends AppCompatActivity
 
     void handleSensor2Data(byte sensor2Data[]) {
         Log.i(TAG,"HANDLE S2");
-        if (sensor2Data[0] == SensorList.INVALID_SENSOR) {
+        if (sensor2Data[0] == SensorConst.INVALID_SENSOR) {
             return;
         } else {
             // check to see which sensor is connected
             switch (sensor2Data[0]) {
-                case SensorList.IMU_MPU6050:
+                case SensorConst.ACCEL_MPU6050:
                     // check to see if sensor is already "installed"
-                    if(sensor2 == null || !(sensor2 instanceof IMU_MPU6050)) {
-                        sensor2 = new IMU_MPU6050(sensor2Data, 2);
+                    if(sensor2 == null || !(sensor2 instanceof Accel_MPU6050)) {
+                        sensor2 = new Accel_MPU6050(sensor2Data, 2);
                     }
                     break;
-                case SensorList.TEMP_MCP9808:
+                case SensorConst.TEMP_MCP9808:
                     // check to see if sensor is already "installed"
-                    if(sensor2 == null || !(sensor2 instanceof TEMP_MCP9808)) {
-                        sensor2 = new TEMP_MCP9808(sensor2Data, 1);
+                    if(sensor2 == null || !(sensor2 instanceof Temp_MCP9808)) {
+                        sensor2 = new Temp_MCP9808(sensor2Data, 1);
                     }
                     break;
                 default:
@@ -451,21 +446,21 @@ public class MainActivity extends AppCompatActivity
 
     void handleSensor3Data(byte sensor3Data[]) {
         Log.i(TAG,"HANDLE S3");
-        if (sensor3Data[0] == SensorList.INVALID_SENSOR) {
+        if (sensor3Data[0] == SensorConst.INVALID_SENSOR) {
             return;
         } else {
             // check to see which sensor is connected
             switch (sensor3Data[0]) {
-                case SensorList.IMU_MPU6050:
+                case SensorConst.ACCEL_MPU6050:
                     // check to see if sensor is already "installed"
-                    if(sensor3 == null || !(sensor3 instanceof IMU_MPU6050)) {
-                        sensor3 = new IMU_MPU6050(sensor3Data, 3);
+                    if(sensor3 == null || !(sensor3 instanceof Accel_MPU6050)) {
+                        sensor3 = new Accel_MPU6050(sensor3Data, 3);
                     }
                     break;
-                case SensorList.TEMP_MCP9808:
+                case SensorConst.TEMP_MCP9808:
                     // check to see if sensor is already "installed"
-                    if(sensor3 == null || !(sensor3 instanceof TEMP_MCP9808)) {
-                        sensor3 = new TEMP_MCP9808(sensor3Data, 3);
+                    if(sensor3 == null || !(sensor3 instanceof Temp_MCP9808)) {
+                        sensor3 = new Temp_MCP9808(sensor3Data, 3);
                     }
                     break;
                 default:
@@ -483,21 +478,21 @@ public class MainActivity extends AppCompatActivity
 
     void handleSensor4Data(byte sensor4Data[]) {
         Log.i(TAG,"HANDLE S4");
-        if (sensor4Data[0] == SensorList.INVALID_SENSOR) {
+        if (sensor4Data[0] == SensorConst.INVALID_SENSOR) {
             return;
         } else {
             // check to see which sensor is connected
             switch (sensor4Data[0]) {
-                case SensorList.IMU_MPU6050:
+                case SensorConst.ACCEL_MPU6050:
                     // check to see if sensor is already "installed"
-                    if(sensor4 == null || !(sensor4 instanceof IMU_MPU6050)) {
-                        sensor4 = new IMU_MPU6050(sensor4Data, 4);
+                    if(sensor4 == null || !(sensor4 instanceof Accel_MPU6050)) {
+                        sensor4 = new Accel_MPU6050(sensor4Data, 4);
                     }
                     break;
-                case SensorList.TEMP_MCP9808:
+                case SensorConst.TEMP_MCP9808:
                     // check to see if sensor is already "installed"
-                    if(sensor4 == null || !(sensor4 instanceof TEMP_MCP9808)) {
-                        sensor4 = new TEMP_MCP9808(sensor4Data, 4);
+                    if(sensor4 == null || !(sensor4 instanceof Temp_MCP9808)) {
+                        sensor4 = new Temp_MCP9808(sensor4Data, 4);
                     }
                     break;
                 default:
@@ -525,7 +520,9 @@ public class MainActivity extends AppCompatActivity
             GraphFragment graphFragment = (GraphFragment)
                     getSupportFragmentManager().findFragmentByTag(GRAPH_FRAG_TAG);
             if (graphFragment != null && graphFragment.isVisible()) {
-                addToGraph(sensor.getGraphData());
+                // TODO post the ArrayList of graph data to the graph fragment
+                // get ArrayList of graph floats
+                // ArrayList<Float> graphDataList = sensor.getGraphData();
             }
         }
     }
@@ -600,19 +597,19 @@ public class MainActivity extends AppCompatActivity
     public boolean sensorConfigWrite(SensorConfig config) {
 
         switch(config.getSensorNumber()) {
-            case SensorList.SENSOR_1:
+            case SensorConst.SENSOR_1:
                 sensorConfig1.setFreq(config.getFreq());
                 sensorConfig1.setSDLogging(config.isSDLogging());
                 break;
-            case SensorList.SENSOR_2:
+            case SensorConst.SENSOR_2:
                 sensorConfig2.setFreq(config.getFreq());
                 sensorConfig2.setSDLogging(config.isSDLogging());
                 break;
-            case SensorList.SENSOR_3:
+            case SensorConst.SENSOR_3:
                 sensorConfig3.setFreq(config.getFreq());
                 sensorConfig3.setSDLogging(config.isSDLogging());
                 break;
-            case SensorList.SENSOR_4:
+            case SensorConst.SENSOR_4:
                 sensorConfig4.setFreq(config.getFreq());
                 sensorConfig4.setSDLogging(config.isSDLogging());
                 break;

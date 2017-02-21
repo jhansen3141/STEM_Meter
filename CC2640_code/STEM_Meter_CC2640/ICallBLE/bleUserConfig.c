@@ -56,7 +56,7 @@
 #define NUM_TX_POWER_VALUES (sizeof( txPowerTable ) / sizeof( txPwrVal_t ))
 
 // Default Tx Power Index
-#define DEFAULT_TX_POWER               7
+#define DEFAULT_TX_POWER               12 // was 7
 
 // Override NOP
 #define OVERRIDE_NOP                   0xC0000001

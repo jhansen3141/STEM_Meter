@@ -359,6 +359,8 @@ static void ProjectZero_init(void) {
 
   // Register for GATT local events and ATT Responses pending for transmission
   GATT_RegisterForMsgs(selfEntity);
+
+  HCI_EXT_SetTxPowerCmd(HCI_EXT_TX_POWER_5_DBM);
 }
 
 

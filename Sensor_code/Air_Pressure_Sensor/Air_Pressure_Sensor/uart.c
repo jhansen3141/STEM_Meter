@@ -24,7 +24,7 @@ void UARTInit(void) {
 	UCSR0B |= (1<<TXEN0) | (1<<RXEN0);
 	UCSR0C |= (1<<UCSZ01) | (1<<UCSZ00); // 8 bit frame, 1 stop bit, no parity
 	UCSR0B |= (1 << RXCIE0); // enable RX interrupt
-	UBRR0L = 0; // 250k baud
+	UBRR0L = 0; // 500k baud
 }
 
 

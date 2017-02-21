@@ -20,7 +20,7 @@ public class SensorConfig {
 
     public SensorConfig(int sensorNumber) {
         this.sensorNumber = sensorNumber;
-        this.freq = SensorList.RATE_OFF;
+        this.freq = SensorConst.RATE_OFF;
         this.isSDLogging = false;
         selected = false;
     }
