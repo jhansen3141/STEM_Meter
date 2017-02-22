@@ -12,6 +12,7 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Looper;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
@@ -99,6 +100,8 @@ public class MainActivity extends AppCompatActivity
     private Sensor sensor3;
     private Sensor sensor4;
 
+    private BaseUnitBattery baseUnitBattery;
+
     private SensorConfig sensorConfig1;
     private SensorConfig sensorConfig2;
     private SensorConfig sensorConfig3;
@@ -126,6 +129,8 @@ public class MainActivity extends AppCompatActivity
         sensorConfig2 = new SensorConfig(2);
         sensorConfig3 = new SensorConfig(3);
         sensorConfig4 = new SensorConfig(4);
+
+        baseUnitBattery = new BaseUnitBattery();
 
         savedDataList = new ArrayList<LineData>();
         savedNameList = new ArrayList<String>();
@@ -297,6 +302,18 @@ public class MainActivity extends AppCompatActivity
                             // Sensor config was read from base unit so update the config objects
                             updateSensorConfigData(characteristic.getValue());
                         }
+                        else if (characteristic == BoardBatteryInfoChar) {
+                            String charString = characteristic.getStringValue(0);
+                            Log.i(TAG,"Bat Char: " + charString);
+                            baseUnitBattery.updateBatteryValues(charString);
+                            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    // TODO Change where the battery info is displayed
+                                    Toast.makeText(getApplicationContext(), baseUnitBattery.getBatStr(), Toast.LENGTH_LONG).show();
+                                }
+                            });
+                        }
                     }
                 }
 
@@ -392,7 +409,7 @@ public class MainActivity extends AppCompatActivity
 
 
     void handleSensor1Data(byte sensor1Data[]) {
-        Log.i(TAG, "HANDLE S1");
+       // Log.i(TAG, "HANDLE S1");
         if (sensor1Data[0] == SensorConst.INVALID_SENSOR) {
             return;
         } else {
@@ -455,7 +472,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     void handleSensor2Data(byte sensor2Data[]) {
-        Log.i(TAG, "HANDLE S2");
+       // Log.i(TAG, "HANDLE S2");
         if (sensor2Data[0] == SensorConst.INVALID_SENSOR) {
             return;
         } else {
@@ -518,7 +535,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     void handleSensor3Data(byte sensor3Data[]) {
-        Log.i(TAG, "HANDLE S3");
+       // Log.i(TAG, "HANDLE S3");
         if (sensor3Data[0] == SensorConst.INVALID_SENSOR) {
             return;
         } else {
@@ -581,7 +598,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     void handleSensor4Data(byte sensor4Data[]) {
-        Log.i(TAG, "HANDLE S4");
+        //Log.i(TAG, "HANDLE S4");
         if (sensor4Data[0] == SensorConst.INVALID_SENSOR) {
             return;
         } else {
@@ -688,7 +705,13 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            // TODO Do something when user clicks settings button
+            if (mBluetoothAdapter == null || mBluetoothGatt == null ||  mConnectionState == STATE_DISCONNECTED) {
+                Toast.makeText(this,"Not Connected", Toast.LENGTH_SHORT).show();
+            }
+            else if(BoardBatteryInfoChar != null) {
+                // Read the battery info
+                mBluetoothGatt.readCharacteristic(BoardBatteryInfoChar);
+            }
             return true;
         }
 
@@ -811,8 +834,6 @@ public class MainActivity extends AppCompatActivity
 
         return graphConfig;
     }
-
-
 
     // Overloaded method to write char data in byte array form
     public boolean writeCharacteristic(BluetoothGattCharacteristic characteristic, byte[] data) {
