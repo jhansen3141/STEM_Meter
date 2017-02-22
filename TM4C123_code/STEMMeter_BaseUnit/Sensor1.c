@@ -35,7 +35,7 @@ static Task_Struct sensor1TaskStruct;
 static Char sensor1TaskStack[TASKSTACKSIZE];
 
 static uint8_t uartBufferRX[SENSOR_FRAME_LENGTH+1];
-bool Sensor1SDWriteEnabled = true;
+bool Sensor1SDWriteEnabled = false;
 static UART_Handle      UART0Handle;
 
 static void Sensor1TaskFxn(UArg arg0, UArg arg1);
@@ -73,7 +73,7 @@ static void Sensor1TaskInit() {
 
 void Sensor1WriteConfig(uint8_t freq) {
 	char txBuffer[10];
-	sprintf(txBuffer,"SF %d\n",freq);
+	sprintf(txBuffer,"SF %d\r",freq);
 	UART_writePolling(UART0Handle,txBuffer,5);
 }
 
