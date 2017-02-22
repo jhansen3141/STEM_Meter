@@ -177,10 +177,11 @@ public class DisplayFragment extends Fragment {
 
             // let the chart know it's data has changed
             mChart.notifyDataSetChanged();
-            mChart.invalidate();
+            mChart.animateXY(1000,1000);
+            //mChart.invalidate();
 
             // limit the number of visible entries
-            //mChart.setVisibleXRangeMaximum(10);
+            mChart.setVisibleXRangeMaximum(10);
             // mChart.setVisibleYRange(30, AxisDependency.LEFT);
 
             // move to the latest entry
@@ -199,6 +200,7 @@ public class DisplayFragment extends Fragment {
         //private final ArrayList<SensorsFragment.SensorListAdapter.SetBoolean> setBooleanList = new ArrayList<SensorsFragment.SensorListAdapter.SetBoolean>();
         private String TAG = "CustomAdapter";
         private int currentSelectedPosition;
+        private int selectedPosition = -1;
 
         public DataListAdapter() {
 
@@ -233,6 +235,7 @@ public class DisplayFragment extends Fragment {
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
             final TextView dataNameText;
+            final ImageButton deleteBtn;
 
             if (convertView == null) {
                 // if the view is null then inflate the custom item layout
@@ -240,6 +243,31 @@ public class DisplayFragment extends Fragment {
             }
 
             dataNameText = (TextView) convertView.findViewById(R.id.dataNameTextView);
+            deleteBtn = (ImageButton) convertView.findViewById(R.id.DeleteBtn);
+            deleteBtn.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View arg0) {
+                    graphName.remove(position);
+                    displayFragInterface.getSavedNameList().remove(position);
+                    displayFragInterface.getSavedList().remove(position);
+
+                    if (selectedPosition == position) {
+                        mChart.clear();
+                        selectedPosition = -1;
+                    }
+
+                    if (position < selectedPosition)
+                        --selectedPosition;
+
+                    notifyDataSetChanged();
+                }
+            });
+
+            if (position == selectedPosition)
+                convertView.setBackgroundColor(Color.BLUE);
+            else
+                convertView.setBackgroundColor(Color.WHITE);
 
             if (dataNameText != null)
                 dataNameText.setText(graphName.get(position));
@@ -250,7 +278,8 @@ public class DisplayFragment extends Fragment {
                 public void onClick(View arg0) {
                     addEntry(displayFragInterface.getSavedList().get(position));
                     Log.i(TAG, "Graph List Item clicked");
-                    //notifyDataSetChanged();
+                    selectedPosition = position;
+                    notifyDataSetChanged();
                 }
             });
 
