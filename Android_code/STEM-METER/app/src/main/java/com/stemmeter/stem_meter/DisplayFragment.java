@@ -175,6 +175,9 @@ public class DisplayFragment extends Fragment {
             //data.addEntry(new Entry(set.getEntryCount(), (float) (Math.random() * 40) + 30f), 0);
             //data.notifyDataChanged();
 
+            mChart.getAxisLeft().resetAxisMinimum();
+            mChart.getAxisLeft().resetAxisMaximum();
+
             // let the chart know it's data has changed
             mChart.notifyDataSetChanged();
             mChart.animateXY(1000,1000);

@@ -5,17 +5,21 @@ package com.stemmeter.stem_meter;
  */
 
 public class GraphConfig {
+
+    private int state;
     private int selectedSensor;
     private int visibleDataNum;
 
     public GraphConfig (int sensor, int visibleDataNum)
     {
+        state = 0;
         this.selectedSensor = selectedSensor;
         this.visibleDataNum = visibleDataNum;
     }
 
     public GraphConfig ()
     {
+        state = 0;
         this.selectedSensor = 0;
         this.visibleDataNum = 10;
     }
@@ -34,5 +38,13 @@ public class GraphConfig {
 
     public void setVisibleDataNum(int visibleDataNum) {
         this.visibleDataNum = visibleDataNum;
+    }
+
+    public int getState() {
+        return state;
+    }
+
+    public void setState(int state) {
+        this.state = state;
     }
 }
