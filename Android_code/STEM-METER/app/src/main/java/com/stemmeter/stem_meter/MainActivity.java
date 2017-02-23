@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity
     private static final int STATE_CONNECTING = 1;
     private static final int STATE_CONNECTED = 2;
 
-    public final static String DEVICE_MAC_STR = "CC:78:AB:19:9A:21";
+    public final static String DEVICE_MAC_STR = "CC:78:AB:AC:B3:FE";
 
     //public final static UUID BOARD_UUID = UUID.fromString("0000ABAE-0000-1000-8000-00805F9B34FB");
     public final static UUID SM_SERVICE_UUID =      UUID.fromString("F000ABAE-0451-4000-B000-000000000000");
@@ -144,6 +144,7 @@ public class MainActivity extends AppCompatActivity
             finish();
         }
 
+            Toast.makeText(this,"WERE HOSED!",Toast.LENGTH_LONG).show();
         ConnectFragment connectFragment = new ConnectFragment();
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.fragment_container, connectFragment, CONNECT_FRAG_TAG).commit();
@@ -646,20 +647,26 @@ public class MainActivity extends AppCompatActivity
     public void postSensorData(Sensor sensor) {
         SensorsFragment sensorsFragment = (SensorsFragment)
                 getSupportFragmentManager().findFragmentByTag(SENSOR_FRAG_TAG);
+        Log.i(TAG,"Check if Sensors are up");
         // if the sensor fragment is showing print the data there
         if (sensorsFragment != null && sensorsFragment.isVisible()) {
             sensorsFragment.printSensorData(sensor.getSensorNumber(), sensor.toString());
     }
         // Determines whether to add sensor data to graph
-        else if(sensor.getSensorNumber() == graphConfig.getSelectedSensor()) {
+        else if(sensor.getSensorNumber() == (graphConfig.getSelectedSensor() + 1)) {
+            Log.i(TAG,"Check if graph Fragment is up");
             GraphFragment graphFragment = (GraphFragment)
                     getSupportFragmentManager().findFragmentByTag(GRAPH_FRAG_TAG);
             if (graphFragment != null && graphFragment.isVisible()) {
                 // TODO post the ArrayList of graph data to the graph fragment
                 // get ArrayList of graph floats
-                // ArrayList<Float> graphDataList = sensor.getGraphData();
+                Log.i(TAG,"Adding data to graph");
+                ArrayList<Float> graphDataList = sensor.getGraphData();
+                graphFragment.addGraphEntry(graphDataList, sensor.getNumberDataPoints());
             }
         }
+        else
+            Log.i(TAG,"Graph and Sensors are not up. Selected Sensor: " + graphConfig.getSelectedSensor() );
     }
 
     @Override

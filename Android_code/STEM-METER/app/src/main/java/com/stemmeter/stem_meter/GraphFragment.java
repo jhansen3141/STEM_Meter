@@ -49,12 +49,15 @@ import static com.stemmeter.stem_meter.R.id.chart;
 
 public class GraphFragment extends Fragment {
 
-
+    public static final int GRAPH_STATE_STOP = 0;
+    public static final int GRAPH_STATE_PLAY = 1;
+    public static final int GRAPH_STATE_PAUSE = 2;
 
     // Container Activity must implement this interface
     public interface GraphFragInterface {
         public ArrayList<LineData> getSavedList();
         public ArrayList<String> getSavedNameList();
+        public GraphConfig getGraphConfig();
     }
 
     GraphFragInterface graphFragInterface;
@@ -65,13 +68,11 @@ public class GraphFragment extends Fragment {
     private ImageButton saveBtn;
     private long currentIndex = 0;
 
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.graph_fragment, container, false);
+        final View view = inflater.inflate(R.layout.graph_fragment, container, false);
         //plot = (XYPlot) view.findViewById(plot);
         mChart = (LineChart) view.findViewById(chart);
         mChart.setNoDataText("No data for the moment");
@@ -119,8 +120,8 @@ public class GraphFragment extends Fragment {
         YAxis leftAxis = mChart.getAxisLeft();
         leftAxis.setTypeface(Typeface.DEFAULT);
         leftAxis.setTextColor(Color.BLACK);
-        leftAxis.setAxisMaximum(100f);
-        leftAxis.setAxisMinimum(0f);
+        leftAxis.setAxisMaximum(0.2f);
+        leftAxis.setAxisMinimum(-0.2f);
         leftAxis.setDrawGridLines(true);
 
         YAxis rightAxis = mChart.getAxisRight();
@@ -186,33 +187,40 @@ public class GraphFragment extends Fragment {
                     playPauseBtn.setBackgroundResource(R.drawable.ic_pause_black_24dp);
                     playPauseBtn.setChecked(true);
                     Log.i(TAG,"Play Button Clicked");
+                    if (graphFragInterface.getGraphConfig().getState() != GRAPH_STATE_PLAY) {
+                        graphFragInterface.getGraphConfig().setState(GRAPH_STATE_PLAY);
+                        mChart.clearValues();
+                        mChart.fitScreen();
+                        saveBtn.setVisibility(View.GONE);
+                    }
                 }
                 else
                 {
                     playPauseBtn.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp);
                     playPauseBtn.setChecked(false);
                     Log.i(TAG,"Pause Button Clicked");
+                    if (graphFragInterface.getGraphConfig().getState() != GRAPH_STATE_PAUSE) {
+                        graphFragInterface.getGraphConfig().setState(GRAPH_STATE_PAUSE);
+                        saveBtn.setVisibility(View.VISIBLE);
+                    }
                 }
             }
         });
 
-        //series = new DynamicSeries("Acceleration");
-
-        //seriesFormatter = new LineAndPointFormatter();
-        //seriesFormatter.setPointLabelFormatter(new PointLabelFormatter());
-        //seriesFormatter.configure(getActivity().getApplicationContext(),
-        //        R.xml.line_point_formatter_with_labels);
-        //seriesFormatter.setPointLabelFormatter(new PointLabelFormatter(Color.TRANSPARENT));
-
-        //plot.addSeries(series,seriesFormatter);
-
-        //plot.setDomainBoundaries(0, 300, BoundaryMode.FIXED );
-        //plot.setRangeBoundaries(-3,3,BoundaryMode.FIXED);
-
         return view;
     }
 
-    private void addEntry() {
+    private void addEntry(float num1) {
+
+        if (num1 > (mChart.getYChartMax() - 0.5)) {
+            mChart.getAxisLeft().setAxisMaximum(num1 + (float)0.5);
+            //mChart.getAxisLeft().resetAxisMaximum();
+        }
+
+        if (num1 < (mChart.getYChartMin() + 0.5)) {
+            mChart.getAxisLeft().setAxisMinimum(num1 - (float)0.5);
+            //mChart.getAxisLeft().resetAxisMinimum();
+        }
 
         LineData data = mChart.getData();
 
@@ -222,11 +230,25 @@ public class GraphFragment extends Fragment {
             // set.addEntry(...); // can be called as well
 
             if (set == null) {
-                set = createSet();
+                set = createSet(Color.BLUE, ColorTemplate.getHoloBlue());
                 data.addDataSet(set);
             }
 
             data.addEntry(new Entry(set.getEntryCount(), (float) (Math.random() * 40) + 30f), 0);
+
+            if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP) {
+                Entry entry;
+
+                if (set.getEntryCount() == 11) {
+                    set.removeEntry(0);
+
+                    for (int i = 0; i < set.getEntryCount(); i++) {
+                        entry = set.getEntryForIndex(i);
+                        entry.setX(entry.getX() - 1);
+                    }
+                }
+            }
+
             data.notifyDataChanged();
 
             // let the chart know it's data has changed
@@ -245,57 +267,241 @@ public class GraphFragment extends Fragment {
         }
     }
 
-    private LineDataSet createSet() {
+    private void addEntry(float num1, float num2) {
 
-        LineDataSet set = new LineDataSet(null, "Dynamic Data");
-        set.setAxisDependency(YAxis.AxisDependency.LEFT);
-        set.setColor(ColorTemplate.getHoloBlue());
-        set.setCircleColor(Color.BLUE);
-        set.setLineWidth(2f);
-        set.setCircleRadius(4f);
-        set.setFillAlpha(65);
-        set.setFillColor(ColorTemplate.getHoloBlue());
-        set.setHighLightColor(Color.rgb(244, 117, 117));
-        set.setValueTextColor(Color.WHITE);
-        set.setValueTextSize(9f);
-        set.setDrawValues(false);
-        return set;
-    }
+        float maxValue = -9999999;
+        float minValue =  9999999;
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        final Runnable runnable = new Runnable() {
+        maxValue = Math.max(num1,num2);
+        minValue = Math.min(num1, num2);
 
-            @Override
-            public void run() {
-                addEntry();
+        if (maxValue > (mChart.getYChartMax() - 0.5)) {
+            mChart.getAxisLeft().setAxisMaximum(maxValue + (float)0.5);
+            //mChart.getAxisLeft().resetAxisMaximum();
+        }
+
+        if (minValue < (mChart.getYChartMin() + 0.5)) {
+            mChart.getAxisLeft().setAxisMinimum(minValue - (float)0.5);
+            //mChart.getAxisLeft().resetAxisMinimum();
+        }
+
+        LineData data = mChart.getData();
+
+        if (data != null) {
+
+            ILineDataSet set1 = data.getDataSetByIndex(0);
+            ILineDataSet set2 = data.getDataSetByIndex(1);
+            // set.addEntry(...); // can be called as well
+
+            if (set1 == null) {
+                set1 = createSet(Color.BLUE, ColorTemplate.getHoloBlue());
+                data.addDataSet(set1);
             }
-        };
 
-        Thread thread = new Thread(new Runnable() {
+            if (set2 == null)
+            {
+                set2 = createSet(Color.RED, Color.RED);
+                data.addDataSet(set2);
+            }
 
-            @Override
-            public void run() {
-                for (int i = 0; i < 100; i++) {
+            data.addEntry(new Entry(set1.getEntryCount(), num1), 0);
+            data.addEntry(new Entry(set2.getEntryCount(), num2), 1);
 
-                    // Don't generate garbage runnables inside the loop.
-                    getActivity().runOnUiThread(runnable);
+            if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP) {
+                Entry entry;
 
-                    try {
-                        Thread.sleep(25);
-                    } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                if (set1.getEntryCount() == 11) {
+                    set1.removeEntry(0);
+
+                    for (int i = 0; i < set1.getEntryCount(); i++) {
+                        entry = set1.getEntryForIndex(i);
+                        entry.setX(entry.getX() - 1);
+                    }
+                }
+
+                if (set2.getEntryCount() == 11) {
+                    data.removeEntry(0, 1);
+
+                    for (int i = 0; i < set2.getEntryCount(); i++) {
+                        entry = set2.getEntryForIndex(i);
+                        entry.setX(entry.getX() - 1);
                     }
                 }
             }
-        });
 
-        thread.start();
+            data.notifyDataChanged();
 
-        //plot.redraw();
+            // let the chart know it's data has changed
+            mChart.notifyDataSetChanged();
+
+            // limit the number of visible entries
+            mChart.setVisibleXRangeMaximum(10);
+            // mChart.setVisibleYRange(30, AxisDependency.LEFT);
+
+            // move to the latest entry
+            mChart.moveViewToX(data.getEntryCount());
+
+            // this automatically refreshes the chart (calls invalidate())
+            // mChart.moveViewTo(data.getXValCount()-7, 55f,
+            // AxisDependency.LEFT);
+        }
     }
+
+    private void addEntry(float num1, float num2, float num3) {
+        //mChart.setVisibleXRangeMaximum(10);
+
+        float maxValue = -9999999;
+        float minValue =  9999999;
+
+        maxValue = Math.max(num1,num2);
+        if (num3 > maxValue)
+            maxValue = num3;
+
+        minValue = Math.min(num1, num2);
+        if (num3 < minValue)
+            minValue = num3;
+
+        if (maxValue > (mChart.getYChartMax() - 0.5)) {
+            mChart.getAxisLeft().setAxisMaximum(maxValue + (float)0.5);
+            //mChart.getAxisLeft().resetAxisMaximum();
+        }
+
+        if (minValue < (mChart.getYChartMin() + 0.5)) {
+            mChart.getAxisLeft().setAxisMinimum(minValue - (float)0.5);
+            //mChart.getAxisLeft().resetAxisMinimum();
+        }
+
+        LineData data = mChart.getData();
+
+        if (data != null) {
+
+            ILineDataSet set1 = data.getDataSetByIndex(0);
+            ILineDataSet set2 = data.getDataSetByIndex(1);
+            ILineDataSet set3 = data.getDataSetByIndex(2);
+            // set.addEntry(...); // can be called as well
+
+            if (set1 == null) {
+                set1 = createSet(Color.BLUE, ColorTemplate.getHoloBlue());
+                data.addDataSet(set1);
+            }
+
+            if (set2 == null)
+            {
+                set2 = createSet(Color.RED, Color.RED);
+                data.addDataSet(set2);
+            }
+
+            if (set3 == null)
+            {
+                set3 = createSet(Color.GREEN, Color.DKGRAY);
+                data.addDataSet(set3);
+            }
+
+            data.addEntry(new Entry(set1.getEntryCount(), num1), 0);
+            data.addEntry(new Entry(set2.getEntryCount(), num2), 1);
+            data.addEntry(new Entry(set3.getEntryCount(), num3), 2);
+
+            if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP) {
+                Entry entry;
+//removing last element from the chart and finding max and min visible value
+                if (set1.getEntryCount() == 11) {
+                    set1.removeEntry(0);
+
+                    for (int i = 0; i < set1.getEntryCount(); i++) {
+                        entry = set1.getEntryForIndex(i);
+                        entry.setX(entry.getX() - 1);
+                    }
+                }
+
+                if (set2.getEntryCount() == 11) {
+                    data.removeEntry(0, 1);
+
+                    for (int i = 0; i < set2.getEntryCount(); i++) {
+                        entry = set2.getEntryForIndex(i);
+                        entry.setX(entry.getX() - 1);
+                    }
+                }
+
+                if (set3.getEntryCount() == 11) {
+                    data.removeEntry(0, 2);
+
+                    for (int i = 0; i < set3.getEntryCount(); i++) {
+                        entry = set3.getEntryForIndex(i);
+                        entry.setX(entry.getX() - 1);
+                    }
+                }
+            }
+            data.notifyDataChanged();
+
+            // let the chart know it's data has changed
+            mChart.notifyDataSetChanged();
+            //mChart.invalidate();
+
+            // limit the number of visible entries
+            mChart.setVisibleXRangeMaximum(10);
+            // mChart.setVisibleYRange(30, AxisDependency.LEFT);
+
+            // move to the latest entry
+            mChart.moveViewToX(data.getEntryCount());
+
+            // this automatically refreshes the chart (calls invalidate())
+            // mChart.moveViewTo(data.getXValCount()-7, 55f,
+            // AxisDependency.LEFT);
+            Log.i(TAG,"Set1, Set2, Set3" + set1.getEntryCount() + set2.getEntryCount() + set3.getEntryCount());
+        }
+    }
+
+    private LineDataSet createSet(int circleColor, int color) {
+
+        LineDataSet set = new LineDataSet(null, "Dynamic Data");
+        set.setAxisDependency(YAxis.AxisDependency.LEFT);
+        set.setColor(color);
+        set.setCircleColor(circleColor);
+        set.setLineWidth(2f);
+        set.setCircleRadius(4f);
+        set.setFillAlpha(65);
+        set.setFillColor(color);
+        set.setHighLightColor(Color.rgb(244, 117, 117));
+        set.setValueTextColor(color);
+        set.setValueTextSize(9f);
+        set.setDrawValues(true);
+        return set;
+    }
+
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//        final Runnable runnable = new Runnable() {
+//
+//            @Override
+//            public void run() {
+//                addEntry();
+//            }
+//        };
+//
+//        Thread thread = new Thread(new Runnable() {
+//
+//            @Override
+//            public void run() {
+//                for (int i = 0; i < 100; i++) {
+//
+//                    // Don't generate garbage runnables inside the loop.
+//                    getActivity().runOnUiThread(runnable);
+//
+//                    try {
+//                        Thread.sleep(25);
+//                    } catch (InterruptedException e) {
+//                        // TODO Auto-generated catch block
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
+//        });
+//
+//        thread.start();
+//
+//        //plot.redraw();
+//    }
 
     @Override
     public void onAttach(Activity activity) {
@@ -309,7 +515,22 @@ public class GraphFragment extends Fragment {
     }
 
 
-    public void addPlot(float value) {
+    public void addGraphEntry(ArrayList<Float> sensorDataList, int numberDataPoints) {
 
+        if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_PAUSE )
+            return;
+
+        switch(numberDataPoints)
+        {
+            case 1:
+                addEntry(sensorDataList.get(0));
+                break;
+            case 2:
+                addEntry(sensorDataList.get(0), sensorDataList.get(1));
+                break;
+            case 3:
+                addEntry(sensorDataList.get(0), sensorDataList.get(1), sensorDataList.get(2));
+                break;
+        }
     }
 }
