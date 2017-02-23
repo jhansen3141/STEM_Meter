@@ -39,16 +39,13 @@ public class SensorsFragment extends ListFragment {
     private String TAG = "SensorFrag";
     private SensorListAdapter sensorListAdapter;
 
-    //private SensorConfig s1Config = new SensorConfig();
-
-
     // Container Activity must implement this interface
     public interface SensorFragInterface {
-        public boolean sensorConfigWrite(SensorConfig config);
-        public SensorConfig getSensorConfig(int sensorNumber);
-        public GraphConfig getGraphConfig();
-        public boolean updateBaseUnitTime();
-        public void readSensorConfigData();
+        boolean sensorConfigWrite(SensorConfig config);
+        SensorConfig getSensorConfig(int sensorNumber);
+        GraphConfig getGraphConfig();
+        boolean updateBaseUnitTime();
+        void readSensorConfigData();
     }
 
     @Override
@@ -63,7 +60,6 @@ public class SensorsFragment extends ListFragment {
         setListAdapter(sensorListAdapter);
 
         //getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        //registerForContextMenu(getListView());
     }
 
     @Override
@@ -93,7 +89,6 @@ public class SensorsFragment extends ListFragment {
             @Override
             public void run() {
                 sensorListAdapter.updateItem(dataStr, sensorNum - 1);
-                sensorListAdapter.notifyDataSetChanged();
             }
         });
 
@@ -128,11 +123,12 @@ public class SensorsFragment extends ListFragment {
         }
 
         public void updateItem(final String item, int position) {
-            sensorData.set(position,item);
-
+            // Only update the sensor data if sensor text box is showing
+            if(setBooleanList.get(position).isSet()) {
+                sensorData.set(position, item);
+                this.notifyDataSetChanged();
+            }
         }
-
-
 
         @Override
         public int getCount() {
@@ -218,6 +214,7 @@ public class SensorsFragment extends ListFragment {
                     altView.setBackgroundColor(Color.BLUE);
                 }
 
+                // set the SD card check box based on its SensorConfig object
                 sdCheck.setChecked(sensorFragInterface.getSensorConfig(position+1).isSDLogging());
 
 
@@ -228,6 +225,7 @@ public class SensorsFragment extends ListFragment {
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 // Apply the adapter to the spinner
                 frequencySpinner.setAdapter(adapter);
+                // Set the spinner based on its SensorConfig object
                 frequencySpinner.setSelection(sensorFragInterface.getSensorConfig(position+1).getFreq());
                 frequencySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     public void onItemSelected(AdapterView<?> parent, View view,
@@ -292,11 +290,11 @@ public class SensorsFragment extends ListFragment {
             }
 
             if(setBooleanList.get(finalPosition).isSet()) {
-                Log.i(TAG,"Returning Normal View");
+               // Log.i(TAG,"Returning Normal View");
                 return convertView;
             }
             else {
-                Log.i(TAG,"Returning Alt View");
+              //  Log.i(TAG,"Returning Alt View");
                 return altView;
             }
 
