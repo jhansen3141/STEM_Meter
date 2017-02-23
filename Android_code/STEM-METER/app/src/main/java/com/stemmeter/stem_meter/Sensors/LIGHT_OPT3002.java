@@ -45,7 +45,7 @@ public class LIGHT_OPT3002 extends Sensor {
     public String toString() {
         if(sensorStringArray != null) {
             return "Optical Power\n" +
-                    sensorStringArray[0] + "nW/cm^2\n";
+                    sensorStringArray[0] + "nW/cm" +  "\u00B2";
         }
         else {
             return "NULL";

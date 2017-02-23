@@ -91,7 +91,6 @@ public class SensorsFragment extends ListFragment {
                 sensorListAdapter.updateItem(dataStr, sensorNum - 1);
             }
         });
-
     }
 
     @Override
