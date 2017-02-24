@@ -395,19 +395,21 @@ public class MainActivity extends AppCompatActivity
         timeData[4] = hour;
         timeData[5] = minutes;
         timeData[6] = seconds;
-        Log.i(TAG,"Year:" + year);
+
         Log.i(TAG,"Setting Base Unit Time...");
         return writeCharacteristic(BoardTimeConfigChar, timeData);
     }
 
     @Override
     public void readSensorConfigData() {
-        // Read the current config values from base unit
-        // Once read callback will update config objects
-        Log.i(TAG,"Reading Sensor Config");
-        mBluetoothGatt.readCharacteristic(BoardSensorConfigChar);
+        // Make sure BLE is connected before trying to read
+        if (mBluetoothAdapter != null && mBluetoothGatt != null) {
+            Log.i(TAG, "Reading Sensor Config");
+            // Read the current config values from base unit
+            // Once read callback will update config objects
+            mBluetoothGatt.readCharacteristic(BoardSensorConfigChar);
+        }
     }
-
 
     void handleSensor1Data(byte sensor1Data[]) {
        // Log.i(TAG, "HANDLE S1");
