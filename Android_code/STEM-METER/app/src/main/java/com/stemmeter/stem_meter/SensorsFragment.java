@@ -38,6 +38,8 @@ public class SensorsFragment extends ListFragment {
     SensorFragInterface sensorFragInterface;
     private String TAG = "SensorFrag";
     private SensorListAdapter sensorListAdapter;
+    private int[] rateReducer = {0,0,0,0};
+    private static boolean hasReadSensorConfig = false;
 
     // Container Activity must implement this interface
     public interface SensorFragInterface {
@@ -83,21 +85,60 @@ public class SensorsFragment extends ListFragment {
         }
     }
 
-    public void printSensorData(final int sensorNum, final String dataStr) {
-        // update the item in the list view
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                sensorListAdapter.updateItem(dataStr, sensorNum - 1);
+    public void printSensorData(final int sensorNum, final String dataStr, final int sensorRate) {
+        boolean shouldUpdateSensor = false;
+
+        // Check to see if we need to reduce update rate (5Hz or 10Hz)
+        if(sensorRate == SensorConst.RATE_FIVE_HZ) {
+            // Increase the count
+            rateReducer[sensorNum-1]++;
+
+            // Check to see if count exceeded
+            if(rateReducer[sensorNum-1] >= 2) {
+                rateReducer[sensorNum-1] = 0;
+                // Update rate has been divided so update the text box
+                shouldUpdateSensor = true;
             }
-        });
+        }
+        else if(sensorRate == SensorConst.RATE_TEN_HZ) {
+            // Increase the count
+            rateReducer[sensorNum-1]++;
+
+            // Check to see if count exceeded
+            if(rateReducer[sensorNum-1] >= 5) {
+                rateReducer[sensorNum-1] = 0;
+                // Update rate has been reduced to 2Hz
+                // So update it
+                shouldUpdateSensor = true;
+            }
+        }
+        else {
+            shouldUpdateSensor = true;
+        }
+
+        // Check to see if we should update the text box
+        if(shouldUpdateSensor) {
+            // update the item in the list view
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    sensorListAdapter.updateItem(dataStr, sensorNum - 1);
+                }
+            });
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        sensorFragInterface.updateBaseUnitTime();
-        sensorFragInterface.readSensorConfigData();
+        // Only read the config settings from the base unit once
+        if(!hasReadSensorConfig) {
+            // Update the base unit time
+            sensorFragInterface.updateBaseUnitTime();
+            // Read the current sensor config settings from base unit
+            sensorFragInterface.readSensorConfigData();
+            hasReadSensorConfig = true;
+        }
     }
     private class SensorListAdapter extends BaseAdapter {
 
