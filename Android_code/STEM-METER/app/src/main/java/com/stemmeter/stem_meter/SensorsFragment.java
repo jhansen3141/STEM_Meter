@@ -2,31 +2,21 @@ package com.stemmeter.stem_meter;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.CheckedTextView;
-import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 
@@ -38,6 +28,7 @@ public class SensorsFragment extends ListFragment {
     SensorFragInterface sensorFragInterface;
     private String TAG = "SensorFrag";
     private SensorListAdapter sensorListAdapter;
+
     private int[] rateReducer = {0,0,0,0};
     private static boolean hasReadSensorConfig = false;
 
@@ -54,11 +45,12 @@ public class SensorsFragment extends ListFragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         sensorListAdapter = new SensorListAdapter();
-        // Add the four sensors with disconnected strings to start
-        sensorListAdapter.addItem("Sensor 1 Disconnected");
-        sensorListAdapter.addItem("Sensor 2 Disconnected");
-        sensorListAdapter.addItem("Sensor 3 Disconnected");
-        sensorListAdapter.addItem("Sensor 4 Disconnected");
+
+        // Add the four sensors with no data strings to start
+        sensorListAdapter.addItem("Sensor 1 - No Data");
+        sensorListAdapter.addItem("Sensor 2 - No Data");
+        sensorListAdapter.addItem("Sensor 3 - No Data");
+        sensorListAdapter.addItem("Sensor 4 - No Data");
         setListAdapter(sensorListAdapter);
 
         //getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -94,9 +86,10 @@ public class SensorsFragment extends ListFragment {
             rateReducer[sensorNum-1]++;
 
             // Check to see if count exceeded
-            if(rateReducer[sensorNum-1] >= 2) {
+            if(rateReducer[sensorNum-1] >= 5) {
                 rateReducer[sensorNum-1] = 0;
-                // Update rate has been divided so update the text box
+                // Update rate has been reduced to 1Hz
+                // So update it
                 shouldUpdateSensor = true;
             }
         }
@@ -105,9 +98,9 @@ public class SensorsFragment extends ListFragment {
             rateReducer[sensorNum-1]++;
 
             // Check to see if count exceeded
-            if(rateReducer[sensorNum-1] >= 5) {
+            if(rateReducer[sensorNum-1] >= 10) {
                 rateReducer[sensorNum-1] = 0;
-                // Update rate has been reduced to 2Hz
+                // Update rate has been reduced to 1Hz
                 // So update it
                 shouldUpdateSensor = true;
             }
@@ -140,6 +133,7 @@ public class SensorsFragment extends ListFragment {
             hasReadSensorConfig = true;
         }
     }
+
     private class SensorListAdapter extends BaseAdapter {
 
         private ArrayList<String> sensorData = new ArrayList<String>();
@@ -166,7 +160,21 @@ public class SensorsFragment extends ListFragment {
             // Only update the sensor data if sensor text box is showing
             if(setBooleanList.get(position).isSet()) {
                 sensorData.set(position, item);
-                this.notifyDataSetChanged();
+                // Only update the row we need to. Not the entire list
+                View v = getListView().getChildAt(position - getListView().getFirstVisiblePosition());
+
+                if(v == null) {
+                    return;
+                }
+
+                TextView sensorText = (TextView) v.findViewById(R.id.sensorDataTextView);
+
+                if(sensorText != null) {
+                    sensorText.setText(item);
+                }
+                else {
+                    Log.i(TAG,"TB Null " + position);
+                }
             }
         }
 
@@ -256,7 +264,6 @@ public class SensorsFragment extends ListFragment {
 
                 // set the SD card check box based on its SensorConfig object
                 sdCheck.setChecked(sensorFragInterface.getSensorConfig(position+1).isSDLogging());
-
 
                 // Create an ArrayAdapter using the string array and a default spinner layout
                 ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),

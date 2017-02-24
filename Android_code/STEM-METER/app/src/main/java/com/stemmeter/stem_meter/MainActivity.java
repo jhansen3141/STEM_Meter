@@ -688,8 +688,9 @@ public class MainActivity extends AppCompatActivity
                 graphFragment.addGraphEntry(graphDataList, sensor.getNumberDataPoints());
             }
         }
-        else
-            Log.i(TAG,"Graph and Sensors are not up. Selected Sensor: " + graphConfig.getSelectedSensor() );
+        else {
+            // Log.i(TAG,"Graph and Sensors are not up. Selected Sensor: " + graphConfig.getSelectedSensor() );
+        }
     }
 
     @Override
