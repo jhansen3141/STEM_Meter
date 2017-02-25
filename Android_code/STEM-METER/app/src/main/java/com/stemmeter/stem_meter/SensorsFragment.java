@@ -30,7 +30,6 @@ public class SensorsFragment extends ListFragment {
     private SensorListAdapter sensorListAdapter;
 
     private int[] rateReducer = {0,0,0,0};
-    private static boolean hasReadSensorConfig = false;
 
     // Container Activity must implement this interface
     public interface SensorFragInterface {
@@ -125,13 +124,12 @@ public class SensorsFragment extends ListFragment {
     public void onResume() {
         super.onResume();
         // Only read the config settings from the base unit once
-        if(!hasReadSensorConfig) {
-            // Update the base unit time
-            sensorFragInterface.updateBaseUnitTime();
-            // Read the current sensor config settings from base unit
-            sensorFragInterface.readSensorConfigData();
-            hasReadSensorConfig = true;
-        }
+
+        // Update the base unit time
+        sensorFragInterface.updateBaseUnitTime();
+        // Read the current sensor config settings from base unit
+        sensorFragInterface.readSensorConfigData();
+
     }
 
     private class SensorListAdapter extends BaseAdapter {

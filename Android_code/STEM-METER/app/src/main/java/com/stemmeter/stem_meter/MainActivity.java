@@ -146,8 +146,9 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         gattDescriptors = new LinkedList<>();
-       // setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
             Toast.makeText(this, "This device does not support BLE", Toast.LENGTH_SHORT).show();
             finish();
@@ -158,7 +159,6 @@ public class MainActivity extends AppCompatActivity
                 .add(R.id.fragment_container, connectFragment, CONNECT_FRAG_TAG).commit();
 
     }
-
 
     public void BoardConnect() {
         mBluetoothManager = (BluetoothManager) getSystemService(getApplicationContext().BLUETOOTH_SERVICE);
@@ -361,14 +361,14 @@ public class MainActivity extends AppCompatActivity
         sensorConfig1.setFreq((int)configData[0]);
         sensorConfig1.setSDLogging(configData[1] == 1);
 
-        sensorConfig2.setFreq((int)configData[1]);
-        sensorConfig2.setSDLogging(configData[2] == 1);
+        sensorConfig2.setFreq((int)configData[2]);
+        sensorConfig2.setSDLogging(configData[3] == 1);
 
-        sensorConfig3.setFreq((int)configData[3]);
-        sensorConfig3.setSDLogging(configData[4] == 1);
+        sensorConfig3.setFreq((int)configData[4]);
+        sensorConfig3.setSDLogging(configData[5] == 1);
 
-        sensorConfig4.setFreq((int)configData[5]);
-        sensorConfig4.setSDLogging(configData[6] == 1);
+        sensorConfig4.setFreq((int)configData[6]);
+        sensorConfig4.setSDLogging(configData[7] == 1);
     }
 
     @Override
