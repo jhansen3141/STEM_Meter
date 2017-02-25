@@ -153,7 +153,6 @@ public class MainActivity extends AppCompatActivity
             finish();
         }
 
-            Toast.makeText(this,"WERE HOSED!",Toast.LENGTH_LONG).show();
         ConnectFragment connectFragment = new ConnectFragment();
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.fragment_container, connectFragment, CONNECT_FRAG_TAG).commit();
@@ -562,7 +561,7 @@ public class MainActivity extends AppCompatActivity
                     }
                     break;
                 case SensorConst.GYRO_MPU6050:
-                    // check to see if sensor is already "installed"
+                    // check to see if sensor is already "installed
                     if(sensor3 == null || !(sensor3 instanceof Gyro_MPU6050)) {
                         sensor3 = new Gyro_MPU6050(sensor3Data, 3);
                     }

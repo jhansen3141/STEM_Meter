@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 public class Accel_MPU6050 extends Sensor {
 
-    private float ACCEL_SENSE = 2048.0f; // +-16g
+
     private int ACCEL_SENSE_COLOR = Color.BLUE;
     private String[] sensorStringArray;
     private float xAccelF,yAccelF,zAccelF;
@@ -23,7 +23,9 @@ public class Accel_MPU6050 extends Sensor {
 
     @Override
     public String[] calcSensorData() {
+        final float ACCEL_SENSE = 2048.0f; // +-16g
         String[] dataStr = new String[3];
+
         short xAccel = (short)((data[5]<<8)   | (data[6] & 0xFF));
         short yAccel = (short)((data[7]<<8)   | (data[8] & 0xFF));
         short zAccel = (short)((data[9]<<8)   | (data[10] & 0xFF));
