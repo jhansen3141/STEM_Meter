@@ -20,10 +20,8 @@ void initBoard(void) {
 	I2CInit();
 	UARTInit();
 	OCR1A = TIMER_ONE_HZ_NUM;
-	TCCR1B|=(1<<WGM12); // Timer1 in CTC mode
-	TIMSK1|=(1<<OCIE1A); // Enable Timer1, CTC Compare A interrupt
-	TCCR1B|=(1<<CS10) | (1<<CS12); // Enable Timer1 with prescaler of F_CPU/1024 (128uS / tick)
-	
+	TCCR1B = 0; // turn timer off
+	TCNT1 = 0; // reset count	
 }
 
 void initSensor(void) {
@@ -66,7 +64,7 @@ void readSensor(sensorData_t *data) {
 	uint16_t mantissa;
 	float multiplier; 
 	float fOpticalPower;
-	char tempStr[6];
+	char tempStr[15];
 	
 	moduleLED(ON);
 
@@ -75,24 +73,24 @@ void readSensor(sensorData_t *data) {
 	
 	rawData = OPT3002_Read(RESULT_REG);
 
-	// copy the raw data into the struct
-	memcpy(data->sensorDataRaw,&rawData,2);
-
 	// Exponent is held in B15:B12
 	exponent = (rawData >> 12) & 0x000F;
 	
 	// Mantissa is held in B11:B0
-	mantissa = rawData & 0x0FFF;
-	
+	mantissa = rawData & 0x0FFF;	
 
-	multiplier = (float)((uint16_t)(1<<exponent) * 1.2f);
+	multiplier = (float)((uint16_t)(1<<exponent) * mantissa);
 	
 	// optical power = 
 	// 2^(B15:B12) * (B11:B0) * 1.2 nW/cm^2
-	fOpticalPower = (float)mantissa * multiplier;
+	fOpticalPower = (float)multiplier * 1.2f;
 	
 	sprintf(tempStr,"%.1f\n",fOpticalPower);
-	strcat(data->sensorDataStr,tempStr);
+	
+	// copy the raw data into the struct
+	strcpy((char*)data->sensorDataRaw,tempStr);
+	
+	strcpy(data->sensorDataStr,tempStr);
 	
 	moduleLED(OFF);
 }
