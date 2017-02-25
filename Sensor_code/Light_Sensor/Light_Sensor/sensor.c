@@ -29,7 +29,7 @@ void initBoard(void) {
 void initSensor(void) {
 	// Start sensor with auto ranging and constant conversions enabled
 	// at 100mS conversion rate
-	OPT3002_Write(CONFIG_REG,(AUTO_RANGE_BM | CONT_CONV_BM));
+	OPT3002_Write(CONFIG_REG,0xC600);
 	moduleLED(OFF);
 }
 
@@ -37,8 +37,8 @@ static void OPT3002_Write(uint8_t reg, uint16_t data) {
 	I2CStart();
 	I2CWrite(SENSOR_I2C_ADDRESS<<1);
 	I2CWrite(reg);
-	I2CWrite((data>>8) & 0xFF);
-	I2CWrite(data & 0xFF);
+	I2CWrite((data>>8));
+	I2CWrite(data & 0x00FF);
 	I2CStop();
 }
 
@@ -66,7 +66,8 @@ void readSensor(sensorData_t *data) {
 	uint16_t mantissa;
 	float multiplier; 
 	float fOpticalPower;
-	char tempStr[6];
+	char tempStr[15];
+
 	
 	moduleLED(ON);
 
@@ -75,24 +76,26 @@ void readSensor(sensorData_t *data) {
 	
 	rawData = OPT3002_Read(RESULT_REG);
 
-	// copy the raw data into the struct
-	memcpy(data->sensorDataRaw,&rawData,2);
-
 	// Exponent is held in B15:B12
 	exponent = (rawData >> 12) & 0x000F;
 	
 	// Mantissa is held in B11:B0
 	mantissa = rawData & 0x0FFF;
 	
-
-	multiplier = (float)((uint16_t)(1<<exponent) * 1.2f);
+	
+	multiplier = (uint16_t)(1<<exponent) * mantissa ;
 	
 	// optical power = 
 	// 2^(B15:B12) * (B11:B0) * 1.2 nW/cm^2
-	fOpticalPower = (float)mantissa * multiplier;
+	fOpticalPower = (float)multiplier * 1.2f;
+		
 	
 	sprintf(tempStr,"%.1f\n",fOpticalPower);
-	strcat(data->sensorDataStr,tempStr);
+	
+	// copy the raw data into the struct
+	memcpy(data->sensorDataRaw,&tempStr,15);
+	
+	strcpy(data->sensorDataStr,tempStr);
 	
 	moduleLED(OFF);
 }

@@ -131,6 +131,7 @@ int main(void) {
 	
 	_delay_ms(100);
 	initSensor();
+	_delay_ms(100);
 	
 	cmdInit();
 	cmdAdd("SF",setSensorFreq);
