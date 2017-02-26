@@ -219,6 +219,11 @@ void EK_TM4C123GXL_initGPIO(void)
     HWREG(GPIO_PORTF_BASE + GPIO_O_CR) |= GPIO_PIN_0;
     GPIOPinTypeGPIOInput(GPIO_PORTF_BASE, GPIO_PIN_0);
 
+    /* UART2 - PD7 requires unlocking before configuration */
+	HWREG(GPIO_PORTD_BASE + GPIO_O_LOCK) = GPIO_LOCK_KEY;
+	HWREG(GPIO_PORTD_BASE + GPIO_O_CR) |= GPIO_PIN_7;
+	GPIOPinTypeGPIOOutput(GPIO_PORTD_BASE, GPIO_PIN_7);
+
 
     /* Initialize peripheral and pins */
     GPIO_init();

@@ -31,9 +31,8 @@ void initBoard(void) {
 	I2CInit();
 	UARTInit();
 	OCR1A = TIMER_ONE_HZ_NUM;
-	TCCR1B|=(1<<WGM12); // Timer1 in CTC mode
-	TIMSK1|=(1<<OCIE1A); // Enable Timer1, CTC Compare A interrupt
-	TCCR1B|=(1<<CS10) | (1<<CS12); // Enable Timer1 with prescaler of F_CPU/1024 (128uS / tick)	
+	TCCR1B = 0; // turn timer off
+	TCNT1 = 0; // reset count
 }
 
 void initSensor(void) {

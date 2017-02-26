@@ -12,7 +12,7 @@
 
 static uint32_t secondCounter = 0;
 static uint32_t minuteCounter = 0;
-sensorRate_t sensorRate = RATE_ONE_HZ;
+sensorRate_t sensorRate = RATE_OFF;
 static sensorData_t data;
 
 void setSensorFreq(int arg_cnt, char **args);
@@ -131,6 +131,7 @@ int main(void) {
 	
 	_delay_ms(100);
 	initSensor();
+	_delay_ms(100);
 	
 	cmdInit();
 	cmdAdd("SF",setSensorFreq);

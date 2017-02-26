@@ -2,31 +2,21 @@ package com.stemmeter.stem_meter;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.CheckedTextView;
-import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 
@@ -38,6 +28,8 @@ public class SensorsFragment extends ListFragment {
     SensorFragInterface sensorFragInterface;
     private String TAG = "SensorFrag";
     private SensorListAdapter sensorListAdapter;
+
+    private int[] rateReducer = {0,0,0,0};
 
     // Container Activity must implement this interface
     public interface SensorFragInterface {
@@ -52,11 +44,12 @@ public class SensorsFragment extends ListFragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         sensorListAdapter = new SensorListAdapter();
-        // Add the four sensors with disconnected strings to start
-        sensorListAdapter.addItem("Sensor 1 Disconnected");
-        sensorListAdapter.addItem("Sensor 2 Disconnected");
-        sensorListAdapter.addItem("Sensor 3 Disconnected");
-        sensorListAdapter.addItem("Sensor 4 Disconnected");
+
+        // Add the four sensors with no data strings to start
+        sensorListAdapter.addItem("Sensor 1 - No Data");
+        sensorListAdapter.addItem("Sensor 2 - No Data");
+        sensorListAdapter.addItem("Sensor 3 - No Data");
+        sensorListAdapter.addItem("Sensor 4 - No Data");
         setListAdapter(sensorListAdapter);
 
         //getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -83,23 +76,62 @@ public class SensorsFragment extends ListFragment {
         }
     }
 
-    public void printSensorData(final int sensorNum, final String dataStr) {
-        // update the item in the list view
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                sensorListAdapter.updateItem(dataStr, sensorNum - 1);
-            }
-        });
+    public void printSensorData(final int sensorNum, final String dataStr, final int sensorRate) {
+        boolean shouldUpdateSensor = false;
 
+        // Check to see if we need to reduce update rate (5Hz or 10Hz)
+        if(sensorRate == SensorConst.RATE_FIVE_HZ) {
+            // Increase the count
+            rateReducer[sensorNum-1]++;
+
+            // Check to see if count exceeded
+            if(rateReducer[sensorNum-1] >= 5) {
+                rateReducer[sensorNum-1] = 0;
+                // Update rate has been reduced to 1Hz
+                // So update it
+                shouldUpdateSensor = true;
+            }
+        }
+        else if(sensorRate == SensorConst.RATE_TEN_HZ) {
+            // Increase the count
+            rateReducer[sensorNum-1]++;
+
+            // Check to see if count exceeded
+            if(rateReducer[sensorNum-1] >= 10) {
+                rateReducer[sensorNum-1] = 0;
+                // Update rate has been reduced to 1Hz
+                // So update it
+                shouldUpdateSensor = true;
+            }
+        }
+        else {
+            shouldUpdateSensor = true;
+        }
+
+        // Check to see if we should update the text box
+        if(shouldUpdateSensor) {
+            // update the item in the list view
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    sensorListAdapter.updateItem(dataStr, sensorNum - 1);
+                }
+            });
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        // Only read the config settings from the base unit once
+
+        // Update the base unit time
         sensorFragInterface.updateBaseUnitTime();
+        // Read the current sensor config settings from base unit
         sensorFragInterface.readSensorConfigData();
+
     }
+
     private class SensorListAdapter extends BaseAdapter {
 
         private ArrayList<String> sensorData = new ArrayList<String>();
@@ -126,7 +158,21 @@ public class SensorsFragment extends ListFragment {
             // Only update the sensor data if sensor text box is showing
             if(setBooleanList.get(position).isSet()) {
                 sensorData.set(position, item);
-                this.notifyDataSetChanged();
+                // Only update the row we need to. Not the entire list
+                View v = getListView().getChildAt(position - getListView().getFirstVisiblePosition());
+
+                if(v == null) {
+                    return;
+                }
+
+                TextView sensorText = (TextView) v.findViewById(R.id.sensorDataTextView);
+
+                if(sensorText != null) {
+                    sensorText.setText(item);
+                }
+                else {
+                    Log.i(TAG,"TB Null " + position);
+                }
             }
         }
 
@@ -216,7 +262,6 @@ public class SensorsFragment extends ListFragment {
 
                 // set the SD card check box based on its SensorConfig object
                 sdCheck.setChecked(sensorFragInterface.getSensorConfig(position+1).isSDLogging());
-
 
                 // Create an ArrayAdapter using the string array and a default spinner layout
                 ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),

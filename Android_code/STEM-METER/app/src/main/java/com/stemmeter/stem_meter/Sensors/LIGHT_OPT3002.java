@@ -1,5 +1,9 @@
 package com.stemmeter.stem_meter.Sensors;
 
+import android.util.Log;
+
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 /**
@@ -8,6 +12,7 @@ import java.util.ArrayList;
 public class LIGHT_OPT3002 extends Sensor {
     private String[] sensorStringArray;
     private float opticalPower;
+    private String TAG = "Light OPT3002";
 
     public LIGHT_OPT3002(byte[] data, int sensorPosition) {
         super(data, sensorPosition,1);
@@ -16,26 +21,24 @@ public class LIGHT_OPT3002 extends Sensor {
     @Override
     public String[] calcSensorData() {
         String[] dataStr = new String[1];
-        short rawData;
-        short exponent;
-        short mantissa;
-        float multiplier;
 
-        rawData = (short)((short)(data[5]<<8)   | (data[6] & 0xFF));
+        byte[] byteString = new byte[15];
 
-        // Exponent is held in B15:B12
-        exponent = (short)((rawData >> 12) & 0x000F);
+        for(int i=0;i<15;i++) {
+            if( (data[5 + i] == 0) || (data[5 + i] == '\n')) {
+                break;
+            }
+            byteString[i] = data[5 + i];
+        }
 
-        // Mantissa is held in B11:B0
-        mantissa = (short)(rawData & 0x0FFF);
+        try {
+            dataStr[0] =  new String(byteString, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            Log.i(TAG,"String format incorrect");
+        }
 
-        multiplier = ((short)(1<<exponent) * 1.2f);
+        opticalPower = Float.parseFloat(dataStr[0]);
 
-        // optical power =
-        // 2^(B15:B12) * (B11:B0) * 1.2 nW/cm^2
-        opticalPower = (float)mantissa * multiplier;
-
-        dataStr[0] = String.format(java.util.Locale.US,"%.2f",opticalPower);
         sensorStringArray = dataStr;
 
         return dataStr;
@@ -45,7 +48,7 @@ public class LIGHT_OPT3002 extends Sensor {
     public String toString() {
         if(sensorStringArray != null) {
             return "Optical Power\n" +
-                    sensorStringArray[0] + "nW/cm^2\n";
+                    sensorStringArray[0] + "uW/cm" +  "\u00B2";
         }
         else {
             return "NULL";

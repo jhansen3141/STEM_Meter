@@ -13,7 +13,6 @@
 #include "sensorCommon.h"
 
 #define SENSOR_NUMBER LIGHT_OPT3002
-#define SENSOR_DEFAULT_RATE RATE_ONE_HZ
 #define NUMBER_DATA_POINTS	(1)
 #define SENSOR_STRING "Optical Power"
 #define SENSOR_STR_LEN	(15)
