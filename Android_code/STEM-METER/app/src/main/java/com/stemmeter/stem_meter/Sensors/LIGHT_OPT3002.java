@@ -3,6 +3,7 @@ package com.stemmeter.stem_meter.Sensors;
 import android.util.Log;
 
 import com.stemmeter.stem_meter.GraphSettings;
+import com.stemmeter.stem_meter.SensorConst;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
@@ -16,8 +17,23 @@ public class LIGHT_OPT3002 extends Sensor {
     private float opticalPower;
     private String TAG = "Light OPT3002";
 
+    private GraphSettings graphSettings;
+    private int units = SensorConst.LIGHT_UNIT_UW;
+    private ArrayList<String> unitList;
+    private ArrayList<String> dataPointList;
+
     public LIGHT_OPT3002(byte[] data, int sensorPosition) {
         super(data, sensorPosition,1);
+
+        unitList = new ArrayList<>();
+        dataPointList = new ArrayList<>();
+
+        unitList.add("\u00B5" + "W/cm" +  "\u00B2");
+        unitList.add("Lux");
+
+        dataPointList.add("Optical Power");
+
+        graphSettings = new GraphSettings(unitList,dataPointList);
     }
 
     @Override
@@ -41,6 +57,13 @@ public class LIGHT_OPT3002 extends Sensor {
 
         opticalPower = Float.parseFloat(dataStr[0]);
 
+        switch(units) {
+            // Lux
+            case SensorConst.LIGHT_UNIT_LUX:
+                opticalPower *= 6.83f;
+                break;
+        }
+
         sensorStringArray = dataStr;
 
         return dataStr;
@@ -49,8 +72,9 @@ public class LIGHT_OPT3002 extends Sensor {
     @Override
     public String toString() {
         if(sensorStringArray != null) {
+            String unitString = unitList.get(units);
             return "Optical Power\n" +
-                    sensorStringArray[0] + "uW/cm" +  "\u00B2";
+                    sensorStringArray[0] + unitString;
         }
         else {
             return "NULL";
@@ -66,11 +90,11 @@ public class LIGHT_OPT3002 extends Sensor {
 
     @Override
     public GraphSettings getGraphSettings() {
-        return null;
+        return graphSettings;
     }
 
     @Override
     public void setGraphUnits(int units) {
-
+        this.units = units;
     }
 }

@@ -1,6 +1,7 @@
 package com.stemmeter.stem_meter.Sensors;
 
 import com.stemmeter.stem_meter.GraphSettings;
+import com.stemmeter.stem_meter.SensorConst;
 
 import java.util.ArrayList;
 
@@ -9,27 +10,47 @@ import java.util.ArrayList;
  */
 public class TEMP_SI7021 extends Sensor {
     private String[] sensorStringArray;
-    private float tempF, tempC, humidity;
+    private float temp, humidity;
+
+    private GraphSettings graphSettings;
+    private int units = SensorConst.TEMP_UNIT_C;
+    private ArrayList<String> unitList;
+    private ArrayList<String> dataPointList;
 
     public TEMP_SI7021(byte[] data, int sensorPosition) {
-        super(data, sensorPosition,3);
+        super(data, sensorPosition,2);
+
+        unitList = new ArrayList<>();
+        dataPointList = new ArrayList<>();
+
+        unitList.add("°C");
+        unitList.add("°F");
+
+        dataPointList.add("Temp");
+        dataPointList.add("Humidity");
+
+        graphSettings = new GraphSettings(unitList,dataPointList);
     }
 
     @Override
     public String[] calcSensorData() {
 
-        String[] dataStr = new String[3];
+        String[] dataStr = new String[2];
 
         short humidityRaw = (short)((data[5]<<8)   | (data[6] & 0xFF));
         short tempRaw = (short)((data[7]<<8)   | (data[8] & 0xFF));
 
         humidity = ((125.0f*(float)humidityRaw) / 65536.0f) - 6.0f;
-        tempC = ((175.72f*(float)tempRaw) / 65536.0f) - 46.85f;
-        tempF = (float)((tempC * 1.8f) + 32.0f);
+        temp = ((175.72f*(float)tempRaw) / 65536.0f) - 46.85f;
 
-        dataStr[0] = String.format(java.util.Locale.US,"%.2f",tempC);
-        dataStr[1] = String.format(java.util.Locale.US,"%.2f",tempF);
-        dataStr[2] = String.format(java.util.Locale.US,"%.2f",humidity);
+        switch(units) {
+            case SensorConst.TEMP_UNIT_F:
+                temp = ((temp * 1.8f) + 32.0f);
+                break;
+        }
+
+        dataStr[0] = String.format(java.util.Locale.US,"%.2f",temp);
+        dataStr[1] = String.format(java.util.Locale.US,"%.2f",humidity);
 
         sensorStringArray = dataStr;
         return dataStr;
@@ -38,27 +59,26 @@ public class TEMP_SI7021 extends Sensor {
     @Override
     public ArrayList<Float> getGraphData() {
         ArrayList<Float> graphData = new ArrayList<>();
-        graphData.add(tempC);
-        graphData.add(tempF);
+        graphData.add(temp);
         graphData.add(humidity);
         return graphData;
     }
 
     @Override
     public GraphSettings getGraphSettings() {
-        return null;
+        return graphSettings;
     }
 
     @Override
     public void setGraphUnits(int units) {
-
+        this.units = units;
     }
 
     @Override
     public String toString() {
         // TODO add units for humidity
-        return "Temperature: " + sensorStringArray[0] + "\u00b0C\n" +
-                "Temperature: " + sensorStringArray[1] + "\u00b0F\n" +
-                "Humidity: " + sensorStringArray[2] + "\n";
+        String unitsString = unitList.get(units);
+        return "Temperature: " + sensorStringArray[0] + unitsString + "\n" +
+                "Humidity: " + sensorStringArray[1] + "";
     }
 }

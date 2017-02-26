@@ -1,6 +1,7 @@
 package com.stemmeter.stem_meter.Sensors;
 
 import com.stemmeter.stem_meter.GraphSettings;
+import com.stemmeter.stem_meter.SensorConst;
 
 import java.util.ArrayList;
 
@@ -13,8 +14,26 @@ public class PRESSURE_MPL3115A2 extends Sensor {
     private float airPressure;
     private double altitude;
 
+    private GraphSettings graphSettings;
+    private int units = SensorConst.PRESSURE_UNIT_PA;
+    private ArrayList<String> unitList;
+    private ArrayList<String> dataPointList;
+
     public PRESSURE_MPL3115A2(byte[] data, int sensorPosition) {
         super(data, sensorPosition,2);
+
+        unitList = new ArrayList<>();
+        dataPointList = new ArrayList<>();
+
+        // Pascals
+        unitList.add("Pa");
+        // 100 Pascals
+        unitList.add("hPa");
+
+        dataPointList.add("Pressure");
+        dataPointList.add("Altitude");
+
+        graphSettings = new GraphSettings(unitList,dataPointList);
     }
 
     @Override
@@ -38,6 +57,11 @@ public class PRESSURE_MPL3115A2 extends Sensor {
 
         airPressure += (float)pressure;
 
+        switch(units) {
+            case SensorConst.PRESSURE_UNIT_HPA:
+                airPressure /= 100;
+                break;
+        }
         altitude = 7000.0f * Math.log(101325.0f/airPressure);
 
         altitude *= 3.28084;
@@ -52,9 +76,9 @@ public class PRESSURE_MPL3115A2 extends Sensor {
     @Override
     public String toString() {
         if(sensorStringArray != null) {
-            // TODO add units
+            String unitsString = unitList.get(units);
             return "Air Pressure\n" +
-                    sensorStringArray[0] + " Pa\n" +
+                    sensorStringArray[0] + unitsString + "\n" +
                     sensorStringArray[1] + " Ft";
         }
         else {
@@ -72,11 +96,11 @@ public class PRESSURE_MPL3115A2 extends Sensor {
 
     @Override
     public GraphSettings getGraphSettings() {
-        return null;
+        return graphSettings;
     }
 
     @Override
     public void setGraphUnits(int units) {
-
+        this.units = units;
     }
 }

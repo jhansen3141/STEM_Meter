@@ -17,6 +17,7 @@ public class Accel_MPU6050 extends Sensor {
     private int ACCEL_SENSE_COLOR = Color.BLUE;
     private String[] sensorStringArray;
     private float xAccelF,yAccelF,zAccelF;
+
     private GraphSettings graphSettings;
     private int units = SensorConst.ACCEL_UNIT_G;
     private ArrayList<String> unitList;
@@ -32,9 +33,9 @@ public class Accel_MPU6050 extends Sensor {
         unitList.add("m/s" + "\u00B2");
         unitList.add("f/s" + "\u00B2");
 
-        dataPointList.add("X");
-        dataPointList.add("Y");
-        dataPointList.add("Z");
+        dataPointList.add("Accel X");
+        dataPointList.add("Accel Y");
+        dataPointList.add("Accel Z");
 
         graphSettings = new GraphSettings(unitList,dataPointList);
 
@@ -56,11 +57,13 @@ public class Accel_MPU6050 extends Sensor {
         zAccelF = zAccel / ACCEL_SENSE;
 
         switch (units) {
+            // meters per second squared
             case SensorConst.ACCEL_UNIT_MS:
                 xAccelF *= 9.80665f;
                 yAccelF *= 9.80665f;
                 zAccelF *= 9.80665f;
                 break;
+            // feet per second squared
             case SensorConst.ACCEL_UNIT_FS:
                 xAccelF *= 32.1740f;
                 yAccelF *= 32.1740f;
@@ -102,7 +105,6 @@ public class Accel_MPU6050 extends Sensor {
     public String toString() {
         if(sensorStringArray != null) {
             String unitString = unitList.get(units);
-
 
             return  "Acceleration\n" +
                     " X:  " + sensorStringArray[0] + unitString +"\n" +

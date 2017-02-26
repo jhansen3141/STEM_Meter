@@ -10,7 +10,6 @@ public final class SensorConst {
     public static final int SENSOR_3 = 3;
     public static final int SENSOR_4 = 4;
 
-
     public static final int INVALID_SENSOR = 0;
     public static final int TEMP_MCP9808 = 1;
     public static final int ACCEL_MPU6050 = 2;
@@ -35,4 +34,34 @@ public final class SensorConst {
     public static final int ACCEL_DP_X = 0;
     public static final int ACCEL_DP_Y = 1;
     public static final int ACCEL_DP_Z = 2;
+
+    public static final int GYRO_UNIT_DS = 0; // degree/s
+    public static final int GYRO_UNIT_RS = 1; // rads/s
+
+    public static final int GYRO_DP_X = 0;
+    public static final int GYRO_DP_Y = 1;
+    public static final int GYRO_DP_Z = 2;
+
+    public static final int LIGHT_UNIT_UW = 0; // uW/cm^2
+    public static final int LIGHT_UNIT_LUX = 1; // Lux
+
+    public static final int LIGHT_DP_ONLY = 0;
+
+    public static final int MAG_UNIT_T = 0; // Telsa
+
+    public static final int MAG_DP_X = 0;
+    public static final int MAG_DP_Y = 1;
+    public static final int MAG_DP_Z = 2;
+
+    public static final int TEMP_UNIT_C = 0;
+    public static final int TEMP_UNIT_F = 1;
+
+    public static final int TEMP_DP_T = 0;  // Temperature
+    public static final int TEMP_DP_H = 1; // Humidity
+
+    public static final int PRESSURE_UNIT_PA = 0;
+    public static final int PRESSURE_UNIT_HPA = 1;
+
+    public static final int PRESSURE_DP_PRESS = 0;
+    public static final int PRESSURE_DP_ALT = 1;
 }

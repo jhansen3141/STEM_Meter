@@ -1,6 +1,7 @@
 package com.stemmeter.stem_meter.Sensors;
 
 import com.stemmeter.stem_meter.GraphSettings;
+import com.stemmeter.stem_meter.SensorConst;
 
 import java.util.ArrayList;
 
@@ -11,16 +12,31 @@ import java.util.ArrayList;
 public class Temp_MCP9808 extends Sensor {
 
     private String[] sensorStringArray;
-    private float tempF, tempC;
+    private float temp;
+
+    private GraphSettings graphSettings;
+    private int units = SensorConst.TEMP_UNIT_C;
+    private ArrayList<String> unitList;
+    private ArrayList<String> dataPointList;
 
     public Temp_MCP9808(byte[] data, int sensorPosition) {
         super(data, sensorPosition,2);
+
+        unitList = new ArrayList<>();
+        dataPointList = new ArrayList<>();
+
+        unitList.add("°C");
+        unitList.add("°F");
+
+        dataPointList.add("Temp");
+
+        graphSettings = new GraphSettings(unitList,dataPointList);
     }
 
     @Override
     public String[] calcSensorData() {
-        double temperature = 0;
-        String[] dataStr = new String[2];
+        double temperature;
+        String[] dataStr = new String[1];
         short tempRaw = (short)((data[5]<<8)   | (data[6] & 0xFF));
 
         temperature = tempRaw & 0x0FFF;
@@ -28,11 +44,15 @@ public class Temp_MCP9808 extends Sensor {
         if ((tempRaw & 0x1000) != 0) {
             temperature -= 256;
         }
-        tempC = (float)temperature;
-        tempF = (float)((temperature * 1.8) + 32.0);
+        temp = (float)temperature;
 
-        dataStr[0] = String.format(java.util.Locale.US,"%.2f",tempC);
-        dataStr[1] = String.format(java.util.Locale.US,"%.2f",tempF);
+        switch(units) {
+            case SensorConst.TEMP_UNIT_F:
+                temp = (float)((temperature * 1.8) + 32.0);
+                break;
+        }
+
+        dataStr[0] = String.format(java.util.Locale.US,"%.2f",temp);
 
         sensorStringArray = dataStr;
         return dataStr;
@@ -41,24 +61,24 @@ public class Temp_MCP9808 extends Sensor {
     @Override
     public ArrayList<Float> getGraphData() {
         ArrayList<Float> graphData = new ArrayList<>();
-        graphData.add(tempF);
-        graphData.add(tempC);
+        graphData.add(temp);
         return graphData;
     }
 
     @Override
     public GraphSettings getGraphSettings() {
-        return null;
+        return graphSettings;
     }
 
     @Override
     public void setGraphUnits(int units) {
-
+        this.units = units;
     }
 
     @Override
     public String toString() {
-        return "Temperature: " + sensorStringArray[1] + "\u00b0F";
+        String unitsString = unitList.get(units);
+        return "Temperature: " + sensorStringArray[0] + unitsString;
     }
 
 

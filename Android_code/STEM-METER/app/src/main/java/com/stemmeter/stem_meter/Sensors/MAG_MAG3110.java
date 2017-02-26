@@ -3,6 +3,7 @@ package com.stemmeter.stem_meter.Sensors;
 import android.util.Log;
 
 import com.stemmeter.stem_meter.GraphSettings;
+import com.stemmeter.stem_meter.SensorConst;
 
 import java.util.ArrayList;
 
@@ -13,11 +14,27 @@ public class MAG_MAG3110 extends Sensor {
 
     private String[] sensorStringArray;
     private float xMagF,yMagF,zMagF;
-    private double heading;
     private final float MAG_SENSE = 10.0f;
+
+    private GraphSettings graphSettings;
+    private int units = SensorConst.MAG_UNIT_T;
+    private ArrayList<String> unitList;
+    private ArrayList<String> dataPointList;
 
     public MAG_MAG3110(byte[] data, int sensorPosition) {
         super(data, sensorPosition,4);
+
+        unitList = new ArrayList<>();
+        dataPointList = new ArrayList<>();
+
+        // micro tesla
+        unitList.add("uT");
+
+        dataPointList.add("Mag X");
+        dataPointList.add("Mag Y");
+        dataPointList.add("Mag Z");
+
+        graphSettings = new GraphSettings(unitList,dataPointList);
     }
 
     @Override
@@ -33,20 +50,9 @@ public class MAG_MAG3110 extends Sensor {
         zMagF = (float)zMag / MAG_SENSE;
 
 
-
-//        heading = Math.atan2((double)xMagF, (double)-yMagF);
-//
-//        if(heading < 0) {
-//            heading += 2*Math.PI;
-//        }
-//
-//        heading *= 180 / Math.PI;
-
-
         dataStr[0] = String.format(java.util.Locale.US,"%.2f",xMagF);
         dataStr[1] = String.format(java.util.Locale.US,"%.2f",yMagF);
         dataStr[2] = String.format(java.util.Locale.US,"%.2f",zMagF);
-       // dataStr[3] = String.format(java.util.Locale.US,"%.2f",heading);
 
         sensorStringArray = dataStr;
 
@@ -56,12 +62,11 @@ public class MAG_MAG3110 extends Sensor {
     @Override
     public String toString() {
         if(sensorStringArray != null) {
-            // TODO add units
+            String unitString = unitList.get(units);
             return "Magnetometer\n" +
-                    " X:  " + sensorStringArray[0] + " \u00B5" + "T\n" +
-                    " Y:  " + sensorStringArray[1] + " \u00B5" + "T\n" +
-                    " Z:  " + sensorStringArray[2] + " \u00B5" + "T";
-                   // " Heading: " + sensorStringArray[3];
+                    " X:  " + sensorStringArray[0] + unitString + "\n" +
+                    " Y:  " + sensorStringArray[1] + unitString + "\n" +
+                    " Z:  " + sensorStringArray[2] + unitString;
         }
         else {
             return "NULL";
@@ -74,17 +79,16 @@ public class MAG_MAG3110 extends Sensor {
         graphData.add(xMagF);
         graphData.add(yMagF);
         graphData.add(zMagF);
-        graphData.add((float)heading);
         return graphData;
     }
 
     @Override
     public GraphSettings getGraphSettings() {
-        return null;
+        return graphSettings;
     }
 
     @Override
     public void setGraphUnits(int units) {
-
+        this.units = units;
     }
 }
