@@ -21,7 +21,6 @@
         ap:lineLabelRotationBottom="-45"
         />-->
 </LinearLayout>
-
 <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -29,21 +28,36 @@
     android:layout_weight="1">
 
     <ImageButton
-        android:id="@+id/CamBtn"
-        android:layout_width="wrap_content"
+        android:id="@+id/GraphSettingsBtn"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginEnd="5dp"
+        android:layout_weight="1"
         android:focusable="false"
-        android:src="@drawable/ic_menu_camera"
+        android:src="@drawable/ic_settings_black_24dp"
+        android:focusableInTouchMode="false"
+        android:layout_gravity="center"
+        />
+
+    <ImageButton
+        android:id="@+id/GraphStopBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="5dp"
+        android:layout_marginEnd="0dp"
+        android:focusable="false"
+        android:src="@drawable/ic_stop_black_24dp"
         android:focusableInTouchMode="false"
         android:layout_gravity="center"
         />
 
     <ToggleButton
         android:id="@+id/PlayPauseBtn"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
+        android:layout_weight="1"
         android:focusable="false"
         android:background="@drawable/ic_play_arrow_black_24dp"
         android:checked="false"
@@ -55,9 +69,11 @@
 
     <ImageButton
         android:id="@+id/ZeroBtn"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
+        android:layout_weight="1"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="5dp"
         android:focusable="false"
         android:src="@drawable/ic_exposure_zero_black_24dp"
         android:focusableInTouchMode="false"
@@ -66,9 +82,11 @@
 
     <ImageButton
         android:id="@+id/SaveBtn"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
+        android:layout_weight="1"
+        android:layout_marginStart="5dp"
+        android:layout_marginEnd="5dp"
         android:focusable="false"
         android:src="@drawable/ic_save_black_24dp"
         android:focusableInTouchMode="false"

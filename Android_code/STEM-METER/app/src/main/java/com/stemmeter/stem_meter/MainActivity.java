@@ -45,7 +45,7 @@ import java.util.Queue;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, ConnectFragment.ConnectFragInterface, SensorsFragment.SensorFragInterface, GraphFragment.GraphFragInterface, DisplayFragment.DisplayFragInterface {
+        implements NavigationView.OnNavigationItemSelectedListener, ConnectFragment.ConnectFragInterface, SensorsFragment.SensorFragInterface, GraphFragment.GraphFragInterface, DisplayFragment.DisplayFragInterface, GraphSettingsFragment.GraphSettingsFragInterface {
 
     private String TAG = "MainActivity";
     private static final int STATE_DISCONNECTED = 0;

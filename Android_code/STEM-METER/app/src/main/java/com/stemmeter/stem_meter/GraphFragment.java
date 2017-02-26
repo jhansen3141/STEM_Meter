@@ -9,6 +9,7 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -53,6 +54,8 @@ public class GraphFragment extends Fragment {
     public static final int GRAPH_STATE_PLAY = 1;
     public static final int GRAPH_STATE_PAUSE = 2;
 
+    private final String GRAPHSETTINGS_FRAG_TAG = "GraphSettingsFragTag";
+
     // Container Activity must implement this interface
     public interface GraphFragInterface {
         public ArrayList<LineData> getSavedList();
@@ -66,6 +69,7 @@ public class GraphFragment extends Fragment {
     private LineChart mChart;
     private ToggleButton playPauseBtn;
     private ImageButton saveBtn;
+    private ImageButton settingsBtn;
     private long currentIndex = 0;
 
     @Override
@@ -128,6 +132,19 @@ public class GraphFragment extends Fragment {
         rightAxis.setEnabled(false);
 
         //mChart.setVisibleXRangeMaximum(10);
+        settingsBtn = (ImageButton) view.findViewById(R.id.GraphSettingsBtn);
+        settingsBtn.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                GraphSettingsFragment graphSettingsFragment = new GraphSettingsFragment();
+                transaction.replace(R.id.fragment_container, graphSettingsFragment, GRAPHSETTINGS_FRAG_TAG);
+                //transaction.addToBackStack(null);
+                transaction.commit();
+            }
+        });
+
 
         saveBtn = (ImageButton) view.findViewById(R.id.SaveBtn);
         saveBtn.setOnClickListener(new View.OnClickListener() {
