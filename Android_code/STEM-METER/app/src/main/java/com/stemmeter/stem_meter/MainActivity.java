@@ -116,6 +116,8 @@ public class MainActivity extends AppCompatActivity
 
     private GraphConfig graphConfig;
 
+    private Menu mainMenu;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -167,9 +169,12 @@ public class MainActivity extends AppCompatActivity
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, 0);
             printConnectionStat("Disconnected");
+            mainMenu.findItem(R.id.connection_icon).setIcon(R.drawable.disconnected_icon);
         } else {
             // TODO change this from hard-coded MAC address to name of BLE device or let user choose from list
             boardDevice = mBluetoothAdapter.getRemoteDevice(DEVICE_MAC_STR);
+
+            mainMenu.findItem(R.id.connection_icon).setIcon(R.drawable.ble_connecting);
             if (boardDevice == null) {
                 printConnectionStat("Scanning for board...");
                 scanLeDevice(true);
@@ -242,6 +247,14 @@ public class MainActivity extends AppCompatActivity
                         mConnectionState = STATE_DISCONNECTED;
                         Log.i(TAG, "Disconnected from GATT server.");
                         printConnectionStat("Disconnected from GATT server");
+
+                        // change the connection status icon to disconnected
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mainMenu.findItem(R.id.connection_icon).setIcon(R.drawable.disconnected_icon);
+                            }
+                        });
                     }
                 }
 
@@ -291,6 +304,14 @@ public class MainActivity extends AppCompatActivity
 
                         serviceDiscovered = true;
                         printConnectionStat("Connected");
+
+                        // change the connection status icon to connected
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mainMenu.findItem(R.id.connection_icon).setIcon(R.drawable.ble_connected);
+                            }
+                        });
 
 
                     } else {
@@ -414,256 +435,276 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    void handleSensor1Data(byte sensor1Data[]) {
-       // Log.i(TAG, "HANDLE S1");
-        if (sensor1Data[0] == SensorConst.INVALID_SENSOR) {
-            return;
-        } else {
-            // check to see which sensor is connected
-            // sensor data type is held in first byte of sensor data
-            switch (sensor1Data[0]) {
-                case SensorConst.ACCEL_MPU6050:
-                    // check to see if sensor is already "installed"
-                    if(sensor1 == null || !(sensor1 instanceof Accel_MPU6050)) {
-                        sensor1 = new Accel_MPU6050(sensor1Data, 1);
-                    }
-                    break;
-                case SensorConst.TEMP_MCP9808:
-                    // check to see if sensor is already "installed"
-                    if(sensor1 == null || !(sensor1 instanceof Temp_MCP9808)) {
-                        sensor1 = new Temp_MCP9808(sensor1Data, 1);
-                    }
-                    break;
-                case SensorConst.GYRO_MPU6050:
-                    // check to see if sensor is already "installed"
-                    if(sensor1 == null || !(sensor1 instanceof Gyro_MPU6050)) {
-                        sensor1 = new Gyro_MPU6050(sensor1Data, 1);
-                    }
-                    break;
-                case SensorConst.LIGHT_OPT3002:
-                    // check to see if sensor is already "installed"
-                    if(sensor1 == null || !(sensor1 instanceof LIGHT_OPT3002)) {
-                        sensor1 = new LIGHT_OPT3002(sensor1Data, 1);
-                    }
-                    break;
-                case SensorConst.MAG_MAG3110:
-                    // check to see if sensor is already "installed"
-                    if(sensor1 == null || !(sensor1 instanceof MAG_MAG3110)) {
-                        sensor1 = new MAG_MAG3110(sensor1Data, 1);
-                    }
-                    break;
-                case SensorConst.PRESSURE_MPL3115A2:
-                    // check to see if sensor is already "installed"
-                    if(sensor1 == null || !(sensor1 instanceof PRESSURE_MPL3115A2)) {
-                        sensor1 = new PRESSURE_MPL3115A2(sensor1Data, 1);
-                    }
-                    break;
-                case SensorConst.TEMP_SI7021:
-                    // check to see if sensor is already "installed"
-                    if(sensor1 == null || !(sensor1 instanceof TEMP_SI7021)) {
-                        sensor1 = new TEMP_SI7021(sensor1Data, 1);
-                    }
-                    break;
-                default:
-                    Log.i(TAG,"Invalid sensor type detected");
+    void handleSensor1Data(final byte sensor1Data[]) {
+        // Start a new thread to handle updating the sensor data
+        new Thread(new Runnable() {
+            public void run() {
+                // Log.i(TAG, "HANDLE S1");
+                if (sensor1Data[0] == SensorConst.INVALID_SENSOR) {
                     return;
+                } else {
+                    // check to see which sensor is connected
+                    // sensor data type is held in first byte of sensor data
+                    switch (sensor1Data[0]) {
+                        case SensorConst.ACCEL_MPU6050:
+                            // check to see if sensor is already "installed"
+                            if(sensor1 == null || !(sensor1 instanceof Accel_MPU6050)) {
+                                sensor1 = new Accel_MPU6050(sensor1Data, 1);
+                            }
+                            break;
+                        case SensorConst.TEMP_MCP9808:
+                            // check to see if sensor is already "installed"
+                            if(sensor1 == null || !(sensor1 instanceof Temp_MCP9808)) {
+                                sensor1 = new Temp_MCP9808(sensor1Data, 1);
+                            }
+                            break;
+                        case SensorConst.GYRO_MPU6050:
+                            // check to see if sensor is already "installed"
+                            if(sensor1 == null || !(sensor1 instanceof Gyro_MPU6050)) {
+                                sensor1 = new Gyro_MPU6050(sensor1Data, 1);
+                            }
+                            break;
+                        case SensorConst.LIGHT_OPT3002:
+                            // check to see if sensor is already "installed"
+                            if(sensor1 == null || !(sensor1 instanceof LIGHT_OPT3002)) {
+                                sensor1 = new LIGHT_OPT3002(sensor1Data, 1);
+                            }
+                            break;
+                        case SensorConst.MAG_MAG3110:
+                            // check to see if sensor is already "installed"
+                            if(sensor1 == null || !(sensor1 instanceof MAG_MAG3110)) {
+                                sensor1 = new MAG_MAG3110(sensor1Data, 1);
+                            }
+                            break;
+                        case SensorConst.PRESSURE_MPL3115A2:
+                            // check to see if sensor is already "installed"
+                            if(sensor1 == null || !(sensor1 instanceof PRESSURE_MPL3115A2)) {
+                                sensor1 = new PRESSURE_MPL3115A2(sensor1Data, 1);
+                            }
+                            break;
+                        case SensorConst.TEMP_SI7021:
+                            // check to see if sensor is already "installed"
+                            if(sensor1 == null || !(sensor1 instanceof TEMP_SI7021)) {
+                                sensor1 = new TEMP_SI7021(sensor1Data, 1);
+                            }
+                            break;
+                        default:
+                            Log.i(TAG,"Invalid sensor type detected");
+                            return;
+                    }
+                }
+                // update the sensor data
+                sensor1.updateData(sensor1Data);
+                // perform calculations on data
+                sensor1.calcSensorData();
+                // post the data to the screen
+                postSensorData(sensor1);
             }
-        }
-        // update the sensor data
-        sensor1.updateData(sensor1Data);
-        // perform calculations on data
-        sensor1.calcSensorData();
-        // post the data to the screen
-        postSensorData(sensor1);
+        }).start();
     }
 
-    void handleSensor2Data(byte sensor2Data[]) {
-       // Log.i(TAG, "HANDLE S2");
-        if (sensor2Data[0] == SensorConst.INVALID_SENSOR) {
-            return;
-        } else {
-            // check to see which sensor is connected
-            // sensor data type is held in first byte of sensor data
-            switch (sensor2Data[0]) {
-                case SensorConst.ACCEL_MPU6050:
-                    // check to see if sensor is already "installed"
-                    if(sensor2 == null || !(sensor2 instanceof Accel_MPU6050)) {
-                        sensor2 = new Accel_MPU6050(sensor2Data, 2);
-                    }
-                    break;
-                case SensorConst.TEMP_MCP9808:
-                    // check to see if sensor is already "installed"
-                    if(sensor2 == null || !(sensor2 instanceof Temp_MCP9808)) {
-                        sensor2 = new Temp_MCP9808(sensor2Data, 2);
-                    }
-                    break;
-                case SensorConst.GYRO_MPU6050:
-                    // check to see if sensor is already "installed"
-                    if(sensor2 == null || !(sensor2 instanceof Gyro_MPU6050)) {
-                        sensor2 = new Gyro_MPU6050(sensor2Data, 2);
-                    }
-                    break;
-                case SensorConst.LIGHT_OPT3002:
-                    // check to see if sensor is already "installed"
-                    if(sensor2 == null || !(sensor2 instanceof LIGHT_OPT3002)) {
-                        sensor2 = new LIGHT_OPT3002(sensor2Data, 2);
-                    }
-                    break;
-                case SensorConst.MAG_MAG3110:
-                    // check to see if sensor is already "installed"
-                    if(sensor2 == null || !(sensor2 instanceof MAG_MAG3110)) {
-                        sensor2 = new MAG_MAG3110(sensor2Data, 2);
-                    }
-                    break;
-                case SensorConst.PRESSURE_MPL3115A2:
-                    // check to see if sensor is already "installed"
-                    if(sensor2 == null || !(sensor2 instanceof PRESSURE_MPL3115A2)) {
-                        sensor2 = new PRESSURE_MPL3115A2(sensor2Data, 2);
-                    }
-                    break;
-                case SensorConst.TEMP_SI7021:
-                    // check to see if sensor is already "installed"
-                    if(sensor2 == null || !(sensor2 instanceof TEMP_SI7021)) {
-                        sensor2 = new TEMP_SI7021(sensor2Data, 2);
-                    }
-                    break;
-                default:
-                    Log.i(TAG,"Invalid sensor type detected");
+    void handleSensor2Data(final byte sensor2Data[]) {
+        // Create new thread to update sensor data
+        new Thread(new Runnable() {
+            public void run() {
+                // Log.i(TAG, "HANDLE S2");
+                if (sensor2Data[0] == SensorConst.INVALID_SENSOR) {
                     return;
+                } else {
+                    // check to see which sensor is connected
+                    // sensor data type is held in first byte of sensor data
+                    switch (sensor2Data[0]) {
+                        case SensorConst.ACCEL_MPU6050:
+                            // check to see if sensor is already "installed"
+                            if(sensor2 == null || !(sensor2 instanceof Accel_MPU6050)) {
+                                sensor2 = new Accel_MPU6050(sensor2Data, 2);
+                            }
+                            break;
+                        case SensorConst.TEMP_MCP9808:
+                            // check to see if sensor is already "installed"
+                            if(sensor2 == null || !(sensor2 instanceof Temp_MCP9808)) {
+                                sensor2 = new Temp_MCP9808(sensor2Data, 2);
+                            }
+                            break;
+                        case SensorConst.GYRO_MPU6050:
+                            // check to see if sensor is already "installed"
+                            if(sensor2 == null || !(sensor2 instanceof Gyro_MPU6050)) {
+                                sensor2 = new Gyro_MPU6050(sensor2Data, 2);
+                            }
+                            break;
+                        case SensorConst.LIGHT_OPT3002:
+                            // check to see if sensor is already "installed"
+                            if(sensor2 == null || !(sensor2 instanceof LIGHT_OPT3002)) {
+                                sensor2 = new LIGHT_OPT3002(sensor2Data, 2);
+                            }
+                            break;
+                        case SensorConst.MAG_MAG3110:
+                            // check to see if sensor is already "installed"
+                            if(sensor2 == null || !(sensor2 instanceof MAG_MAG3110)) {
+                                sensor2 = new MAG_MAG3110(sensor2Data, 2);
+                            }
+                            break;
+                        case SensorConst.PRESSURE_MPL3115A2:
+                            // check to see if sensor is already "installed"
+                            if(sensor2 == null || !(sensor2 instanceof PRESSURE_MPL3115A2)) {
+                                sensor2 = new PRESSURE_MPL3115A2(sensor2Data, 2);
+                            }
+                            break;
+                        case SensorConst.TEMP_SI7021:
+                            // check to see if sensor is already "installed"
+                            if(sensor2 == null || !(sensor2 instanceof TEMP_SI7021)) {
+                                sensor2 = new TEMP_SI7021(sensor2Data, 2);
+                            }
+                            break;
+                        default:
+                            Log.i(TAG,"Invalid sensor type detected");
+                            return;
+                    }
+                }
+                // update the sensor data
+                sensor2.updateData(sensor2Data);
+                // perform calculations on data
+                sensor2.calcSensorData();
+                // post the data to the screen
+                postSensorData(sensor2);
             }
-        }
-        // update the sensor data
-        sensor2.updateData(sensor2Data);
-        // perform calculations on data
-        sensor2.calcSensorData();
-        // post the data to the screen
-        postSensorData(sensor2);
+        }).start();
     }
 
-    void handleSensor3Data(byte sensor3Data[]) {
-       // Log.i(TAG, "HANDLE S3");
-        if (sensor3Data[0] == SensorConst.INVALID_SENSOR) {
-            return;
-        } else {
-            // check to see which sensor is connected
-            // sensor data type is held in first byte of sensor data
-            switch (sensor3Data[0]) {
-                case SensorConst.ACCEL_MPU6050:
-                    // check to see if sensor is already "installed"
-                    if(sensor3 == null || !(sensor3 instanceof Accel_MPU6050)) {
-                        sensor3 = new Accel_MPU6050(sensor3Data, 3);
-                    }
-                    break;
-                case SensorConst.TEMP_MCP9808:
-                    // check to see if sensor is already "installed"
-                    if(sensor3 == null || !(sensor3 instanceof Temp_MCP9808)) {
-                        sensor3 = new Temp_MCP9808(sensor3Data, 3);
-                    }
-                    break;
-                case SensorConst.GYRO_MPU6050:
-                    // check to see if sensor is already "installed
-                    if(sensor3 == null || !(sensor3 instanceof Gyro_MPU6050)) {
-                        sensor3 = new Gyro_MPU6050(sensor3Data, 3);
-                    }
-                    break;
-                case SensorConst.LIGHT_OPT3002:
-                    // check to see if sensor is already "installed"
-                    if(sensor3 == null || !(sensor3 instanceof LIGHT_OPT3002)) {
-                        sensor3 = new LIGHT_OPT3002(sensor3Data, 3);
-                    }
-                    break;
-                case SensorConst.MAG_MAG3110:
-                    // check to see if sensor is already "installed"
-                    if(sensor3 == null || !(sensor3 instanceof MAG_MAG3110)) {
-                        sensor3 = new MAG_MAG3110(sensor3Data, 3);
-                    }
-                    break;
-                case SensorConst.PRESSURE_MPL3115A2:
-                    // check to see if sensor is already "installed"
-                    if(sensor3 == null || !(sensor3 instanceof PRESSURE_MPL3115A2)) {
-                        sensor3 = new PRESSURE_MPL3115A2(sensor3Data, 3);
-                    }
-                    break;
-                case SensorConst.TEMP_SI7021:
-                    // check to see if sensor is already "installed"
-                    if(sensor3 == null || !(sensor3 instanceof TEMP_SI7021)) {
-                        sensor3 = new TEMP_SI7021(sensor3Data, 3);
-                    }
-                    break;
-                default:
-                    Log.i(TAG,"Invalid sensor type detected");
+    void handleSensor3Data(final byte sensor3Data[]) {
+        // Create new thread to update sensor data
+        new Thread(new Runnable() {
+            public void run() {
+                // Log.i(TAG, "HANDLE S3");
+                if (sensor3Data[0] == SensorConst.INVALID_SENSOR) {
                     return;
+                } else {
+                    // check to see which sensor is connected
+                    // sensor data type is held in first byte of sensor data
+                    switch (sensor3Data[0]) {
+                        case SensorConst.ACCEL_MPU6050:
+                            // check to see if sensor is already "installed"
+                            if(sensor3 == null || !(sensor3 instanceof Accel_MPU6050)) {
+                                sensor3 = new Accel_MPU6050(sensor3Data, 3);
+                            }
+                            break;
+                        case SensorConst.TEMP_MCP9808:
+                            // check to see if sensor is already "installed"
+                            if(sensor3 == null || !(sensor3 instanceof Temp_MCP9808)) {
+                                sensor3 = new Temp_MCP9808(sensor3Data, 3);
+                            }
+                            break;
+                        case SensorConst.GYRO_MPU6050:
+                            // check to see if sensor is already "installed
+                            if(sensor3 == null || !(sensor3 instanceof Gyro_MPU6050)) {
+                                sensor3 = new Gyro_MPU6050(sensor3Data, 3);
+                            }
+                            break;
+                        case SensorConst.LIGHT_OPT3002:
+                            // check to see if sensor is already "installed"
+                            if(sensor3 == null || !(sensor3 instanceof LIGHT_OPT3002)) {
+                                sensor3 = new LIGHT_OPT3002(sensor3Data, 3);
+                            }
+                            break;
+                        case SensorConst.MAG_MAG3110:
+                            // check to see if sensor is already "installed"
+                            if(sensor3 == null || !(sensor3 instanceof MAG_MAG3110)) {
+                                sensor3 = new MAG_MAG3110(sensor3Data, 3);
+                            }
+                            break;
+                        case SensorConst.PRESSURE_MPL3115A2:
+                            // check to see if sensor is already "installed"
+                            if(sensor3 == null || !(sensor3 instanceof PRESSURE_MPL3115A2)) {
+                                sensor3 = new PRESSURE_MPL3115A2(sensor3Data, 3);
+                            }
+                            break;
+                        case SensorConst.TEMP_SI7021:
+                            // check to see if sensor is already "installed"
+                            if(sensor3 == null || !(sensor3 instanceof TEMP_SI7021)) {
+                                sensor3 = new TEMP_SI7021(sensor3Data, 3);
+                            }
+                            break;
+                        default:
+                            Log.i(TAG,"Invalid sensor type detected");
+                            return;
+                    }
+                }
+                // update the sensor data
+                sensor3.updateData(sensor3Data);
+                // perform calculations on data
+                sensor3.calcSensorData();
+                // post the data to the screen
+                postSensorData(sensor3);
             }
-        }
-        // update the sensor data
-        sensor3.updateData(sensor3Data);
-        // perform calculations on data
-        sensor3.calcSensorData();
-        // post the data to the screen
-        postSensorData(sensor3);
+        }).start();
     }
 
-    void handleSensor4Data(byte sensor4Data[]) {
-        //Log.i(TAG, "HANDLE S4");
-        if (sensor4Data[0] == SensorConst.INVALID_SENSOR) {
-            return;
-        } else {
-            // check to see which sensor is connected
-            // sensor data type is held in first byte of sensor data
-            switch (sensor4Data[0]) {
-                case SensorConst.ACCEL_MPU6050:
-                    // check to see if sensor is already "installed"
-                    if(sensor4 == null || !(sensor4 instanceof Accel_MPU6050)) {
-                        sensor4 = new Accel_MPU6050(sensor4Data, 4);
-                    }
-                    break;
-                case SensorConst.TEMP_MCP9808:
-                    // check to see if sensor is already "installed"
-                    if(sensor4 == null || !(sensor4 instanceof Temp_MCP9808)) {
-                        sensor4 = new Temp_MCP9808(sensor4Data, 4);
-                    }
-                    break;
-                case SensorConst.GYRO_MPU6050:
-                    // check to see if sensor is already "installed"
-                    if(sensor4 == null || !(sensor4 instanceof Gyro_MPU6050)) {
-                        sensor4 = new Gyro_MPU6050(sensor4Data, 4);
-                    }
-                    break;
-                case SensorConst.LIGHT_OPT3002:
-                    // check to see if sensor is already "installed"
-                    if(sensor4 == null || !(sensor4 instanceof LIGHT_OPT3002)) {
-                        sensor4 = new LIGHT_OPT3002(sensor4Data, 4);
-                    }
-                    break;
-                case SensorConst.MAG_MAG3110:
-                    // check to see if sensor is already "installed"
-                    if(sensor4 == null || !(sensor4 instanceof MAG_MAG3110)) {
-                        sensor4 = new MAG_MAG3110(sensor4Data, 4);
-                    }
-                    break;
-                case SensorConst.PRESSURE_MPL3115A2:
-                    // check to see if sensor is already "installed"
-                    if(sensor4 == null || !(sensor4 instanceof PRESSURE_MPL3115A2)) {
-                        sensor4 = new PRESSURE_MPL3115A2(sensor4Data, 4);
-                    }
-                    break;
-                case SensorConst.TEMP_SI7021:
-                    // check to see if sensor is already "installed"
-                    if(sensor4 == null || !(sensor4 instanceof TEMP_SI7021)) {
-                        sensor4 = new TEMP_SI7021(sensor4Data, 4);
-                    }
-                    break;
-                default:
-                    Log.i(TAG,"Invalid sensor type detected");
+    void handleSensor4Data(final byte sensor4Data[]) {
+
+        new Thread(new Runnable() {
+            public void run() {
+                //Log.i(TAG, "HANDLE S4");
+                if (sensor4Data[0] == SensorConst.INVALID_SENSOR) {
                     return;
+                } else {
+                    // check to see which sensor is connected
+                    // sensor data type is held in first byte of sensor data
+                    switch (sensor4Data[0]) {
+                        case SensorConst.ACCEL_MPU6050:
+                            // check to see if sensor is already "installed"
+                            if(sensor4 == null || !(sensor4 instanceof Accel_MPU6050)) {
+                                sensor4 = new Accel_MPU6050(sensor4Data, 4);
+                            }
+                            break;
+                        case SensorConst.TEMP_MCP9808:
+                            // check to see if sensor is already "installed"
+                            if(sensor4 == null || !(sensor4 instanceof Temp_MCP9808)) {
+                                sensor4 = new Temp_MCP9808(sensor4Data, 4);
+                            }
+                            break;
+                        case SensorConst.GYRO_MPU6050:
+                            // check to see if sensor is already "installed"
+                            if(sensor4 == null || !(sensor4 instanceof Gyro_MPU6050)) {
+                                sensor4 = new Gyro_MPU6050(sensor4Data, 4);
+                            }
+                            break;
+                        case SensorConst.LIGHT_OPT3002:
+                            // check to see if sensor is already "installed"
+                            if(sensor4 == null || !(sensor4 instanceof LIGHT_OPT3002)) {
+                                sensor4 = new LIGHT_OPT3002(sensor4Data, 4);
+                            }
+                            break;
+                        case SensorConst.MAG_MAG3110:
+                            // check to see if sensor is already "installed"
+                            if(sensor4 == null || !(sensor4 instanceof MAG_MAG3110)) {
+                                sensor4 = new MAG_MAG3110(sensor4Data, 4);
+                            }
+                            break;
+                        case SensorConst.PRESSURE_MPL3115A2:
+                            // check to see if sensor is already "installed"
+                            if(sensor4 == null || !(sensor4 instanceof PRESSURE_MPL3115A2)) {
+                                sensor4 = new PRESSURE_MPL3115A2(sensor4Data, 4);
+                            }
+                            break;
+                        case SensorConst.TEMP_SI7021:
+                            // check to see if sensor is already "installed"
+                            if(sensor4 == null || !(sensor4 instanceof TEMP_SI7021)) {
+                                sensor4 = new TEMP_SI7021(sensor4Data, 4);
+                            }
+                            break;
+                        default:
+                            Log.i(TAG,"Invalid sensor type detected");
+                            return;
+                    }
+                }
+                // update the sensor data
+                sensor4.updateData(sensor4Data);
+                // perform calculations on data
+                sensor4.calcSensorData();
+                // post the data to the screen
+                postSensorData(sensor4);
             }
-        }
-        // update the sensor data
-        sensor4.updateData(sensor4Data);
-        // perform calculations on data
-        sensor4.calcSensorData();
-        // post the data to the screen
-        postSensorData(sensor4);
+        }).start();
     }
 
     public void postSensorData(Sensor sensor) {
@@ -706,6 +747,7 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+        mainMenu = menu;
         return true;
     }
 
@@ -850,6 +892,7 @@ public class MainActivity extends AppCompatActivity
 
     // Overloaded method to write char data in byte array form
     public boolean writeCharacteristic(BluetoothGattCharacteristic characteristic, byte[] data) {
+
         byte[] dataToSend = new byte[20];
 
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
@@ -872,6 +915,7 @@ public class MainActivity extends AppCompatActivity
         } catch (NullPointerException npe) {
             return false;
         }
+
         return waitForWrite();
     }
 
