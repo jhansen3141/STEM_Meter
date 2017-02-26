@@ -13,7 +13,6 @@
 #include "sensorCommon.h"
 
 #define SENSOR_NUMBER IMU_GYRO_MPU6050
-#define SENSOR_DEFAULT_RATE RATE_ONE_HZ
 #define NUMBER_DATA_POINTS	(3)
 #define SENSOR_STRING "G:X,G:Y,G:Z"
 #define SENSOR_STR_LEN	(15)

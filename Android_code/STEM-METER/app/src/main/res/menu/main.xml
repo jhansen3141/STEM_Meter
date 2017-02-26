@@ -6,4 +6,10 @@
         android:orderInCategory="100"
         android:title="@string/action_settings"
         app:showAsAction="never" />
+
+    <item android:id="@+id/connection_icon"
+        android:title="Connection Status"
+        android:icon="@drawable/disconnected_icon"
+        android:orderInCategory="100"
+        app:showAsAction="always" />
 </menu>

@@ -10,11 +10,9 @@ import java.util.ArrayList;
 
 public class Gyro_MPU6050 extends Sensor {
 
-    private float GYRO_SENSE = 16.384f; // +-2000 degress/s
     private int ACCEL_SENSE_COLOR = Color.BLUE;
     private String[] sensorStringArray;
     private float xGyroF,yGyroF,zGyroF;
-
 
     public Gyro_MPU6050(byte[] data, int sensorPosition) {
         super(data, sensorPosition,3);
@@ -23,11 +21,12 @@ public class Gyro_MPU6050 extends Sensor {
 
     @Override
     public String[] calcSensorData() {
+        final float GYRO_SENSE = 16.384f; // +-2000 degress/s
         String[] dataStr = new String[3];
 
-        short xGyro  = (short)((data[11]<<8)  | (data[12] & 0xFF));
-        short yGyro  = (short)((data[13]<<8)  | (data[14] & 0xFF));
-        short zGyro  = (short)((data[15]<<8)  | (data[16] & 0xFF));
+        short xGyro  = (short)((data[5]<<8)  | (data[6] & 0xFF));
+        short yGyro  = (short)((data[7]<<8)  | (data[8] & 0xFF));
+        short zGyro  = (short)((data[9]<<8)  | (data[10] & 0xFF));
 
         xGyroF = xGyro / GYRO_SENSE;
         yGyroF = yGyro / GYRO_SENSE;
