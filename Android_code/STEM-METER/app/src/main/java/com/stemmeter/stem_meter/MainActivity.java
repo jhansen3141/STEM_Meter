@@ -45,7 +45,12 @@ import java.util.Queue;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, ConnectFragment.ConnectFragInterface, SensorsFragment.SensorFragInterface, GraphFragment.GraphFragInterface, DisplayFragment.DisplayFragInterface, GraphSettingsFragment.GraphSettingsFragInterface {
+        implements NavigationView.OnNavigationItemSelectedListener,
+        ConnectFragment.ConnectFragInterface,
+        SensorsFragment.SensorFragInterface,
+        GraphFragment.GraphFragInterface,
+        DisplayFragment.DisplayFragInterface,
+        GraphSettingsFragment.GraphSettingsFragInterface {
 
     private String TAG = "MainActivity";
     private static final int STATE_DISCONNECTED = 0;
@@ -963,5 +968,27 @@ public class MainActivity extends AppCompatActivity
         Log.i(TAG, "Write complete");
 
         return true;
+    }
+
+    @Override
+    public Sensor getSensor(int sensorNumber) {
+        Sensor returnSesnor = null;
+
+        switch(sensorNumber) {
+            case SensorConst.SENSOR_1:
+                returnSesnor = sensor1;
+                break;
+            case SensorConst.SENSOR_2:
+                returnSesnor = sensor2;
+                break;
+            case SensorConst.SENSOR_3:
+                returnSesnor = sensor3;
+                break;
+            case SensorConst.SENSOR_4:
+                returnSesnor = sensor4;
+                break;
+
+        }
+        return returnSesnor;
     }
 }

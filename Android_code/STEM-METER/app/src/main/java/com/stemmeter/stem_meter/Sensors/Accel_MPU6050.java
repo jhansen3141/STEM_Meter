@@ -2,6 +2,9 @@ package com.stemmeter.stem_meter.Sensors;
 
 import android.graphics.Color;
 
+import com.stemmeter.stem_meter.GraphSettings;
+import com.stemmeter.stem_meter.SensorConst;
+
 import java.util.ArrayList;
 
 /**
@@ -14,12 +17,27 @@ public class Accel_MPU6050 extends Sensor {
     private int ACCEL_SENSE_COLOR = Color.BLUE;
     private String[] sensorStringArray;
     private float xAccelF,yAccelF,zAccelF;
-
+    private GraphSettings graphSettings;
+    private int units = SensorConst.ACCEL_UNIT_G;
 
     public Accel_MPU6050(byte[] data, int sensorPosition) {
         super(data, sensorPosition,3);
+
+        ArrayList<String> unitList = new ArrayList<>();
+        ArrayList<String> dataPointList = new ArrayList<>();;
+
+        unitList.add("Gs");
+        unitList.add("m/s2");
+
+        dataPointList.add("X");
+        dataPointList.add("Y");
+        dataPointList.add("Z");
+
+        graphSettings = new GraphSettings(unitList,dataPointList);
+
         this.setColor(ACCEL_SENSE_COLOR);
     }
+
 
     @Override
     public String[] calcSensorData() {
@@ -33,6 +51,15 @@ public class Accel_MPU6050 extends Sensor {
         xAccelF = xAccel / ACCEL_SENSE;
         yAccelF = yAccel / ACCEL_SENSE;
         zAccelF = zAccel / ACCEL_SENSE;
+
+        switch (units) {
+            case SensorConst.ACCEL_UNIT_MS:
+                xAccelF *= 9.8f;
+                yAccelF *= 9.8f;
+                zAccelF *= 9.8f;
+                break;
+
+        }
 
         dataStr[0] = String.format(java.util.Locale.US,"%.2f",xAccelF);
         dataStr[1] = String.format(java.util.Locale.US,"%.2f",yAccelF);
@@ -51,6 +78,17 @@ public class Accel_MPU6050 extends Sensor {
         graphData.add(zAccelF);
         return graphData;
     }
+
+    @Override
+    public GraphSettings getGraphSettings() {
+        return graphSettings;
+    }
+
+    @Override
+    public void setGraphUnits(int units) {
+        this.units = units;
+    }
+
 
     @Override
     public String toString() {

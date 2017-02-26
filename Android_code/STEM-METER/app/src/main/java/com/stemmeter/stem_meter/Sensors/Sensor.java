@@ -1,5 +1,7 @@
 package com.stemmeter.stem_meter.Sensors;
 
+import com.stemmeter.stem_meter.GraphSettings;
+
 import java.util.ArrayList;
 
 /**
@@ -62,6 +64,10 @@ public abstract class Sensor {
     public abstract String[] calcSensorData();
 
     public abstract ArrayList<Float> getGraphData();
+
+    public abstract GraphSettings getGraphSettings();
+
+    public abstract void setGraphUnits(int units);
 
     public int getNumberDataPoints() {
         return numberDataPoints;

@@ -25,6 +25,7 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.stemmeter.stem_meter.Sensors.Sensor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,9 +42,15 @@ public class GraphSettingsFragment extends Fragment {
     private String TAG = "GraphSettingsFragTag";
     private Spinner selectedSensorSpinner;
     // Container Activity must implement this interface
-    public interface GraphSettingsFragInterface {
 
+    // Container Activity must implement this interface
+    public interface GraphSettingsFragInterface {
+        public Sensor getSensor(int sensorNumber);
     }
+
+    GraphSettingsFragInterface graphSettingsInterface;
+
+
 
     //@Override
     //public void onActivityCreated(Bundle savedInstanceState) {
@@ -62,12 +69,13 @@ public class GraphSettingsFragment extends Fragment {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
         selectedSensorSpinner.setAdapter(adapter);
+
+
         // Set the spinner based on its SensorConfig object
         //selectedSensorSpinner.setSelection(sensorFragInterface.getSensorConfig(position+1).getFreq());
         selectedSensorSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> parent, View view,
-                                       int freqSelected, long id)
-            {
+                                       int freqSelected, long id) {
             }
 
             @Override
