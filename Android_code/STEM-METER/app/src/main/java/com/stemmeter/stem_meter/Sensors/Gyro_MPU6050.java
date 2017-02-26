@@ -2,6 +2,8 @@ package com.stemmeter.stem_meter.Sensors;
 
 import android.graphics.Color;
 
+import com.stemmeter.stem_meter.GraphSettings;
+
 import java.util.ArrayList;
 
 /**
@@ -48,6 +50,16 @@ public class Gyro_MPU6050 extends Sensor {
         graphData.add(yGyroF);
         graphData.add(zGyroF);
         return graphData;
+    }
+
+    @Override
+    public GraphSettings getGraphSettings() {
+        return null;
+    }
+
+    @Override
+    public void setGraphUnits(int units) {
+
     }
 
     @Override

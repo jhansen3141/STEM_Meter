@@ -31,6 +31,7 @@ public final class SensorConst {
 
     public static final int ACCEL_UNIT_G = 0;
     public static final int ACCEL_UNIT_MS = 1;
+    public static final int ACCEL_UNIT_FS = 2;
     public static final int ACCEL_DP_X = 0;
     public static final int ACCEL_DP_Y = 1;
     public static final int ACCEL_DP_Z = 2;

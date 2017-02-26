@@ -1,5 +1,7 @@
 package com.stemmeter.stem_meter.Sensors;
 
+import com.stemmeter.stem_meter.GraphSettings;
+
 import java.util.ArrayList;
 
 /**
@@ -7,7 +9,7 @@ import java.util.ArrayList;
  */
 
 public class Temp_MCP9808 extends Sensor {
-    // HI MONROE
+
     private String[] sensorStringArray;
     private float tempF, tempC;
 
@@ -42,6 +44,16 @@ public class Temp_MCP9808 extends Sensor {
         graphData.add(tempF);
         graphData.add(tempC);
         return graphData;
+    }
+
+    @Override
+    public GraphSettings getGraphSettings() {
+        return null;
+    }
+
+    @Override
+    public void setGraphUnits(int units) {
+
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.stemmeter.stem_meter.Sensors;
 
+import com.stemmeter.stem_meter.GraphSettings;
+
 import java.util.ArrayList;
 
 /**
@@ -40,6 +42,16 @@ public class TEMP_SI7021 extends Sensor {
         graphData.add(tempF);
         graphData.add(humidity);
         return graphData;
+    }
+
+    @Override
+    public GraphSettings getGraphSettings() {
+        return null;
+    }
+
+    @Override
+    public void setGraphUnits(int units) {
+
     }
 
     @Override

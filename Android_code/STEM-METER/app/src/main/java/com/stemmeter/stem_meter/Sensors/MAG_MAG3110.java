@@ -2,6 +2,8 @@ package com.stemmeter.stem_meter.Sensors;
 
 import android.util.Log;
 
+import com.stemmeter.stem_meter.GraphSettings;
+
 import java.util.ArrayList;
 
 /**
@@ -74,5 +76,15 @@ public class MAG_MAG3110 extends Sensor {
         graphData.add(zMagF);
         graphData.add((float)heading);
         return graphData;
+    }
+
+    @Override
+    public GraphSettings getGraphSettings() {
+        return null;
+    }
+
+    @Override
+    public void setGraphUnits(int units) {
+
     }
 }

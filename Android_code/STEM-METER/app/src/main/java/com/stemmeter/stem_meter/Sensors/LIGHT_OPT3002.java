@@ -2,6 +2,8 @@ package com.stemmeter.stem_meter.Sensors;
 
 import android.util.Log;
 
+import com.stemmeter.stem_meter.GraphSettings;
+
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -60,5 +62,15 @@ public class LIGHT_OPT3002 extends Sensor {
         ArrayList<Float> graphData = new ArrayList<>();
         graphData.add(opticalPower);
         return graphData;
+    }
+
+    @Override
+    public GraphSettings getGraphSettings() {
+        return null;
+    }
+
+    @Override
+    public void setGraphUnits(int units) {
+
     }
 }

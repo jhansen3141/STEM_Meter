@@ -1,5 +1,7 @@
 package com.stemmeter.stem_meter.Sensors;
 
+import com.stemmeter.stem_meter.GraphSettings;
+
 import java.util.ArrayList;
 
 /**
@@ -66,5 +68,15 @@ public class PRESSURE_MPL3115A2 extends Sensor {
         graphData.add(airPressure);
         graphData.add((float)altitude);
         return graphData;
+    }
+
+    @Override
+    public GraphSettings getGraphSettings() {
+        return null;
+    }
+
+    @Override
+    public void setGraphUnits(int units) {
+
     }
 }

@@ -19,15 +19,18 @@ public class Accel_MPU6050 extends Sensor {
     private float xAccelF,yAccelF,zAccelF;
     private GraphSettings graphSettings;
     private int units = SensorConst.ACCEL_UNIT_G;
+    private ArrayList<String> unitList;
+    private ArrayList<String> dataPointList;
 
     public Accel_MPU6050(byte[] data, int sensorPosition) {
         super(data, sensorPosition,3);
 
-        ArrayList<String> unitList = new ArrayList<>();
-        ArrayList<String> dataPointList = new ArrayList<>();;
+        unitList = new ArrayList<>();
+        dataPointList = new ArrayList<>();
 
         unitList.add("Gs");
-        unitList.add("m/s2");
+        unitList.add("m/s" + "\u00B2");
+        unitList.add("f/s" + "\u00B2");
 
         dataPointList.add("X");
         dataPointList.add("Y");
@@ -54,9 +57,14 @@ public class Accel_MPU6050 extends Sensor {
 
         switch (units) {
             case SensorConst.ACCEL_UNIT_MS:
-                xAccelF *= 9.8f;
-                yAccelF *= 9.8f;
-                zAccelF *= 9.8f;
+                xAccelF *= 9.80665f;
+                yAccelF *= 9.80665f;
+                zAccelF *= 9.80665f;
+                break;
+            case SensorConst.ACCEL_UNIT_FS:
+                xAccelF *= 32.1740f;
+                yAccelF *= 32.1740f;
+                zAccelF *= 32.1740f;
                 break;
 
         }
@@ -93,10 +101,13 @@ public class Accel_MPU6050 extends Sensor {
     @Override
     public String toString() {
         if(sensorStringArray != null) {
-            return "Acceleration\n" +
-                    " X:  " + sensorStringArray[0] + "g\n" +
-                    " Y:  " + sensorStringArray[1] + "g\n" +
-                    " Z:  " + sensorStringArray[2] + "g";
+            String unitString = unitList.get(units);
+
+
+            return  "Acceleration\n" +
+                    " X:  " + sensorStringArray[0] + unitString +"\n" +
+                    " Y:  " + sensorStringArray[1] + unitString + "\n" +
+                    " Z:  " + sensorStringArray[2] + unitString;
         }
         else {
             return "NULL";
