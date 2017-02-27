@@ -721,6 +721,10 @@ public class MainActivity extends AppCompatActivity
                 sensorsFragment.printSensorData(sensor.getSensorNumber(), "Sensor " +sensor.getSensorNumber() +" - OFF", sensor.getSensorRate());
             }
             else {
+//                if(sensor.getSensorNumber() == 1) {
+//                    Log.i(TAG,"SN: " + sensor.getSyncNumber());
+//
+//                }
                 sensorsFragment.printSensorData(sensor.getSensorNumber(), sensor.toString(), sensor.getSensorRate());
             }
         }

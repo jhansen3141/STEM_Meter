@@ -18,6 +18,8 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.stemmeter.stem_meter.Sensors.Sensor;
+
 import java.util.ArrayList;
 
 /**
@@ -38,6 +40,7 @@ public class SensorsFragment extends ListFragment {
         GraphConfig getGraphConfig();
         boolean updateBaseUnitTime();
         void readSensorConfigData();
+        Sensor getSensor(int sensorNumber);
     }
 
     @Override
