@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources >
+    <string-array name="sensor_array">
+        <item>Sensor 1</item>
+        <item>Sensor 2</item>
+        <item>Sensor 3</item>
+        <item>Sensor 4</item>
+    </string-array>
+</resources>
