@@ -111,10 +111,7 @@ public class MainActivity extends AppCompatActivity
 
     private BaseUnitBattery baseUnitBattery;
 
-    private SensorConfig sensorConfig1;
-    private SensorConfig sensorConfig2;
-    private SensorConfig sensorConfig3;
-    private SensorConfig sensorConfig4;
+    private ArrayList<SensorConfig> sensorConfigList;
 
     private ArrayList<LineData> savedDataList;
     private ArrayList<String> savedNameList;
@@ -136,10 +133,11 @@ public class MainActivity extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        sensorConfig1 = new SensorConfig(1);
-        sensorConfig2 = new SensorConfig(2);
-        sensorConfig3 = new SensorConfig(3);
-        sensorConfig4 = new SensorConfig(4);
+        sensorConfigList = new ArrayList<>();
+        sensorConfigList.add(new SensorConfig(1));
+        sensorConfigList.add(new SensorConfig(2));
+        sensorConfigList.add(new SensorConfig(3));
+        sensorConfigList.add(new SensorConfig(4));
 
         baseUnitBattery = new BaseUnitBattery();
 
@@ -384,17 +382,17 @@ public class MainActivity extends AppCompatActivity
         // Byte 6 = S4 Freq | Byte 7 = S4 SD Log
         Log.i(TAG,"Updating sensor config objects");
 
-        sensorConfig1.setFreq((int)configData[0]);
-        sensorConfig1.setSDLogging(configData[1] == 1);
+        sensorConfigList.get(0).setFreq((int) configData[0]);
+        sensorConfigList.get(0).setSDLogging(configData[1] == 1);
 
-        sensorConfig2.setFreq((int)configData[2]);
-        sensorConfig2.setSDLogging(configData[3] == 1);
+        sensorConfigList.get(1).setFreq((int) configData[2]);
+        sensorConfigList.get(1).setSDLogging(configData[3] == 1);
 
-        sensorConfig3.setFreq((int)configData[4]);
-        sensorConfig3.setSDLogging(configData[5] == 1);
+        sensorConfigList.get(2).setFreq((int) configData[4]);
+        sensorConfigList.get(2).setSDLogging(configData[5] == 1);
 
-        sensorConfig4.setFreq((int)configData[6]);
-        sensorConfig4.setSDLogging(configData[7] == 1);
+        sensorConfigList.get(3).setFreq((int) configData[6]);
+        sensorConfigList.get(3).setSDLogging(configData[7] == 1);
     }
 
     @Override
@@ -718,8 +716,18 @@ public class MainActivity extends AppCompatActivity
        // Log.i(TAG,"Check if Sensors are up");
         // if the sensor fragment is showing print the data there
         if (sensorsFragment != null && sensorsFragment.isVisible()) {
-            sensorsFragment.printSensorData(sensor.getSensorNumber(), sensor.toString(),sensor.getSensorRate());
-    }
+            // Check to see if the sensor is "OFF"
+            if(sensorConfigList.get(sensor.getSensorNumber()-1).getFreq() == SensorConst.RATE_OFF) {
+                sensorsFragment.printSensorData(sensor.getSensorNumber(), "Sensor " +sensor.getSensorNumber() +" - OFF", sensor.getSensorRate());
+            }
+            else {
+//                if(sensor.getSensorNumber() == 1) {
+//                    Log.i(TAG,"SN: " + sensor.getSyncNumber());
+//
+//                }
+                sensorsFragment.printSensorData(sensor.getSensorNumber(), sensor.toString(), sensor.getSensorRate());
+            }
+        }
         // Determines whether to add sensor data to graph
         else if(sensor.getSensorNumber() == (graphConfig.getSelectedSensor() + 1)) {
            // Log.i(TAG,"Check if graph Fragment is up");
@@ -813,25 +821,9 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean sensorConfigWrite(SensorConfig config) {
-
-        switch(config.getSensorNumber()) {
-            case SensorConst.SENSOR_1:
-                sensorConfig1.setFreq(config.getFreq());
-                sensorConfig1.setSDLogging(config.isSDLogging());
-                break;
-            case SensorConst.SENSOR_2:
-                sensorConfig2.setFreq(config.getFreq());
-                sensorConfig2.setSDLogging(config.isSDLogging());
-                break;
-            case SensorConst.SENSOR_3:
-                sensorConfig3.setFreq(config.getFreq());
-                sensorConfig3.setSDLogging(config.isSDLogging());
-                break;
-            case SensorConst.SENSOR_4:
-                sensorConfig4.setFreq(config.getFreq());
-                sensorConfig4.setSDLogging(config.isSDLogging());
-                break;
-        }
+        // Set the appropriate config to the new settings
+        sensorConfigList.get(config.getSensorNumber()-1).setFreq(config.getFreq());
+        sensorConfigList.get(config.getSensorNumber()-1).setSDLogging(config.isSDLogging());
 
         // Byte 0 = S1 Freq | Byte 1 = S1 SD Log
         // Byte 2 = S2 Freq | Byte 3 = S2 SD Log
@@ -840,41 +832,24 @@ public class MainActivity extends AppCompatActivity
 
         byte[] configData = new byte[8];
 
-        configData[0] = (byte)sensorConfig1.getFreq();
-        configData[1] = (byte)((sensorConfig1.isSDLogging()) ? 1 : 0);
+        configData[0] = (byte)sensorConfigList.get(0).getFreq();
+        configData[1] = (byte)((sensorConfigList.get(0).isSDLogging()) ? 1 : 0);
 
-        configData[2] = (byte)sensorConfig2.getFreq();
-        configData[3] = (byte)((sensorConfig2.isSDLogging()) ? 1 : 0);
+        configData[2] = (byte)sensorConfigList.get(1).getFreq();
+        configData[3] = (byte)((sensorConfigList.get(1).isSDLogging()) ? 1 : 0);
 
-        configData[4] = (byte)sensorConfig3.getFreq();
-        configData[5] = (byte)((sensorConfig3.isSDLogging()) ? 1 : 0);
+        configData[4] = (byte)sensorConfigList.get(2).getFreq();
+        configData[5] = (byte)((sensorConfigList.get(2).isSDLogging()) ? 1 : 0);
 
-        configData[6] = (byte)sensorConfig4.getFreq();
-        configData[5] = (byte)((sensorConfig4.isSDLogging()) ? 1 : 0);
+        configData[6] = (byte)sensorConfigList.get(3).getFreq();
+        configData[5] = (byte)((sensorConfigList.get(3).isSDLogging()) ? 1 : 0);
 
         return writeCharacteristic(BoardSensorConfigChar, configData);
     }
 
     @Override
     public SensorConfig getSensorConfig(int sensorNumber) {
-        SensorConfig config = null;
-        switch(sensorNumber) {
-            case 1:
-                config = sensorConfig1;
-            break;
-            case 2:
-                config = sensorConfig2;
-            break;
-            case 3:
-                config = sensorConfig3;
-                break;
-            case 4:
-                config = sensorConfig4;
-            break;
-
-        }
-
-        return config;
+        return sensorConfigList.get(sensorNumber-1);
     }
 
     @Override

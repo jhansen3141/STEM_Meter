@@ -18,6 +18,8 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.stemmeter.stem_meter.Sensors.Sensor;
+
 import java.util.ArrayList;
 
 /**
@@ -38,6 +40,7 @@ public class SensorsFragment extends ListFragment {
         GraphConfig getGraphConfig();
         boolean updateBaseUnitTime();
         void readSensorConfigData();
+        Sensor getSensor(int sensorNumber);
     }
 
     @Override
@@ -281,9 +284,10 @@ public class SensorsFragment extends ListFragment {
                         // Set the freq to the one just selected
                         config.setFreq(freqSelected);
                         // Set the SD logging boolean to whatever it was before
-                        config.setSDLogging(sensorFragInterface.getSensorConfig(finalPosition+1).isSDLogging());
+                        config.setSDLogging(sensorFragInterface.getSensorConfig(finalPosition + 1).isSDLogging());
                         // Write the new config to the base unit over BLE
                         sensorFragInterface.sensorConfigWrite(config);
+
                         Log.i(TAG,"FS:" + freqSelected);
                     }
 

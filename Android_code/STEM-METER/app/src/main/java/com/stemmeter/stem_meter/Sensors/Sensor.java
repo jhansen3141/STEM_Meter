@@ -23,7 +23,8 @@ public abstract class Sensor {
         //sensor rate is held is second byte
         sensorRate = (int)data[1];
         // the sync number (24 bits) is held in bytes 2-4
-        syncNumber = ((int)data[2]<<16) | ((int)data[3]<<8) | ((int)data[4]);
+        syncNumber = (((data[2] & 0xFF)<<16) | ((data[3] & 0xFF)<<8) | (data[4] & 0xFF));
+
     }
 
     public void updateData(byte data[]) {

@@ -24,7 +24,7 @@
 #define SPICOMMANDS_TASK_PRIORITY 		2 // spiCommands Priority
 #define SPI_BUFFER_SIZE 				21
 #define MASTER_SEND_ID 					0
-#define SPI_BIT_RATE					5000000
+#define SPI_BIT_RATE					5000000 // 10MHz
 #define SPI_CONFIG_TRANS				0
 #define SPI_DATA_TRANS					1
 #define SPI_CONFIG_DATA_MARKER			0xA5

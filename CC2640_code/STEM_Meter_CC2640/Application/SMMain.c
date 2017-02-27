@@ -39,7 +39,7 @@
  * CONSTANTS
  */
 // Advertising interval when device is discoverable (units of 625us, 160=100ms)
-#define DEFAULT_ADVERTISING_INTERVAL          100
+#define DEFAULT_ADVERTISING_INTERVAL          50
 
 // Limited discoverable mode advertises for 30.72s, and then stops
 // General discoverable mode advertises indefinitely
@@ -155,6 +155,7 @@ static uint8_t advertData[] =
 // GAP GATT Attributes
 static uint8_t attDeviceName[GAP_DEVICE_NAME_LEN] = "STEM Meter";
 static bool isAdvertising = TRUE;
+static bool isConnected = FALSE;
 
 // Globals used for ATT Response retransmission
 static gattMsgEvent_t *pAttRsp = NULL;
@@ -550,17 +551,19 @@ static void user_processApplicationMessage(app_msg_t *pMsg) {
 
     case APP_MSG_TOGGLE_ADVERTISING:
     {
-    	if(isAdvertising) {
-    		isAdvertising = FALSE;
-    		enqueueBatMonitortTaskMsg(BATMONITOR_MSG_BLU_LED_OFF);
-    	}
-    	else {
-    		isAdvertising = TRUE;
-    	}
+    	if(!isConnected) {
+			if(isAdvertising) {
+				isAdvertising = FALSE;
+				enqueueBatMonitortTaskMsg(BATMONITOR_MSG_BLU_LED_OFF);
+			}
+			else {
+				isAdvertising = TRUE;
+			}
 
-		// Set advertisement enabled.
-		GAPRole_SetParameter(GAPROLE_ADVERT_ENABLED, sizeof(uint8_t),
-							 &isAdvertising);
+			// Set advertisement enabled.
+			GAPRole_SetParameter(GAPROLE_ADVERT_ENABLED, sizeof(uint8_t),
+								 &isAdvertising);
+    	}
     }
     	break;
 
@@ -620,6 +623,7 @@ static void user_processGapStateChangeEvt(gaprole_States_t newState)
     case GAPROLE_ADVERTISING:
     	// Blue LED flashing when advertising
     	enqueueBatMonitortTaskMsg(BATMONITOR_MSG_BLE_LEG_TOGGLE);
+    	isConnected = FALSE;
       break;
 
     case GAPROLE_CONNECTED:
@@ -629,6 +633,7 @@ static void user_processGapStateChangeEvt(gaprole_States_t newState)
         GAPRole_GetParameter(GAPROLE_CONN_BD_ADDR, peerAddress);
         // Blue LED Solid when connected
         enqueueBatMonitortTaskMsg(BATMONITOR_MSG_BLU_LED_ON);
+        isConnected = TRUE;
 
        }
       break;
