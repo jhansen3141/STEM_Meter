@@ -42,7 +42,7 @@ public class PRESSURE_MPL3115A2 extends Sensor {
         int pressure;
 
         // Combine the bytes together
-        pressure = ((data[5]<<16)) | ((data[6]<<8)) | (data[7] & 0xFF);
+        pressure = ((data[5] << 16)) | (((data[6] & 0xFF) << 8)) | (data[7] & 0xFF);
 
         // Pressure is an 18 bit number with 2 bits of decimal. Get rid of decimal portion
         pressure >>= 6;
