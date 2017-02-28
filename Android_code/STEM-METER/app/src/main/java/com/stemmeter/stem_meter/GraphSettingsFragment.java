@@ -17,6 +17,7 @@ import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.stemmeter.stem_meter.R.id.chart;
+import static com.stemmeter.stem_meter.R.id.seekBar;
 
 /**
  * Created by monro on 2/25/2017.
@@ -49,7 +51,11 @@ public class GraphSettingsFragment extends Fragment {
     private DataListAdapter dataListAdapter;
     private UnitListAdapter unitListAdapter;
     private ImageButton doneBtn;
+    private ImageButton cancelBtn;
+    private SeekBar dataSeekBar;
     private final String GRAPH_FRAG_TAG = "GraphFragTag";
+    private TextView seekBarText;
+    private ArrayList<Boolean> dataPoints;
     // Container Activity must implement this interface
 
     // Container Activity must implement this interface
@@ -59,7 +65,7 @@ public class GraphSettingsFragment extends Fragment {
         public GraphConfig getGraphConfig();
     }
 
-    GraphSettingsFragInterface graphSettingsInterface;
+    //GraphSettingsFragInterface graphSettingsInterface;
 
 
 
@@ -88,8 +94,13 @@ public class GraphSettingsFragment extends Fragment {
         selectedSensorSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> parent, View view,
                                        int sensorSelected, long id) {
+                if (graphSettingsFragInterface.getSensor(sensorSelected + 1) == null) {
+                    selectedSensorSpinner.setSelection(graphSettingsFragInterface.getGraphConfig().getSelectedSensor());
+                    return;
+                }
+
                 graphSettingsFragInterface.getGraphConfig().setSelectedSensor(sensorSelected);
-                reinializeDataListView();
+                reinitializeDataListView();
                 reinitializeUnitListView();
             }
 
@@ -122,11 +133,43 @@ public class GraphSettingsFragment extends Fragment {
         ListView unitNameListView = (ListView) view.findViewById(R.id.Unitlist);
         unitNameListView.setAdapter(unitListAdapter);
 
+        seekBarText = (TextView) view.findViewById(R.id.SeekBarTextView);
+        dataSeekBar = (SeekBar) view.findViewById(R.id.seekBar);
+        dataSeekBar.setProgress(graphSettingsFragInterface.getGraphConfig().getVisibleDataNum());
+        seekBarText.setText(String.valueOf(String.valueOf(graphSettingsFragInterface.getGraphConfig().getVisibleDataNum())));
+        dataSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                seekBarText.setText(String.valueOf(progress));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
         doneBtn = (ImageButton) view.findViewById(R.id.DoneBtn);
         doneBtn.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View arg0) {
+                // Commit changes to visible data number in graph config
+                graphSettingsFragInterface.getGraphConfig().setVisibleDataNum(dataSeekBar.getProgress());
+
+                // commit changes to data points boolean list in graph config
+                graphSettingsFragInterface.getGraphConfig().getDataPoints().set(0, dataPoints.get(0));
+                Log.i(TAG, "First:" + String.valueOf(dataPoints.get(0)));
+                graphSettingsFragInterface.getGraphConfig().getDataPoints().set(1, dataPoints.get(1));
+                Log.i(TAG, "Second:" + String.valueOf(dataPoints.get(1)));
+                graphSettingsFragInterface.getGraphConfig().getDataPoints().set(2, dataPoints.get(2));
+                Log.i(TAG, "Third:" + String.valueOf(dataPoints.get(2)));
+
                 FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
                 GraphFragment graphFragment = new GraphFragment();
                 transaction.replace(R.id.fragment_container, graphFragment, GRAPH_FRAG_TAG);
@@ -135,10 +178,30 @@ public class GraphSettingsFragment extends Fragment {
             }
         });
 
+        cancelBtn = (ImageButton) view.findViewById(R.id.CancelBtn);
+        cancelBtn.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+
+                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                GraphFragment graphFragment = new GraphFragment();
+                transaction.replace(R.id.fragment_container, graphFragment, GRAPH_FRAG_TAG);
+                //transaction.addToBackStack(null);
+                transaction.commit();
+            }
+        });
+
+        // Initialize data points to what is in graphConfig
+        dataPoints = new ArrayList<Boolean>();
+        dataPoints.add(graphSettingsFragInterface.getGraphConfig().getDataPoints().get(0));
+        dataPoints.add(graphSettingsFragInterface.getGraphConfig().getDataPoints().get(1));
+        dataPoints.add(graphSettingsFragInterface.getGraphConfig().getDataPoints().get(2));
+
         return view;
     }
 
-    private void reinializeDataListView()
+    private void reinitializeDataListView()
     {
         dataListAdapter.removeAllItems();
         GraphSettings graphSettings = graphSettingsFragInterface.getSensor(graphSettingsFragInterface.getGraphConfig().getSelectedSensor() + 1).getGraphSettings();
@@ -230,12 +293,25 @@ public class GraphSettingsFragment extends Fragment {
             if (dataNameText != null)
                 dataNameText.setText(dataPointName.get(position));
 
+            if (dataPoints.get(position))
+                convertView.setBackgroundColor(Color.BLUE);
+            else
+                convertView.setBackgroundColor(Color.WHITE);
+
             convertView.setOnClickListener(new View.OnClickListener() {
 
                 @Override
                 public void onClick(View arg0) {
-                    selectedPosition = position;
-                    notifyDataSetChanged();
+                    if (dataPoints.get(position)) {
+                        dataPoints.set(position, false);
+                        //arg0.setBackgroundColor(Color.WHITE);
+                        notifyDataSetChanged();
+                    }
+                    else{
+                        dataPoints.set(position, true);
+                        //arg0.setBackgroundColor(Color.BLUE);
+                        notifyDataSetChanged();
+                    }
                 }
             });
 

@@ -124,8 +124,8 @@ public class GraphFragment extends Fragment {
         YAxis leftAxis = mChart.getAxisLeft();
         leftAxis.setTypeface(Typeface.DEFAULT);
         leftAxis.setTextColor(Color.BLACK);
-        leftAxis.setAxisMaximum(0.2f);
-        leftAxis.setAxisMinimum(-0.2f);
+        leftAxis.setAxisMaximum(-9999999.2f);
+        leftAxis.setAxisMinimum(9999999.2f);
         leftAxis.setDrawGridLines(true);
 
         YAxis rightAxis = mChart.getAxisRight();
@@ -251,12 +251,12 @@ public class GraphFragment extends Fragment {
                 data.addDataSet(set);
             }
 
-            data.addEntry(new Entry(set.getEntryCount(), (float) (Math.random() * 40) + 30f), 0);
+            data.addEntry(new Entry(set.getEntryCount(), num1), 0);
 
             if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP) {
                 Entry entry;
 
-                if (set.getEntryCount() == 11) {
+                if (set.getEntryCount() == graphFragInterface.getGraphConfig().getVisibleDataNum()) {
                     set.removeEntry(0);
 
                     for (int i = 0; i < set.getEntryCount(); i++) {
@@ -272,7 +272,7 @@ public class GraphFragment extends Fragment {
             mChart.notifyDataSetChanged();
 
             // limit the number of visible entries
-            mChart.setVisibleXRangeMaximum(10);
+            mChart.setVisibleXRangeMaximum(graphFragInterface.getGraphConfig().getVisibleDataNum());
             // mChart.setVisibleYRange(30, AxisDependency.LEFT);
 
             // move to the latest entry
@@ -327,7 +327,7 @@ public class GraphFragment extends Fragment {
             if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP) {
                 Entry entry;
 
-                if (set1.getEntryCount() == 11) {
+                if (set1.getEntryCount() == graphFragInterface.getGraphConfig().getVisibleDataNum()) {
                     set1.removeEntry(0);
 
                     for (int i = 0; i < set1.getEntryCount(); i++) {
@@ -336,7 +336,7 @@ public class GraphFragment extends Fragment {
                     }
                 }
 
-                if (set2.getEntryCount() == 11) {
+                if (set2.getEntryCount() == graphFragInterface.getGraphConfig().getVisibleDataNum()) {
                     data.removeEntry(0, 1);
 
                     for (int i = 0; i < set2.getEntryCount(); i++) {
@@ -352,7 +352,7 @@ public class GraphFragment extends Fragment {
             mChart.notifyDataSetChanged();
 
             // limit the number of visible entries
-            mChart.setVisibleXRangeMaximum(10);
+            mChart.setVisibleXRangeMaximum(graphFragInterface.getGraphConfig().getVisibleDataNum());
             // mChart.setVisibleYRange(30, AxisDependency.LEFT);
 
             // move to the latest entry
@@ -421,7 +421,7 @@ public class GraphFragment extends Fragment {
             if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP) {
                 Entry entry;
 //removing last element from the chart and finding max and min visible value
-                if (set1.getEntryCount() == 11) {
+                if (set1.getEntryCount() == graphFragInterface.getGraphConfig().getVisibleDataNum()) {
                     set1.removeEntry(0);
 
                     for (int i = 0; i < set1.getEntryCount(); i++) {
@@ -430,7 +430,7 @@ public class GraphFragment extends Fragment {
                     }
                 }
 
-                if (set2.getEntryCount() == 11) {
+                if (set2.getEntryCount() == graphFragInterface.getGraphConfig().getVisibleDataNum()) {
                     data.removeEntry(0, 1);
 
                     for (int i = 0; i < set2.getEntryCount(); i++) {
@@ -439,7 +439,7 @@ public class GraphFragment extends Fragment {
                     }
                 }
 
-                if (set3.getEntryCount() == 11) {
+                if (set3.getEntryCount() == graphFragInterface.getGraphConfig().getVisibleDataNum()) {
                     data.removeEntry(0, 2);
 
                     for (int i = 0; i < set3.getEntryCount(); i++) {
@@ -455,7 +455,7 @@ public class GraphFragment extends Fragment {
             //mChart.invalidate();
 
             // limit the number of visible entries
-            mChart.setVisibleXRangeMaximum(10);
+            mChart.setVisibleXRangeMaximum(graphFragInterface.getGraphConfig().getVisibleDataNum());
             // mChart.setVisibleYRange(30, AxisDependency.LEFT);
 
             // move to the latest entry
@@ -540,13 +540,32 @@ public class GraphFragment extends Fragment {
         switch(numberDataPoints)
         {
             case 1:
-                addEntry(sensorDataList.get(0));
+                if (graphFragInterface.getGraphConfig().getDataPoints().get(0))
+                    addEntry(sensorDataList.get(0));
                 break;
             case 2:
-                addEntry(sensorDataList.get(0), sensorDataList.get(1));
+                if (graphFragInterface.getGraphConfig().getDataPoints().get(0) && graphFragInterface.getGraphConfig().getDataPoints().get(1))
+                    addEntry(sensorDataList.get(0), sensorDataList.get(1));
+                else if (graphFragInterface.getGraphConfig().getDataPoints().get(0))
+                    addEntry(sensorDataList.get(0));
+                else if (graphFragInterface.getGraphConfig().getDataPoints().get(1))
+                    addEntry(sensorDataList.get(1));
                 break;
             case 3:
-                addEntry(sensorDataList.get(0), sensorDataList.get(1), sensorDataList.get(2));
+                if (graphFragInterface.getGraphConfig().getDataPoints().get(0) && graphFragInterface.getGraphConfig().getDataPoints().get(1) && graphFragInterface.getGraphConfig().getDataPoints().get(2))
+                    addEntry(sensorDataList.get(0), sensorDataList.get(1), sensorDataList.get(2));
+                else if (!graphFragInterface.getGraphConfig().getDataPoints().get(0) && graphFragInterface.getGraphConfig().getDataPoints().get(1) && graphFragInterface.getGraphConfig().getDataPoints().get(2))
+                    addEntry(sensorDataList.get(1), sensorDataList.get(2));
+                else if (graphFragInterface.getGraphConfig().getDataPoints().get(0) && !graphFragInterface.getGraphConfig().getDataPoints().get(1) && graphFragInterface.getGraphConfig().getDataPoints().get(2))
+                    addEntry(sensorDataList.get(0), sensorDataList.get(2));
+                else if (!graphFragInterface.getGraphConfig().getDataPoints().get(0) && !graphFragInterface.getGraphConfig().getDataPoints().get(1) && graphFragInterface.getGraphConfig().getDataPoints().get(2))
+                    addEntry(sensorDataList.get(2));
+                else if (graphFragInterface.getGraphConfig().getDataPoints().get(0) && graphFragInterface.getGraphConfig().getDataPoints().get(1) && !graphFragInterface.getGraphConfig().getDataPoints().get(2))
+                    addEntry(sensorDataList.get(0), sensorDataList.get(1));
+                else if (!graphFragInterface.getGraphConfig().getDataPoints().get(0) && graphFragInterface.getGraphConfig().getDataPoints().get(1) && !graphFragInterface.getGraphConfig().getDataPoints().get(2))
+                    addEntry(sensorDataList.get(1));
+                else if (graphFragInterface.getGraphConfig().getDataPoints().get(0) && !graphFragInterface.getGraphConfig().getDataPoints().get(1) && !graphFragInterface.getGraphConfig().getDataPoints().get(2))
+                    addEntry(sensorDataList.get(0));
                 break;
         }
     }

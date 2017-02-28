@@ -58,10 +58,10 @@ public class MainActivity extends AppCompatActivity
     private static final int STATE_CONNECTED = 2;
 
     // Monroe's Base Unit Address
-   // public final static String DEVICE_MAC_STR = "CC:78:AB:AC:B3:FE";
+    public final static String DEVICE_MAC_STR = "CC:78:AB:AC:B3:FE";
 
     // Josh's Base Unit Address
-    public final static String DEVICE_MAC_STR = "CC:78:AB:19:9A:21";
+    //public final static String DEVICE_MAC_STR = "CC:78:AB:19:9A:21";
 
     //public final static UUID BOARD_UUID = UUID.fromString("0000ABAE-0000-1000-8000-00805F9B34FB");
     public final static UUID SM_SERVICE_UUID =      UUID.fromString("F000ABAE-0451-4000-B000-000000000000");
@@ -103,6 +103,7 @@ public class MainActivity extends AppCompatActivity
     private final String CONNECT_FRAG_TAG = "ConnectFragTag";
     private final String GRAPH_FRAG_TAG = "GraphFragTag";
     private final String SENSOR_FRAG_TAG = "SensorFragTag";
+    private final String DISPLAY_FRAG_TAG = "DisplayFragTag";
 
     private Sensor sensor1;
     private Sensor sensor2;
@@ -809,7 +810,7 @@ public class MainActivity extends AppCompatActivity
             transaction.commit();
         } else if (id == R.id.nav_display) {
             DisplayFragment displayFragment = new DisplayFragment();
-            transaction.replace(R.id.fragment_container, displayFragment, GRAPH_FRAG_TAG);
+            transaction.replace(R.id.fragment_container, displayFragment, DISPLAY_FRAG_TAG);
             //transaction.addToBackStack(null);
             transaction.commit();
         }
