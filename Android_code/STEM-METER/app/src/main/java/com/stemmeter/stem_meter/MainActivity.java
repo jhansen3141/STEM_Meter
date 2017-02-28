@@ -13,7 +13,9 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
+import android.os.Message;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
@@ -441,181 +443,164 @@ public class MainActivity extends AppCompatActivity
     }
 
     void handleSensor1Data(final byte sensor1Data[]) {
-        // Start a new thread to handle updating the sensor data
-        new Thread(new Runnable() {
-            public void run() {
-//                 Log.i(TAG, "HANDLE S1");
-                if (sensor1Data[0] == SensorConst.INVALID_SENSOR) {
+//      Log.i(TAG, "HANDLE S1");
+        if (sensor1Data[0] == SensorConst.INVALID_SENSOR) {
+            return;
+        } else {
+            // check to see which sensor is connected
+            // sensor data type is held in first byte of sensor data
+            switch (sensor1Data[0]) {
+                case SensorConst.ACCEL_MPU6050:
+                    sensor1 = new Accel_MPU6050(sensor1Data, 1);
+                    break;
+                case SensorConst.TEMP_MCP9808:
+                    sensor1 = new Temp_MCP9808(sensor1Data, 1);
+                    break;
+                case SensorConst.GYRO_MPU6050:
+                    sensor1 = new Gyro_MPU6050(sensor1Data, 1);
+                    break;
+                case SensorConst.LIGHT_OPT3002:
+                    sensor1 = new LIGHT_OPT3002(sensor1Data, 1);
+                    break;
+                case SensorConst.MAG_MAG3110:
+                    sensor1 = new MAG_MAG3110(sensor1Data, 1);
+                    break;
+                case SensorConst.PRESSURE_MPL3115A2:
+                    sensor1 = new PRESSURE_MPL3115A2(sensor1Data, 1);
+                    break;
+                case SensorConst.TEMP_SI7021:
+                    sensor1 = new TEMP_SI7021(sensor1Data, 1);
+                    break;
+                default:
+                    Log.i(TAG,"Invalid sensor type detected");
                     return;
-                } else {
-                    // check to see which sensor is connected
-                    // sensor data type is held in first byte of sensor data
-                    switch (sensor1Data[0]) {
-                        case SensorConst.ACCEL_MPU6050:
-                            sensor1 = new Accel_MPU6050(sensor1Data, 1);
-                            break;
-                        case SensorConst.TEMP_MCP9808:
-                            sensor1 = new Temp_MCP9808(sensor1Data, 1);
-                            break;
-                        case SensorConst.GYRO_MPU6050:
-                            sensor1 = new Gyro_MPU6050(sensor1Data, 1);
-                            break;
-                        case SensorConst.LIGHT_OPT3002:
-                            sensor1 = new LIGHT_OPT3002(sensor1Data, 1);
-                            break;
-                        case SensorConst.MAG_MAG3110:
-                            sensor1 = new MAG_MAG3110(sensor1Data, 1);
-                            break;
-                        case SensorConst.PRESSURE_MPL3115A2:
-                            sensor1 = new PRESSURE_MPL3115A2(sensor1Data, 1);
-                            break;
-                        case SensorConst.TEMP_SI7021:
-                            sensor1 = new TEMP_SI7021(sensor1Data, 1);
-                            break;
-                        default:
-                            Log.i(TAG,"Invalid sensor type detected");
-                            return;
-                    }
-                }
-                // perform calculations on data
-                sensor1.calcSensorData();
-                // post the data to the screen
-                postSensorData(sensor1);
             }
-        }).start();
+        }
+        // perform calculations on data
+        sensor1.calcSensorData();
+        // post the data to the screen
+        postSensorData(sensor1);
+
     }
 
     void handleSensor2Data(final byte sensor2Data[]) {
-//         Create new thread to update sensor data
-        new Thread(new Runnable() {
-            public void run() {
-//                 Log.i(TAG, "HANDLE S2");
-                if (sensor2Data[0] == SensorConst.INVALID_SENSOR) {
+    //  Log.i(TAG, "HANDLE S2");
+        if (sensor2Data[0] == SensorConst.INVALID_SENSOR) {
+            return;
+        } else {
+            switch (sensor2Data[0]) {
+                case SensorConst.ACCEL_MPU6050:
+                    sensor2 = new Accel_MPU6050(sensor2Data, 2);
+                    break;
+                case SensorConst.TEMP_MCP9808:
+                    sensor2 = new Temp_MCP9808(sensor2Data, 2);
+                    break;
+                case SensorConst.GYRO_MPU6050:
+                    sensor2 = new Gyro_MPU6050(sensor2Data, 2);
+                    break;
+                case SensorConst.LIGHT_OPT3002:
+                    sensor2 = new LIGHT_OPT3002(sensor2Data, 2);
+                    break;
+                case SensorConst.MAG_MAG3110:
+                    sensor2 = new MAG_MAG3110(sensor2Data, 2);
+                    break;
+                case SensorConst.PRESSURE_MPL3115A2:
+                    sensor2 = new PRESSURE_MPL3115A2(sensor2Data, 2);
+                    break;
+                case SensorConst.TEMP_SI7021:
+                    sensor2 = new TEMP_SI7021(sensor2Data, 2);
+                    break;
+                default:
+                    Log.i(TAG,"Invalid sensor type detected");
                     return;
-                } else {
-                    switch (sensor2Data[0]) {
-                        case SensorConst.ACCEL_MPU6050:
-                            sensor2 = new Accel_MPU6050(sensor2Data, 2);
-                            break;
-                        case SensorConst.TEMP_MCP9808:
-                            sensor2 = new Temp_MCP9808(sensor2Data, 2);
-                            break;
-                        case SensorConst.GYRO_MPU6050:
-                            sensor2 = new Gyro_MPU6050(sensor2Data, 2);
-                            break;
-                        case SensorConst.LIGHT_OPT3002:
-                            sensor2 = new LIGHT_OPT3002(sensor2Data, 2);
-                            break;
-                        case SensorConst.MAG_MAG3110:
-                            sensor2 = new MAG_MAG3110(sensor2Data, 2);
-                            break;
-                        case SensorConst.PRESSURE_MPL3115A2:
-                            sensor2 = new PRESSURE_MPL3115A2(sensor2Data, 2);
-                            break;
-                        case SensorConst.TEMP_SI7021:
-                            sensor2 = new TEMP_SI7021(sensor2Data, 2);
-                            break;
-                        default:
-                            Log.i(TAG,"Invalid sensor type detected");
-                            return;
-                    }
-                }
-                // perform calculations on data
-                sensor2.calcSensorData();
-                // post the data to the screen
-                postSensorData(sensor2);
             }
-        }).start();
+        }
+        // perform calculations on data
+        sensor2.calcSensorData();
+        // post the data to the screen
+        postSensorData(sensor2);
     }
 
     void handleSensor3Data(final byte sensor3Data[]) {
-        // Create new thread to update sensor data
-        new Thread(new Runnable() {
-            public void run() {
-//                 Log.i(TAG, "HANDLE S3");
-                if (sensor3Data[0] == SensorConst.INVALID_SENSOR) {
+
+//      Log.i(TAG, "HANDLE S3");
+        if (sensor3Data[0] == SensorConst.INVALID_SENSOR) {
+            return;
+        } else {
+            // check to see which sensor is connected
+            // sensor data type is held in first byte of sensor data
+            switch (sensor3Data[0]) {
+                case SensorConst.ACCEL_MPU6050:
+                    sensor3 = new Accel_MPU6050(sensor3Data, 3);
+                    break;
+                case SensorConst.TEMP_MCP9808:
+                    sensor3 = new Temp_MCP9808(sensor3Data, 3);
+                    break;
+                case SensorConst.GYRO_MPU6050:
+                    sensor3 = new Gyro_MPU6050(sensor3Data, 3);
+                    break;
+                case SensorConst.LIGHT_OPT3002:
+                    sensor3 = new LIGHT_OPT3002(sensor3Data, 3);
+                    break;
+                case SensorConst.MAG_MAG3110:
+                    sensor3 = new MAG_MAG3110(sensor3Data, 3);
+                    break;
+                case SensorConst.PRESSURE_MPL3115A2:
+                    sensor3 = new PRESSURE_MPL3115A2(sensor3Data, 3);
+                    break;
+                case SensorConst.TEMP_SI7021:
+                    sensor3 = new TEMP_SI7021(sensor3Data, 3);
+                    break;
+                default:
+                    Log.i(TAG,"Invalid sensor type detected");
                     return;
-                } else {
-                    // check to see which sensor is connected
-                    // sensor data type is held in first byte of sensor data
-                    switch (sensor3Data[0]) {
-                        case SensorConst.ACCEL_MPU6050:
-                            sensor3 = new Accel_MPU6050(sensor3Data, 3);
-                            break;
-                        case SensorConst.TEMP_MCP9808:
-                            sensor3 = new Temp_MCP9808(sensor3Data, 3);
-                            break;
-                        case SensorConst.GYRO_MPU6050:
-                            sensor3 = new Gyro_MPU6050(sensor3Data, 3);
-                            break;
-                        case SensorConst.LIGHT_OPT3002:
-                            sensor3 = new LIGHT_OPT3002(sensor3Data, 3);
-                            break;
-                        case SensorConst.MAG_MAG3110:
-                            sensor3 = new MAG_MAG3110(sensor3Data, 3);
-                            break;
-                        case SensorConst.PRESSURE_MPL3115A2:
-                            sensor3 = new PRESSURE_MPL3115A2(sensor3Data, 3);
-                            break;
-                        case SensorConst.TEMP_SI7021:
-                            sensor3 = new TEMP_SI7021(sensor3Data, 3);
-                            break;
-                        default:
-                            Log.i(TAG,"Invalid sensor type detected");
-                            return;
-                    }
-                }
-                // perform calculations on data
-                sensor3.calcSensorData();
-                // post the data to the screen
-                postSensorData(sensor3);
             }
-        }).start();
+        }
+        // perform calculations on data
+        sensor3.calcSensorData();
+        // post the data to the screen
+        postSensorData(sensor3);
     }
 
     void handleSensor4Data(final byte sensor4Data[]) {
 
-        new Thread(new Runnable() {
-            public void run() {
-               Log.i(TAG, "HANDLE S4");
-                if (sensor4Data[0] == SensorConst.INVALID_SENSOR) {
+       Log.i(TAG, "HANDLE S4");
+        if (sensor4Data[0] == SensorConst.INVALID_SENSOR) {
+            return;
+        } else {
+            // check to see which sensor is connected
+            // sensor data type is held in first byte of sensor data
+            switch (sensor4Data[0]) {
+                case SensorConst.ACCEL_MPU6050:
+                    sensor4 = new Accel_MPU6050(sensor4Data, 4);
+                    break;
+                case SensorConst.TEMP_MCP9808:
+                    sensor4 = new Temp_MCP9808(sensor4Data, 4);
+                    break;
+                case SensorConst.GYRO_MPU6050:
+                    sensor4 = new Gyro_MPU6050(sensor4Data, 4);
+                    break;
+                case SensorConst.LIGHT_OPT3002:
+                    sensor4 = new LIGHT_OPT3002(sensor4Data, 4);
+                    break;
+                case SensorConst.MAG_MAG3110:
+                    sensor4 = new MAG_MAG3110(sensor4Data, 4);
+                    break;
+                case SensorConst.PRESSURE_MPL3115A2:
+                    sensor4 = new PRESSURE_MPL3115A2(sensor4Data, 4);
+                    break;
+                case SensorConst.TEMP_SI7021:
+                    sensor4 = new TEMP_SI7021(sensor4Data, 4);
+                    break;
+                default:
+                    Log.i(TAG,"Invalid sensor type detected");
                     return;
-                } else {
-                    // check to see which sensor is connected
-                    // sensor data type is held in first byte of sensor data
-                    switch (sensor4Data[0]) {
-                        case SensorConst.ACCEL_MPU6050:
-                            sensor4 = new Accel_MPU6050(sensor4Data, 4);
-                            break;
-                        case SensorConst.TEMP_MCP9808:
-                            sensor4 = new Temp_MCP9808(sensor4Data, 4);
-                            break;
-                        case SensorConst.GYRO_MPU6050:
-                            sensor4 = new Gyro_MPU6050(sensor4Data, 4);
-                            break;
-                        case SensorConst.LIGHT_OPT3002:
-                            sensor4 = new LIGHT_OPT3002(sensor4Data, 4);
-                            break;
-                        case SensorConst.MAG_MAG3110:
-                            sensor4 = new MAG_MAG3110(sensor4Data, 4);
-                            break;
-                        case SensorConst.PRESSURE_MPL3115A2:
-                            sensor4 = new PRESSURE_MPL3115A2(sensor4Data, 4);
-                            break;
-                        case SensorConst.TEMP_SI7021:
-                            sensor4 = new TEMP_SI7021(sensor4Data, 4);
-                            break;
-                        default:
-                            Log.i(TAG,"Invalid sensor type detected");
-                            return;
-                    }
-                }
-                // perform calculations on data
-                sensor4.calcSensorData();
-                // post the data to the screen
-                postSensorData(sensor4);
             }
-        }).start();
+        }
+        // perform calculations on data
+        sensor4.calcSensorData();
+        // post the data to the screen
+        postSensorData(sensor4);
     }
 
     public void postSensorData(Sensor sensor) {
