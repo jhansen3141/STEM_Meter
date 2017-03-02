@@ -20,8 +20,8 @@
 #include "SMMain.h"
 #include "BatteryMonitor.h"
 
-#define SPICOMMANDS_TASK_STACK_SIZE	    1350 // spiCommands task size in bytes
-#define SPICOMMANDS_TASK_PRIORITY 		2 // spiCommands Priority
+#define SPICOMMANDS_TASK_STACK_SIZE	    1300 // spiCommands task size in bytes
+#define SPICOMMANDS_TASK_PRIORITY 		1 // spiCommands Priority
 #define SPI_BUFFER_SIZE 				21
 #define MASTER_SEND_ID 					0
 #define SPI_BIT_RATE					5000000 // 10MHz
@@ -167,7 +167,7 @@ static void intPinCallbackFxn(PIN_Handle handle, PIN_Id pinId) {
 static void transferCallback(SPI_Handle handle, SPI_Transaction *transaction) {
 	// sensor number is held in first byte
 	uint8_t messageID = SPIBufRX[0];
-	uint8_t sensorData[20] = {0};
+	//uint8_t sensorData[20] = {0};
 
 	if(transaction->status == SPI_TRANSFER_COMPLETED) {
 
@@ -175,20 +175,20 @@ static void transferCallback(SPI_Handle handle, SPI_Transaction *transaction) {
 		// enqueue an update for the sensor char with the new data
 		case SENSOR_1_ID:
 			// copy the sensor data into array minus the first byte which is sen num
-			memcpy(sensorData,SPIBufRX+1,20);
-			enqueueSensorCharUpdate(STEMMETER_SERVICE_SENSOR1DATA_UUID,sensorData);
+			//memcpy(sensorData,SPIBufRX+1,20);
+			enqueueSensorCharUpdate(STEMMETER_SERVICE_SENSOR1DATA_UUID,SPIBufRX+1);
 			break;
 		case SENSOR_2_ID:
-			memcpy(sensorData,SPIBufRX+1,20);
-			enqueueSensorCharUpdate(STEMMETER_SERVICE_SENSOR2DATA_UUID,sensorData);
+			//memcpy(sensorData,SPIBufRX+1,20);
+			enqueueSensorCharUpdate(STEMMETER_SERVICE_SENSOR2DATA_UUID,SPIBufRX+1);
 			break;
 		case SENSOR_3_ID:
-			memcpy(sensorData,SPIBufRX+1,20);
-			enqueueSensorCharUpdate(STEMMETER_SERVICE_SENSOR3DATA_UUID,sensorData);
+			//memcpy(sensorData,SPIBufRX+1,20);
+			enqueueSensorCharUpdate(STEMMETER_SERVICE_SENSOR3DATA_UUID,SPIBufRX+1);
 			break;
 		case SENSOR_4_ID:
-			memcpy(sensorData,SPIBufRX+1,20);
-			enqueueSensorCharUpdate(STEMMETER_SERVICE_SENSOR4DATA_UUID,sensorData);
+			//memcpy(sensorData,SPIBufRX+1,20);
+			enqueueSensorCharUpdate(STEMMETER_SERVICE_SENSOR4DATA_UUID,SPIBufRX+1);
 			break;
 		case CHARGE_START_ID:
 			enqueueBatMonitortTaskMsg(BATMONITOR_MSG_RED_LED_ON);
@@ -277,6 +277,7 @@ static void user_processSPICommandsMessage(spiCommands_msg_t *pMsg) {
 			// Toggle interrupt line to let master know data is ready to be recieved
 			// Master will then perform SPI transfer to get time data
 			PIN_setOutputValue(intPinHandle, Board_SPIINT, 1);
+			Task_sleep(1);
 			PIN_setOutputValue(intPinHandle, Board_SPIINT, 0);
 		}
 			break;

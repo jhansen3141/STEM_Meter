@@ -29,7 +29,7 @@
 #include "FatSD.h"
 
 #define TASKSTACKSIZE       1500
-#define TASK_PRIORITY 		1
+#define TASK_PRIORITY 		2
 
 static Task_Struct sensor1TaskStruct;
 static Char sensor1TaskStack[TASKSTACKSIZE];

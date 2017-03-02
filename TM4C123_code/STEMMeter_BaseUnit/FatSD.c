@@ -46,6 +46,8 @@
 
 #define TIME_STR_LEN		18
 
+#define TASK_PRIORITY 		1
+
 Task_Struct SDCardTaskStruct;
 Char SDCardTaskStack[TASKSTACKSIZE];
 
@@ -89,6 +91,7 @@ void SDCard_createTask(void) {
     Task_Params_init(&taskParams);
     taskParams.stackSize = TASKSTACKSIZE;
     taskParams.stack = &SDCardTaskStack;
+    taskParams.priority = TASK_PRIORITY;
     Task_construct(&SDCardTaskStruct,
 		(Task_FuncPtr)SDCardFxn, &taskParams, NULL);
 }

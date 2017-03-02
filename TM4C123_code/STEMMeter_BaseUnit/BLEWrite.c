@@ -66,6 +66,7 @@ static Queue_Handle hBleWritesMsgQ;
 static Semaphore_Struct semBLEWriteStruct;
 static Semaphore_Handle semBLEWriteHandle;
 
+
 // Struct for task messages
 typedef struct {
   Queue_Elem _elem;
@@ -161,7 +162,7 @@ static void SPISlaveInterrupt(unsigned int index) {
 	// enqueue a message to tell task that sensor update is requested
 	enqueueBLEMsg(UPDATE_SENSOR_CONFIG_MSG);
 	// disable the interrupt until finished
-	GPIO_disableInt(Board_SPI_SLAVE_INT);
+	//GPIO_disableInt(Board_SPI_SLAVE_INT);
 }
 
 static bool SPISendUpdate(uint8_t *txBuffer, uint8_t *rxBuffer) {
@@ -291,7 +292,7 @@ static void updateSensorConfig() {
 	memset(dummyTXBuffer,0,21);
 	// Need to block the task
 	// otherwise SPI data gets out of sync
-	Task_sleep(25);
+	//Task_sleep(25);
 
 	// perform a transfer to get the config data from the CC2640
 	ret = SPISendUpdate(dummyTXBuffer,localRXBuffer);
@@ -304,37 +305,26 @@ static void updateSensorConfig() {
 				// Byte 2 = S2 Freq | Byte 3 = S2 SD Log
 				// Byte 4 = S3 Freq | Byte 5 = S3 SD Log
 				// Byte 6 = S4 Freq | Byte 7 = S4 SD Log
+
+				// ------- Sensor 1 -------- ///
+
 				Sensor1WriteConfig(localRXBuffer[0]);
-				if(localRXBuffer[1]) {
-					Sensor1SDWriteEnabled = true;
-				}
-				else {
-					Sensor1SDWriteEnabled = false;
-				}
+				Sensor1SDWriteEnabled = localRXBuffer[1];
+
+				// ------- Sensor 2 -------- ///
 
 				Sensor2WriteConfig(localRXBuffer[2]);
-				if(localRXBuffer[3]) {
-					Sensor2SDWriteEnabled = true;
-				}
-				else {
-					Sensor2SDWriteEnabled = false;
-				}
+				Sensor2SDWriteEnabled = localRXBuffer[3];
+
+				// ------- Sensor 3 -------- ///
 
 				Sensor3WriteConfig(localRXBuffer[4]);
-				if(localRXBuffer[5]) {
-					Sensor3SDWriteEnabled = true;
-				}
-				else {
-					Sensor3SDWriteEnabled = false;
-				}
+				Sensor3SDWriteEnabled = localRXBuffer[5];
 
+				// ------- Sensor 4 -------- ///
 				Sensor4WriteConfig(localRXBuffer[6]);
-				if(localRXBuffer[7]) {
-					Sensor4SDWriteEnabled = true;
-				}
-				else {
-					Sensor4SDWriteEnabled = false;
-				}
+				Sensor4SDWriteEnabled = localRXBuffer[7];
+
 				break;
 
 			case SPI_SD_TOGGLE_MARKER:
@@ -349,7 +339,7 @@ static void updateSensorConfig() {
 	}
 
 	// Re-Enable interrupt
-	GPIO_enableInt(Board_SPI_SLAVE_INT);
+//	GPIO_enableInt(Board_SPI_SLAVE_INT);
 }
 
 void enqueueBLEWritetTaskMsg(bleWrite_msg_types_t msgType, uint8_t *buffer, uint16_t len) {
