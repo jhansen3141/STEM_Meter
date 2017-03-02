@@ -1,5 +1,8 @@
 package com.stemmeter.stem_meter;
 
+import android.Manifest;
+import android.annotation.TargetApi;
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -9,13 +12,13 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
-import android.os.Message;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
@@ -122,6 +125,7 @@ public class MainActivity extends AppCompatActivity
 
     private Menu mainMenu;
 
+    private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -163,37 +167,89 @@ public class MainActivity extends AppCompatActivity
             finish();
         }
 
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if(this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("This app needs location access");
+                builder.setMessage("Please grant location access so this app can scan for BLE devices.");
+                builder.setPositiveButton(android.R.string.ok, null);
+                builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @TargetApi(23)
+                    @Override
+                    public void onDismiss(DialogInterface dialogInterface) {
+                        requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION);
+                    }
+                });
+                builder.show();
+            }
+        }
+
         ConnectFragment connectFragment = new ConnectFragment();
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.fragment_container, connectFragment, CONNECT_FRAG_TAG).commit();
 
+        printConnectionStat("Disconnected");
+
     }
 
-    public void BoardConnect() {
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[],
+                                           int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_COARSE_LOCATION: {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d(TAG, "coarse location permission granted");
+                    ConnectFragment connectFragment = new ConnectFragment();
+                    getSupportFragmentManager().beginTransaction()
+                            .add(R.id.fragment_container, connectFragment, CONNECT_FRAG_TAG).commit();
+                } else {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle("Functionality limited");
+                    builder.setMessage("Since location access has not been granted, this app will not be able to discover beacons when in the background.");
+                    builder.setPositiveButton(android.R.string.ok, null);
+                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                        }
+                    });
+                    builder.show();
+                }
+                return;
+            }
+        }
+    }
+
+
+    public void BoardConnect(BluetoothDevice device) {
+        printConnectionStat("Connecting to board...");
+        boardDevice = device;
+        mainMenu.findItem(R.id.connection_icon).setIcon(R.drawable.ble_connecting);
+        mBluetoothGatt = boardDevice.connectGatt(getApplicationContext(), true, mGattCallback);
+    }
+
+    public void BLEScan() {
         mBluetoothManager = (BluetoothManager) getSystemService(getApplicationContext().BLUETOOTH_SERVICE);
         mBluetoothAdapter = mBluetoothManager.getAdapter();
         if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) { // if bluetooth is not enabled
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, 0);
             printConnectionStat("Disconnected");
-            mainMenu.findItem(R.id.connection_icon).setIcon(R.drawable.disconnected_icon);
-        } else {
-            // TODO change this from hard-coded MAC address to name of BLE device or let user choose from list
-            boardDevice = mBluetoothAdapter.getRemoteDevice(DEVICE_MAC_STR);
-
-            mainMenu.findItem(R.id.connection_icon).setIcon(R.drawable.ble_connecting);
-            if (boardDevice == null) {
-                printConnectionStat("Scanning for board...");
-                scanLeDevice(true);
-            } else {
-                printConnectionStat("Connecting to board...");
-                mBluetoothGatt = boardDevice.connectGatt(getApplicationContext(), true, mGattCallback);
-            }
+        } else if (mConnectionState == BluetoothProfile.STATE_DISCONNECTED) {
+            printConnectionStat("Scanning...");
+            scanLeDevice(true);
+        }
+        else {
+            mBluetoothGatt.disconnect();
+            mConnectionState = STATE_DISCONNECTED;
+            printConnectionStat("Scanning...");
+            scanLeDevice(true);
         }
     }
 
     private void scanLeDevice(final boolean enable) {
         Log.i(TAG, "Scanning...");
+        // Scan for 10 seconds only
         final long SCAN_PERIOD = 10000;
         mHandler = new Handler();
         if (enable) {
@@ -203,6 +259,10 @@ public class MainActivity extends AppCompatActivity
                 public void run() {
                     mScanning = false;
                     mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                    if(mConnectionState == BluetoothProfile.STATE_DISCONNECTED) {
+                        printConnectionStat("Disconnected");
+                    }
+                    Log.i(TAG, "Stopped Scanning");
                 }
             }, SCAN_PERIOD);
 
@@ -220,12 +280,16 @@ public class MainActivity extends AppCompatActivity
             new BluetoothAdapter.LeScanCallback() {
                 @Override
                 public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
-                    if (device.getName().equals("STEM Meter")) {
-                        boardDevice = device;
-                        mBluetoothGatt = boardDevice.connectGatt(getApplicationContext(), true, mGattCallback);
+                    if(device != null && device.getName() != null) {
+                        if (device.getName().equals("STEM Meter")) {
+                            ConnectFragment connectFragment = (ConnectFragment)
+                                    getSupportFragmentManager().findFragmentByTag(CONNECT_FRAG_TAG);
+                            if (connectFragment != null) {
+                                BLEDevice bleDevice = new BLEDevice(device,Integer.toString(rssi));
+                                connectFragment.addScanListItem(bleDevice);
+                            }
+                        }
                     }
-                    printConnectionStat("Board Found");
-                    Log.i(TAG, "DEVICE FOUND: " + device.getName());
                 }
             };
 
@@ -246,9 +310,11 @@ public class MainActivity extends AppCompatActivity
                 public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
                     if (newState == BluetoothProfile.STATE_CONNECTED) {
                         mConnectionState = STATE_CONNECTED;
+
                         Log.i(TAG, "Connected to GATT server.");
                         Log.i(TAG, "Attempting to start service discovery:" + mBluetoothGatt.discoverServices());
                         printConnectionStat("Connected to GATT server. Starting service discovery");
+
 
                     } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                         mConnectionState = STATE_DISCONNECTED;
@@ -319,8 +385,7 @@ public class MainActivity extends AppCompatActivity
                                 mainMenu.findItem(R.id.connection_icon).setIcon(R.drawable.ble_connected);
                             }
                         });
-
-
+                        
                     } else {
                         Log.w(TAG, "onServicesDiscovered received: " + status);
                     }
@@ -364,7 +429,6 @@ public class MainActivity extends AppCompatActivity
                     } else if (characteristic.equals(BoardSensor3DataChar)) {
                         handleSensor3Data(characteristic.getValue());
                     } else if (characteristic.equals(BoardSensor4DataChar)) {
-                        Log.i(TAG,"S4 Data Received");
                         handleSensor4Data(characteristic.getValue());
                     }
                 }
@@ -644,6 +708,7 @@ public class MainActivity extends AppCompatActivity
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         mainMenu = menu;
+        mainMenu.findItem(R.id.connection_icon).setIcon(R.drawable.disconnected_icon);
         return true;
     }
 
