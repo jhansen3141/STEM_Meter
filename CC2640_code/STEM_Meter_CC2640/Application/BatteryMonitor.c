@@ -20,7 +20,7 @@
 #include "SPICommands.h"
 
 #define BATMONITOR_TASK_STACK_SIZE	    950 // BatMonitor task size in bytes
-#define BATMONITOR_TASK_PRIORITY 		3 // BatMonitor Priority
+#define BATMONITOR_TASK_PRIORITY 		2 // BatMonitor Priority
 #define BATT_GAUGE_ADDR				    0x70 // I2C slave address for battery gauge
 #define BUTTON_PRESS					0x01
 #define BUTTON_LONG_PRESS				0x02

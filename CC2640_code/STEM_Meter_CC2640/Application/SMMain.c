@@ -397,9 +397,9 @@ static void ProjectZero_taskFxn(UArg a0, UArg a1) {
 				case STEMMETER_SERVICE_SERV_UUID:
 					user_STEMMeter_Service_ValueChangeDispatchHandler(pWrite);
 					break;
-		}
-		// Free the message received from the service callback.
-		ICall_free(pWrite);
+			}
+			// Free the message received from the service callback.
+			ICall_free(pWrite);
 		}
 
 		if (errno == ICALL_ERRNO_SUCCESS) {
@@ -533,8 +533,31 @@ static void user_processApplicationMessage(app_msg_t *pMsg) {
       break;
 
     case APP_MSG_UPDATE_CHARVAL: /* Message from ourselves to send  */
-      user_updateCharVal(pCharData);
-      break;
+    {
+     // user_updateCharVal(pCharData);
+		switch(pCharData->svcUUID) {
+			case STEMMETER_SERVICE_SENSOR1DATA_UUID:
+				STEMMeter_Service_SetParameter(STEMMETER_SERVICE_SENSOR1DATA, STEMMETER_SERVICE_SENSOR1DATA_LEN, pCharData->data);
+				break;
+
+			case STEMMETER_SERVICE_SENSOR2DATA_UUID:
+				STEMMeter_Service_SetParameter(STEMMETER_SERVICE_SENSOR2DATA, STEMMETER_SERVICE_SENSOR2DATA_LEN, pCharData->data);
+				break;
+
+			case STEMMETER_SERVICE_SENSOR3DATA_UUID:
+				STEMMeter_Service_SetParameter(STEMMETER_SERVICE_SENSOR3DATA, STEMMETER_SERVICE_SENSOR3DATA_LEN, pCharData->data);
+				break;
+
+			case STEMMETER_SERVICE_SENSOR4DATA_UUID:
+				STEMMeter_Service_SetParameter(STEMMETER_SERVICE_SENSOR4DATA, STEMMETER_SERVICE_SENSOR4DATA_LEN, pCharData->data);
+				break;
+
+			case STEMMETER_SERVICE_BATTERYDATA_UUID:
+				STEMMeter_Service_SetParameter(STEMMETER_SERVICE_BATTERYDATA, STEMMETER_SERVICE_BATTERYDATA_LEN, pCharData->data);
+				break;
+		}
+    }
+    	break;
 
     case APP_MSG_GAP_STATE_CHANGE: /* Message that GAP state changed  */
       user_processGapStateChangeEvt( *(gaprole_States_t *)pMsg->pdu );

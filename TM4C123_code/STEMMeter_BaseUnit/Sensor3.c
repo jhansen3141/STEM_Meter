@@ -29,7 +29,7 @@
 
 
 #define TASKSTACKSIZE       1500
-#define TASK_PRIORITY 		1
+#define TASK_PRIORITY 		2
 
 static Task_Struct sensor3TaskStruct;
 static Char sensor3TaskStack[TASKSTACKSIZE];

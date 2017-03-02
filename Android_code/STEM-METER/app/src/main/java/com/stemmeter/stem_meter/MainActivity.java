@@ -1,5 +1,8 @@
 package com.stemmeter.stem_meter;
 
+import android.Manifest;
+import android.annotation.TargetApi;
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -9,33 +12,35 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
-import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.Toast;
-import android.os.Handler;
 
-import com.stemmeter.stem_meter.Sensors.Accel_MPU6050;
 import com.github.mikephil.charting.data.LineData;
+import com.stemmeter.stem_meter.Sensors.Accel_MPU6050;
 import com.stemmeter.stem_meter.Sensors.Gyro_MPU6050;
 import com.stemmeter.stem_meter.Sensors.LIGHT_OPT3002;
 import com.stemmeter.stem_meter.Sensors.MAG_MAG3110;
 import com.stemmeter.stem_meter.Sensors.PRESSURE_MPL3115A2;
 import com.stemmeter.stem_meter.Sensors.Sensor;
-import com.stemmeter.stem_meter.Sensors.Temp_MCP9808;
 import com.stemmeter.stem_meter.Sensors.TEMP_SI7021;
+import com.stemmeter.stem_meter.Sensors.Temp_MCP9808;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -121,6 +126,8 @@ public class MainActivity extends AppCompatActivity
 
     private Menu mainMenu;
 
+    private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -147,6 +154,7 @@ public class MainActivity extends AppCompatActivity
 
         graphConfig = new GraphConfig();
 
+
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         //noinspection RestrictedApi
         navigationView.setNavigationItemSelectedListener(this);
@@ -160,37 +168,89 @@ public class MainActivity extends AppCompatActivity
             finish();
         }
 
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if(this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("This app needs location access");
+                builder.setMessage("Please grant location access so this app can scan for BLE devices.");
+                builder.setPositiveButton(android.R.string.ok, null);
+                builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @TargetApi(23)
+                    @Override
+                    public void onDismiss(DialogInterface dialogInterface) {
+                        requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION);
+                    }
+                });
+                builder.show();
+            }
+        }
+
         ConnectFragment connectFragment = new ConnectFragment();
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.fragment_container, connectFragment, CONNECT_FRAG_TAG).commit();
 
+        printConnectionStat("Disconnected");
+
     }
 
-    public void BoardConnect() {
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[],
+                                           int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_COARSE_LOCATION: {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d(TAG, "coarse location permission granted");
+                    ConnectFragment connectFragment = new ConnectFragment();
+                    getSupportFragmentManager().beginTransaction()
+                            .add(R.id.fragment_container, connectFragment, CONNECT_FRAG_TAG).commit();
+                } else {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle("Functionality limited");
+                    builder.setMessage("Since location access has not been granted, this app will not be able to discover beacons when in the background.");
+                    builder.setPositiveButton(android.R.string.ok, null);
+                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                        }
+                    });
+                    builder.show();
+                }
+                return;
+            }
+        }
+    }
+
+
+    public void BoardConnect(BluetoothDevice device) {
+        printConnectionStat("Connecting to board...");
+        boardDevice = device;
+        mainMenu.findItem(R.id.connection_icon).setIcon(R.drawable.ble_connecting);
+        mBluetoothGatt = boardDevice.connectGatt(getApplicationContext(), true, mGattCallback);
+    }
+
+    public void BLEScan() {
         mBluetoothManager = (BluetoothManager) getSystemService(getApplicationContext().BLUETOOTH_SERVICE);
         mBluetoothAdapter = mBluetoothManager.getAdapter();
         if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) { // if bluetooth is not enabled
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, 0);
             printConnectionStat("Disconnected");
-            mainMenu.findItem(R.id.connection_icon).setIcon(R.drawable.disconnected_icon);
-        } else {
-            // TODO change this from hard-coded MAC address to name of BLE device or let user choose from list
-            boardDevice = mBluetoothAdapter.getRemoteDevice(DEVICE_MAC_STR);
-
-            mainMenu.findItem(R.id.connection_icon).setIcon(R.drawable.ble_connecting);
-            if (boardDevice == null) {
-                printConnectionStat("Scanning for board...");
-                scanLeDevice(true);
-            } else {
-                printConnectionStat("Connecting to board...");
-                mBluetoothGatt = boardDevice.connectGatt(getApplicationContext(), true, mGattCallback);
-            }
+        } else if (mConnectionState == BluetoothProfile.STATE_DISCONNECTED) {
+            printConnectionStat("Scanning...");
+            scanLeDevice(true);
+        }
+        else {
+            mBluetoothGatt.disconnect();
+            mConnectionState = STATE_DISCONNECTED;
+            printConnectionStat("Scanning...");
+            scanLeDevice(true);
         }
     }
 
     private void scanLeDevice(final boolean enable) {
         Log.i(TAG, "Scanning...");
+        // Scan for 10 seconds only
         final long SCAN_PERIOD = 10000;
         mHandler = new Handler();
         if (enable) {
@@ -200,6 +260,10 @@ public class MainActivity extends AppCompatActivity
                 public void run() {
                     mScanning = false;
                     mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                    if(mConnectionState == BluetoothProfile.STATE_DISCONNECTED) {
+                        printConnectionStat("Disconnected");
+                    }
+                    Log.i(TAG, "Stopped Scanning");
                 }
             }, SCAN_PERIOD);
 
@@ -217,12 +281,16 @@ public class MainActivity extends AppCompatActivity
             new BluetoothAdapter.LeScanCallback() {
                 @Override
                 public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
-                    if (device.getName().equals("STEM Meter")) {
-                        boardDevice = device;
-                        mBluetoothGatt = boardDevice.connectGatt(getApplicationContext(), true, mGattCallback);
+                    if(device != null && device.getName() != null) {
+                        if (device.getName().equals("STEM Meter")) {
+                            ConnectFragment connectFragment = (ConnectFragment)
+                                    getSupportFragmentManager().findFragmentByTag(CONNECT_FRAG_TAG);
+                            if (connectFragment != null) {
+                                BLEDevice bleDevice = new BLEDevice(device,Integer.toString(rssi));
+                                connectFragment.addScanListItem(bleDevice);
+                            }
+                        }
                     }
-                    printConnectionStat("Board Found");
-                    Log.i(TAG, "DEVICE FOUND: " + device.getName());
                 }
             };
 
@@ -243,9 +311,11 @@ public class MainActivity extends AppCompatActivity
                 public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
                     if (newState == BluetoothProfile.STATE_CONNECTED) {
                         mConnectionState = STATE_CONNECTED;
+
                         Log.i(TAG, "Connected to GATT server.");
                         Log.i(TAG, "Attempting to start service discovery:" + mBluetoothGatt.discoverServices());
                         printConnectionStat("Connected to GATT server. Starting service discovery");
+
 
                     } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                         mConnectionState = STATE_DISCONNECTED;
@@ -317,7 +387,6 @@ public class MainActivity extends AppCompatActivity
                             }
                         });
 
-
                     } else {
                         Log.w(TAG, "onServicesDiscovered received: " + status);
                     }
@@ -363,7 +432,6 @@ public class MainActivity extends AppCompatActivity
                     } else if (characteristic.equals(BoardSensor4DataChar)) {
                         handleSensor4Data(characteristic.getValue());
                     }
-
                 }
             };
 
@@ -440,275 +508,164 @@ public class MainActivity extends AppCompatActivity
     }
 
     void handleSensor1Data(final byte sensor1Data[]) {
-        // Start a new thread to handle updating the sensor data
-        new Thread(new Runnable() {
-            public void run() {
-                // Log.i(TAG, "HANDLE S1");
-                if (sensor1Data[0] == SensorConst.INVALID_SENSOR) {
+//      Log.i(TAG, "HANDLE S1");
+        if (sensor1Data[0] == SensorConst.INVALID_SENSOR) {
+            return;
+        } else {
+            // check to see which sensor is connected
+            // sensor data type is held in first byte of sensor data
+            switch (sensor1Data[0]) {
+                case SensorConst.ACCEL_MPU6050:
+                    sensor1 = new Accel_MPU6050(sensor1Data, 1);
+                    break;
+                case SensorConst.TEMP_MCP9808:
+                    sensor1 = new Temp_MCP9808(sensor1Data, 1);
+                    break;
+                case SensorConst.GYRO_MPU6050:
+                    sensor1 = new Gyro_MPU6050(sensor1Data, 1);
+                    break;
+                case SensorConst.LIGHT_OPT3002:
+                    sensor1 = new LIGHT_OPT3002(sensor1Data, 1);
+                    break;
+                case SensorConst.MAG_MAG3110:
+                    sensor1 = new MAG_MAG3110(sensor1Data, 1);
+                    break;
+                case SensorConst.PRESSURE_MPL3115A2:
+                    sensor1 = new PRESSURE_MPL3115A2(sensor1Data, 1);
+                    break;
+                case SensorConst.TEMP_SI7021:
+                    sensor1 = new TEMP_SI7021(sensor1Data, 1);
+                    break;
+                default:
+                    Log.i(TAG,"Invalid sensor type detected");
                     return;
-                } else {
-                    // check to see which sensor is connected
-                    // sensor data type is held in first byte of sensor data
-                    switch (sensor1Data[0]) {
-                        case SensorConst.ACCEL_MPU6050:
-                            // check to see if sensor is already "installed"
-                            if(sensor1 == null || !(sensor1 instanceof Accel_MPU6050)) {
-                                sensor1 = new Accel_MPU6050(sensor1Data, 1);
-                            }
-                            break;
-                        case SensorConst.TEMP_MCP9808:
-                            // check to see if sensor is already "installed"
-                            if(sensor1 == null || !(sensor1 instanceof Temp_MCP9808)) {
-                                sensor1 = new Temp_MCP9808(sensor1Data, 1);
-                            }
-                            break;
-                        case SensorConst.GYRO_MPU6050:
-                            // check to see if sensor is already "installed"
-                            if(sensor1 == null || !(sensor1 instanceof Gyro_MPU6050)) {
-                                sensor1 = new Gyro_MPU6050(sensor1Data, 1);
-                            }
-                            break;
-                        case SensorConst.LIGHT_OPT3002:
-                            // check to see if sensor is already "installed"
-                            if(sensor1 == null || !(sensor1 instanceof LIGHT_OPT3002)) {
-                                sensor1 = new LIGHT_OPT3002(sensor1Data, 1);
-                            }
-                            break;
-                        case SensorConst.MAG_MAG3110:
-                            // check to see if sensor is already "installed"
-                            if(sensor1 == null || !(sensor1 instanceof MAG_MAG3110)) {
-                                sensor1 = new MAG_MAG3110(sensor1Data, 1);
-                            }
-                            break;
-                        case SensorConst.PRESSURE_MPL3115A2:
-                            // check to see if sensor is already "installed"
-                            if(sensor1 == null || !(sensor1 instanceof PRESSURE_MPL3115A2)) {
-                                sensor1 = new PRESSURE_MPL3115A2(sensor1Data, 1);
-                            }
-                            break;
-                        case SensorConst.TEMP_SI7021:
-                            // check to see if sensor is already "installed"
-                            if(sensor1 == null || !(sensor1 instanceof TEMP_SI7021)) {
-                                sensor1 = new TEMP_SI7021(sensor1Data, 1);
-                            }
-                            break;
-                        default:
-                            Log.i(TAG,"Invalid sensor type detected");
-                            return;
-                    }
-                }
-                // update the sensor data
-                sensor1.updateData(sensor1Data);
-                // perform calculations on data
-                sensor1.calcSensorData();
-                // post the data to the screen
-                postSensorData(sensor1);
             }
-        }).start();
+        }
+        // perform calculations on data
+        sensor1.calcSensorData();
+        // post the data to the screen
+        postSensorData(sensor1);
+
     }
 
     void handleSensor2Data(final byte sensor2Data[]) {
-        // Create new thread to update sensor data
-        new Thread(new Runnable() {
-            public void run() {
-                // Log.i(TAG, "HANDLE S2");
-                if (sensor2Data[0] == SensorConst.INVALID_SENSOR) {
+    //  Log.i(TAG, "HANDLE S2");
+        if (sensor2Data[0] == SensorConst.INVALID_SENSOR) {
+            return;
+        } else {
+            switch (sensor2Data[0]) {
+                case SensorConst.ACCEL_MPU6050:
+                    sensor2 = new Accel_MPU6050(sensor2Data, 2);
+                    break;
+                case SensorConst.TEMP_MCP9808:
+                    sensor2 = new Temp_MCP9808(sensor2Data, 2);
+                    break;
+                case SensorConst.GYRO_MPU6050:
+                    sensor2 = new Gyro_MPU6050(sensor2Data, 2);
+                    break;
+                case SensorConst.LIGHT_OPT3002:
+                    sensor2 = new LIGHT_OPT3002(sensor2Data, 2);
+                    break;
+                case SensorConst.MAG_MAG3110:
+                    sensor2 = new MAG_MAG3110(sensor2Data, 2);
+                    break;
+                case SensorConst.PRESSURE_MPL3115A2:
+                    sensor2 = new PRESSURE_MPL3115A2(sensor2Data, 2);
+                    break;
+                case SensorConst.TEMP_SI7021:
+                    sensor2 = new TEMP_SI7021(sensor2Data, 2);
+                    break;
+                default:
+                    Log.i(TAG,"Invalid sensor type detected");
                     return;
-                } else {
-                    // check to see which sensor is connected
-                    // sensor data type is held in first byte of sensor data
-                    switch (sensor2Data[0]) {
-                        case SensorConst.ACCEL_MPU6050:
-                            // check to see if sensor is already "installed"
-                            if(sensor2 == null || !(sensor2 instanceof Accel_MPU6050)) {
-                                sensor2 = new Accel_MPU6050(sensor2Data, 2);
-                            }
-                            break;
-                        case SensorConst.TEMP_MCP9808:
-                            // check to see if sensor is already "installed"
-                            if(sensor2 == null || !(sensor2 instanceof Temp_MCP9808)) {
-                                sensor2 = new Temp_MCP9808(sensor2Data, 2);
-                            }
-                            break;
-                        case SensorConst.GYRO_MPU6050:
-                            // check to see if sensor is already "installed"
-                            if(sensor2 == null || !(sensor2 instanceof Gyro_MPU6050)) {
-                                sensor2 = new Gyro_MPU6050(sensor2Data, 2);
-                            }
-                            break;
-                        case SensorConst.LIGHT_OPT3002:
-                            // check to see if sensor is already "installed"
-                            if(sensor2 == null || !(sensor2 instanceof LIGHT_OPT3002)) {
-                                sensor2 = new LIGHT_OPT3002(sensor2Data, 2);
-                            }
-                            break;
-                        case SensorConst.MAG_MAG3110:
-                            // check to see if sensor is already "installed"
-                            if(sensor2 == null || !(sensor2 instanceof MAG_MAG3110)) {
-                                sensor2 = new MAG_MAG3110(sensor2Data, 2);
-                            }
-                            break;
-                        case SensorConst.PRESSURE_MPL3115A2:
-                            // check to see if sensor is already "installed"
-                            if(sensor2 == null || !(sensor2 instanceof PRESSURE_MPL3115A2)) {
-                                sensor2 = new PRESSURE_MPL3115A2(sensor2Data, 2);
-                            }
-                            break;
-                        case SensorConst.TEMP_SI7021:
-                            // check to see if sensor is already "installed"
-                            if(sensor2 == null || !(sensor2 instanceof TEMP_SI7021)) {
-                                sensor2 = new TEMP_SI7021(sensor2Data, 2);
-                            }
-                            break;
-                        default:
-                            Log.i(TAG,"Invalid sensor type detected");
-                            return;
-                    }
-                }
-                // update the sensor data
-                sensor2.updateData(sensor2Data);
-                // perform calculations on data
-                sensor2.calcSensorData();
-                // post the data to the screen
-                postSensorData(sensor2);
             }
-        }).start();
+        }
+        // perform calculations on data
+        sensor2.calcSensorData();
+        // post the data to the screen
+        postSensorData(sensor2);
     }
 
     void handleSensor3Data(final byte sensor3Data[]) {
-        // Create new thread to update sensor data
-        new Thread(new Runnable() {
-            public void run() {
-                // Log.i(TAG, "HANDLE S3");
-                if (sensor3Data[0] == SensorConst.INVALID_SENSOR) {
+
+//      Log.i(TAG, "HANDLE S3");
+        if (sensor3Data[0] == SensorConst.INVALID_SENSOR) {
+            return;
+        } else {
+            // check to see which sensor is connected
+            // sensor data type is held in first byte of sensor data
+            switch (sensor3Data[0]) {
+                case SensorConst.ACCEL_MPU6050:
+                    sensor3 = new Accel_MPU6050(sensor3Data, 3);
+                    break;
+                case SensorConst.TEMP_MCP9808:
+                    sensor3 = new Temp_MCP9808(sensor3Data, 3);
+                    break;
+                case SensorConst.GYRO_MPU6050:
+                    sensor3 = new Gyro_MPU6050(sensor3Data, 3);
+                    break;
+                case SensorConst.LIGHT_OPT3002:
+                    sensor3 = new LIGHT_OPT3002(sensor3Data, 3);
+                    break;
+                case SensorConst.MAG_MAG3110:
+                    sensor3 = new MAG_MAG3110(sensor3Data, 3);
+                    break;
+                case SensorConst.PRESSURE_MPL3115A2:
+                    sensor3 = new PRESSURE_MPL3115A2(sensor3Data, 3);
+                    break;
+                case SensorConst.TEMP_SI7021:
+                    sensor3 = new TEMP_SI7021(sensor3Data, 3);
+                    break;
+                default:
+                    Log.i(TAG,"Invalid sensor type detected");
                     return;
-                } else {
-                    // check to see which sensor is connected
-                    // sensor data type is held in first byte of sensor data
-                    switch (sensor3Data[0]) {
-                        case SensorConst.ACCEL_MPU6050:
-                            // check to see if sensor is already "installed"
-                            if(sensor3 == null || !(sensor3 instanceof Accel_MPU6050)) {
-                                sensor3 = new Accel_MPU6050(sensor3Data, 3);
-                            }
-                            break;
-                        case SensorConst.TEMP_MCP9808:
-                            // check to see if sensor is already "installed"
-                            if(sensor3 == null || !(sensor3 instanceof Temp_MCP9808)) {
-                                sensor3 = new Temp_MCP9808(sensor3Data, 3);
-                            }
-                            break;
-                        case SensorConst.GYRO_MPU6050:
-                            // check to see if sensor is already "installed
-                            if(sensor3 == null || !(sensor3 instanceof Gyro_MPU6050)) {
-                                sensor3 = new Gyro_MPU6050(sensor3Data, 3);
-                            }
-                            break;
-                        case SensorConst.LIGHT_OPT3002:
-                            // check to see if sensor is already "installed"
-                            if(sensor3 == null || !(sensor3 instanceof LIGHT_OPT3002)) {
-                                sensor3 = new LIGHT_OPT3002(sensor3Data, 3);
-                            }
-                            break;
-                        case SensorConst.MAG_MAG3110:
-                            // check to see if sensor is already "installed"
-                            if(sensor3 == null || !(sensor3 instanceof MAG_MAG3110)) {
-                                sensor3 = new MAG_MAG3110(sensor3Data, 3);
-                            }
-                            break;
-                        case SensorConst.PRESSURE_MPL3115A2:
-                            // check to see if sensor is already "installed"
-                            if(sensor3 == null || !(sensor3 instanceof PRESSURE_MPL3115A2)) {
-                                sensor3 = new PRESSURE_MPL3115A2(sensor3Data, 3);
-                            }
-                            break;
-                        case SensorConst.TEMP_SI7021:
-                            // check to see if sensor is already "installed"
-                            if(sensor3 == null || !(sensor3 instanceof TEMP_SI7021)) {
-                                sensor3 = new TEMP_SI7021(sensor3Data, 3);
-                            }
-                            break;
-                        default:
-                            Log.i(TAG,"Invalid sensor type detected");
-                            return;
-                    }
-                }
-                // update the sensor data
-                sensor3.updateData(sensor3Data);
-                // perform calculations on data
-                sensor3.calcSensorData();
-                // post the data to the screen
-                postSensorData(sensor3);
             }
-        }).start();
+        }
+        // perform calculations on data
+        sensor3.calcSensorData();
+        // post the data to the screen
+        postSensorData(sensor3);
     }
 
     void handleSensor4Data(final byte sensor4Data[]) {
 
-        new Thread(new Runnable() {
-            public void run() {
-                //Log.i(TAG, "HANDLE S4");
-                if (sensor4Data[0] == SensorConst.INVALID_SENSOR) {
+       Log.i(TAG, "HANDLE S4");
+        if (sensor4Data[0] == SensorConst.INVALID_SENSOR) {
+            return;
+        } else {
+            // check to see which sensor is connected
+            // sensor data type is held in first byte of sensor data
+            switch (sensor4Data[0]) {
+                case SensorConst.ACCEL_MPU6050:
+                    sensor4 = new Accel_MPU6050(sensor4Data, 4);
+                    break;
+                case SensorConst.TEMP_MCP9808:
+                    sensor4 = new Temp_MCP9808(sensor4Data, 4);
+                    break;
+                case SensorConst.GYRO_MPU6050:
+                    sensor4 = new Gyro_MPU6050(sensor4Data, 4);
+                    break;
+                case SensorConst.LIGHT_OPT3002:
+                    sensor4 = new LIGHT_OPT3002(sensor4Data, 4);
+                    break;
+                case SensorConst.MAG_MAG3110:
+                    sensor4 = new MAG_MAG3110(sensor4Data, 4);
+                    break;
+                case SensorConst.PRESSURE_MPL3115A2:
+                    sensor4 = new PRESSURE_MPL3115A2(sensor4Data, 4);
+                    break;
+                case SensorConst.TEMP_SI7021:
+                    sensor4 = new TEMP_SI7021(sensor4Data, 4);
+                    break;
+                default:
+                    Log.i(TAG,"Invalid sensor type detected");
                     return;
-                } else {
-                    // check to see which sensor is connected
-                    // sensor data type is held in first byte of sensor data
-                    switch (sensor4Data[0]) {
-                        case SensorConst.ACCEL_MPU6050:
-                            // check to see if sensor is already "installed"
-                            if(sensor4 == null || !(sensor4 instanceof Accel_MPU6050)) {
-                                sensor4 = new Accel_MPU6050(sensor4Data, 4);
-                            }
-                            break;
-                        case SensorConst.TEMP_MCP9808:
-                            // check to see if sensor is already "installed"
-                            if(sensor4 == null || !(sensor4 instanceof Temp_MCP9808)) {
-                                sensor4 = new Temp_MCP9808(sensor4Data, 4);
-                            }
-                            break;
-                        case SensorConst.GYRO_MPU6050:
-                            // check to see if sensor is already "installed"
-                            if(sensor4 == null || !(sensor4 instanceof Gyro_MPU6050)) {
-                                sensor4 = new Gyro_MPU6050(sensor4Data, 4);
-                            }
-                            break;
-                        case SensorConst.LIGHT_OPT3002:
-                            // check to see if sensor is already "installed"
-                            if(sensor4 == null || !(sensor4 instanceof LIGHT_OPT3002)) {
-                                sensor4 = new LIGHT_OPT3002(sensor4Data, 4);
-                            }
-                            break;
-                        case SensorConst.MAG_MAG3110:
-                            // check to see if sensor is already "installed"
-                            if(sensor4 == null || !(sensor4 instanceof MAG_MAG3110)) {
-                                sensor4 = new MAG_MAG3110(sensor4Data, 4);
-                            }
-                            break;
-                        case SensorConst.PRESSURE_MPL3115A2:
-                            // check to see if sensor is already "installed"
-                            if(sensor4 == null || !(sensor4 instanceof PRESSURE_MPL3115A2)) {
-                                sensor4 = new PRESSURE_MPL3115A2(sensor4Data, 4);
-                            }
-                            break;
-                        case SensorConst.TEMP_SI7021:
-                            // check to see if sensor is already "installed"
-                            if(sensor4 == null || !(sensor4 instanceof TEMP_SI7021)) {
-                                sensor4 = new TEMP_SI7021(sensor4Data, 4);
-                            }
-                            break;
-                        default:
-                            Log.i(TAG,"Invalid sensor type detected");
-                            return;
-                    }
-                }
-                // update the sensor data
-                sensor4.updateData(sensor4Data);
-                // perform calculations on data
-                sensor4.calcSensorData();
-                // post the data to the screen
-                postSensorData(sensor4);
             }
-        }).start();
+        }
+        // perform calculations on data
+        sensor4.calcSensorData();
+        // post the data to the screen
+        postSensorData(sensor4);
     }
 
     public void postSensorData(Sensor sensor) {
@@ -717,17 +674,7 @@ public class MainActivity extends AppCompatActivity
        // Log.i(TAG,"Check if Sensors are up");
         // if the sensor fragment is showing print the data there
         if (sensorsFragment != null && sensorsFragment.isVisible()) {
-            // Check to see if the sensor is "OFF"
-            if(sensorConfigList.get(sensor.getSensorNumber()-1).getFreq() == SensorConst.RATE_OFF) {
-                sensorsFragment.printSensorData(sensor.getSensorNumber(), "Sensor " +sensor.getSensorNumber() +" - OFF", sensor.getSensorRate());
-            }
-            else {
-//                if(sensor.getSensorNumber() == 1) {
-//                    Log.i(TAG,"SN: " + sensor.getSyncNumber());
-//
-//                }
-                sensorsFragment.printSensorData(sensor.getSensorNumber(), sensor.toString(), sensor.getSensorRate());
-            }
+            sensorsFragment.printSensorData(sensor.getSensorNumber(), sensor.toString());
         }
         // Determines whether to add sensor data to graph
         else if(sensor.getSensorNumber() == (graphConfig.getSelectedSensor() + 1)) {
@@ -762,6 +709,7 @@ public class MainActivity extends AppCompatActivity
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         mainMenu = menu;
+        mainMenu.findItem(R.id.connection_icon).setIcon(R.drawable.disconnected_icon);
         return true;
     }
 
@@ -967,4 +915,5 @@ public class MainActivity extends AppCompatActivity
         }
         return returnSesnor;
     }
+
 }

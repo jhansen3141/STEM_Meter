@@ -79,48 +79,14 @@ public class SensorsFragment extends ListFragment {
         }
     }
 
-    public void printSensorData(final int sensorNum, final String dataStr, final int sensorRate) {
-        boolean shouldUpdateSensor = false;
-
-        // Check to see if we need to reduce update rate (5Hz or 10Hz)
-        if(sensorRate == SensorConst.RATE_FIVE_HZ) {
-            // Increase the count
-            rateReducer[sensorNum-1]++;
-
-            // Check to see if count exceeded
-            if(rateReducer[sensorNum-1] >= 5) {
-                rateReducer[sensorNum-1] = 0;
-                // Update rate has been reduced to 1Hz
-                // So update it
-                shouldUpdateSensor = true;
+    public void printSensorData(final int sensorNum, final String dataStr) {
+        // update the item in the list view
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                sensorListAdapter.updateItem(dataStr, sensorNum - 1);
             }
-        }
-        else if(sensorRate == SensorConst.RATE_TEN_HZ) {
-            // Increase the count
-            rateReducer[sensorNum-1]++;
-
-            // Check to see if count exceeded
-            if(rateReducer[sensorNum-1] >= 10) {
-                rateReducer[sensorNum-1] = 0;
-                // Update rate has been reduced to 1Hz
-                // So update it
-                shouldUpdateSensor = true;
-            }
-        }
-        else {
-            shouldUpdateSensor = true;
-        }
-
-        // Check to see if we should update the text box
-        if(shouldUpdateSensor) {
-            // update the item in the list view
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    sensorListAdapter.updateItem(dataStr, sensorNum - 1);
-                }
-            });
-        }
+        });
     }
 
     @Override
