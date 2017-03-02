@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity
    // public final static String DEVICE_MAC_STR = "CC:78:AB:AC:B3:FE";
 
     // Josh's Base Unit Address
-    public final static String DEVICE_MAC_STR = "CC:78:AB:19:9A:21";
+  //  public final static String DEVICE_MAC_STR = "CC:78:AB:19:9A:21";
 
     //public final static UUID BOARD_UUID = UUID.fromString("0000ABAE-0000-1000-8000-00805F9B34FB");
     public final static UUID SM_SERVICE_UUID =      UUID.fromString("F000ABAE-0451-4000-B000-000000000000");
@@ -385,7 +385,7 @@ public class MainActivity extends AppCompatActivity
                                 mainMenu.findItem(R.id.connection_icon).setIcon(R.drawable.ble_connected);
                             }
                         });
-                        
+
                     } else {
                         Log.w(TAG, "onServicesDiscovered received: " + status);
                     }
