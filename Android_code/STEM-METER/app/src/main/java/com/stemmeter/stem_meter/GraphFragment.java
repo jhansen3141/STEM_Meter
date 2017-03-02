@@ -31,6 +31,7 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.stemmeter.stem_meter.Sensors.Sensor;
 
 import java.text.FieldPosition;
 import java.text.Format;
@@ -61,6 +62,7 @@ public class GraphFragment extends Fragment {
         public ArrayList<LineData> getSavedList();
         public ArrayList<String> getSavedNameList();
         public GraphConfig getGraphConfig();
+        public Sensor getSensor(int sensorNumber);
     }
 
     GraphFragInterface graphFragInterface;
@@ -71,6 +73,9 @@ public class GraphFragment extends Fragment {
     private ImageButton saveBtn;
     private ImageButton settingsBtn;
     private long currentIndex = 0;
+    private String dataSetName1;
+    private String dataSetName2;
+    private String dataSetName3;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -224,6 +229,28 @@ public class GraphFragment extends Fragment {
             }
         });
 
+        ArrayList<Boolean> visibleDataSets = graphFragInterface.getGraphConfig().getDataPoints();
+        Sensor sensor = graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1);
+
+        if (sensor != null) {
+            ArrayList<String> dataSetNames = sensor.getGraphSettings().getDataPoints();
+
+            if (visibleDataSets.get(0) && dataSetNames.size() > 0)
+                dataSetName1 = dataSetNames.get(0);
+            else if (visibleDataSets.get(1) && dataSetNames.size() > 1)
+                dataSetName1 = dataSetNames.get(1);
+            else if (dataSetNames.size() > 2)
+                dataSetName1 = dataSetNames.get(2);
+
+            if (visibleDataSets.get(1) && dataSetNames.size() > 1)
+                dataSetName2 = dataSetNames.get(1);
+            else if (dataSetNames.size() > 2)
+                dataSetName2 = dataSetNames.get(2);
+
+            if (dataSetNames.size() > 2)
+            dataSetName3 = dataSetNames.get(2);
+        }
+
         return view;
     }
 
@@ -247,7 +274,7 @@ public class GraphFragment extends Fragment {
             // set.addEntry(...); // can be called as well
 
             if (set == null) {
-                set = createSet(Color.BLUE, ColorTemplate.getHoloBlue());
+                set = createSet(Color.BLUE, ColorTemplate.getHoloBlue(), dataSetName1);
                 data.addDataSet(set);
             }
 
@@ -311,13 +338,13 @@ public class GraphFragment extends Fragment {
             // set.addEntry(...); // can be called as well
 
             if (set1 == null) {
-                set1 = createSet(Color.BLUE, ColorTemplate.getHoloBlue());
+                set1 = createSet(Color.BLUE, ColorTemplate.getHoloBlue(), dataSetName1);
                 data.addDataSet(set1);
             }
 
             if (set2 == null)
             {
-                set2 = createSet(Color.RED, Color.RED);
+                set2 = createSet(Color.RED, Color.RED, dataSetName2);
                 data.addDataSet(set2);
             }
 
@@ -398,19 +425,19 @@ public class GraphFragment extends Fragment {
             // set.addEntry(...); // can be called as well
 
             if (set1 == null) {
-                set1 = createSet(Color.BLUE, ColorTemplate.getHoloBlue());
+                set1 = createSet(Color.BLUE, ColorTemplate.getHoloBlue(), dataSetName1);
                 data.addDataSet(set1);
             }
 
             if (set2 == null)
             {
-                set2 = createSet(Color.RED, Color.RED);
+                set2 = createSet(Color.RED, Color.RED, dataSetName2);
                 data.addDataSet(set2);
             }
 
             if (set3 == null)
             {
-                set3 = createSet(Color.GREEN, Color.DKGRAY);
+                set3 = createSet(Color.GREEN, Color.DKGRAY, dataSetName3);
                 data.addDataSet(set3);
             }
 
@@ -468,9 +495,9 @@ public class GraphFragment extends Fragment {
         }
     }
 
-    private LineDataSet createSet(int circleColor, int color) {
+    private LineDataSet createSet(int circleColor, int color, String name) {
 
-        LineDataSet set = new LineDataSet(null, "Dynamic Data");
+        LineDataSet set = new LineDataSet(null, name);
         set.setAxisDependency(YAxis.AxisDependency.LEFT);
         set.setColor(color);
         set.setCircleColor(circleColor);
