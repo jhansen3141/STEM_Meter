@@ -1,5 +1,7 @@
 package com.stemmeter.stem_meter;
 
+import android.graphics.Color;
+
 /**
  * Created by Josh on 11/28/2016.
  */
@@ -22,11 +24,14 @@ public final class SensorConst {
     public static final int RATE_OFF = 0;
     public static final int RATE_TEN_HZ = 1;
     public static final int RATE_FIVE_HZ = 2;
-    public static final int RATE_ONE_HZ = 3;
-    public static final int RATE_ONE_MIN = 4;
-    public static final int RATE_TEN_MIN = 5;
-    public static final int RATE_THRITY_MIN = 6;
-    public static final int RATE_ONE_HOUR = 7;
+    public static final int RATE_ONE_SEC = 3;
+    public static final int RATE_FIVE_SEC = 4;
+    public static final int RATE_TEN_SEC = 5;
+    public static final int RATE_THIRTY_SEC = 6;
+    public static final int RATE_ONE_MIN = 7;
+    public static final int RATE_TEN_MIN = 8;
+    public static final int RATE_THIRTY_MIN = 9;
+    public static final int RATE_ONE_HOUR = 10;
 
     public static final int ACCEL_UNIT_G = 0;
     public static final int ACCEL_UNIT_MS = 1;
@@ -64,4 +69,6 @@ public final class SensorConst {
 
     public static final int PRESSURE_DP_PRESS = 0;
     public static final int PRESSURE_DP_ALT = 1;
+
+    public static final int SELECTION_COLOR = Color.rgb(66, 215, 244); // Light blue
 }
