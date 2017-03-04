@@ -271,18 +271,20 @@ public class SensorsFragment extends ListFragment {
 
                     @Override
                     public void onClick(View arg0) {
-                        Log.i(TAG, "SD Checkbox clicked");
                         // Create a new config object
+                        // Add one to offset zero based number
                         SensorConfig config = new SensorConfig(finalPosition+1);
                         // Set the freq to what it was before
                         config.setFreq(sensorFragInterface.getSensorConfig(finalPosition+1).getFreq());
 
+                        // if it was checked then now its not
                         if (sdCheck.isChecked()) {
                             sdCheck.setChecked(false);
                             // Set the SD logging boolean to false
                             config.setSDLogging(false);
 
                         }
+                        // if it wasnt checked now it is
                         else {
                             sdCheck.setChecked(true);
                             // Set the SD logging boolean to false

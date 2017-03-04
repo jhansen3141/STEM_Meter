@@ -790,7 +790,7 @@ public class MainActivity extends AppCompatActivity
         configData[5] = (byte)((sensorConfigList.get(2).isSDLogging()) ? 1 : 0);
 
         configData[6] = (byte)sensorConfigList.get(3).getFreq();
-        configData[5] = (byte)((sensorConfigList.get(3).isSDLogging()) ? 1 : 0);
+        configData[7] = (byte)((sensorConfigList.get(3).isSDLogging()) ? 1 : 0);
 
         return writeCharacteristic(BoardSensorConfigChar, configData);
     }
