@@ -24,12 +24,8 @@ ISR(USART_RX_vect) {
 ISR(TIMER1_COMPA_vect) {
 	uint8_t shouldRead = FALSE;
 	// there are 5 rates that are based on one second intervals
-	if(sensorRate == RATE_ONE_MIN ||
-		sensorRate == RATE_TEN_MIN ||
-		sensorRate == RATE_THRITY_MIN ||
-		sensorRate == RATE_ONE_HOUR ||
-		sensorRate == RATE_ONE_HZ) 
-	{
+	// if any rate greater than 5Hz is used ISR is called once a second
+	if(sensorRate > RATE_FIVE_HZ) {
 		secondCounter++;
 		if(secondCounter == 60) {
 			secondCounter = 0;
@@ -38,6 +34,19 @@ ISR(TIMER1_COMPA_vect) {
 	}
 	
 	switch (sensorRate) {
+		
+		case RATE_FIVE_SEC:
+			if( ((secondCounter % 5) == 0) || (secondCounter == 0) ) {
+				shouldRead = TRUE;	
+			}
+			break;
+			
+		case RATE_TEN_SEC:
+			if( ((secondCounter % 10) == 0) || (secondCounter == 0) ) {
+				shouldRead = TRUE;
+			}
+			break;
+			
 		case RATE_ONE_MIN:
 			if(secondCounter == 0) {
 				shouldRead = TRUE;
@@ -50,7 +59,7 @@ ISR(TIMER1_COMPA_vect) {
 			}
 			break;
 		
-		case RATE_THRITY_MIN:
+		case RATE_THIRTY_MIN:
 			if(((minuteCounter % 30) == 0) && (secondCounter == 0)) {
 				shouldRead = TRUE;
 			}
@@ -61,6 +70,8 @@ ISR(TIMER1_COMPA_vect) {
 				shouldRead = TRUE;
 			}
 			break;
+		// default case handles 10Hz and 5Hz
+		// off is not considered because timer is disabled when off
 		default:	
 			shouldRead = TRUE;
 			break;
@@ -76,6 +87,7 @@ void setSensorFreq(int arg_cnt, char **args) {
 	uint8_t freqCommand = atoi(args[1]);
 	TCCR1B = 0; // turn timer off
 	TCNT1 = 0; // reset count
+	
 	switch (freqCommand) {
 		case RATE_OFF:
 			return;
@@ -90,9 +102,24 @@ void setSensorFreq(int arg_cnt, char **args) {
 			sensorRate = RATE_FIVE_HZ;
 			break;
 		
-		case RATE_ONE_HZ:
+		case RATE_ONE_SEC:
 			OCR1A = TIMER_ONE_HZ_NUM;
-			sensorRate = RATE_ONE_HZ;
+			sensorRate = RATE_ONE_SEC;
+			break;
+			
+		case RATE_FIVE_SEC:
+			OCR1A = TIMER_ONE_HZ_NUM;
+			sensorRate = RATE_FIVE_SEC;
+			break;
+			
+		case RATE_TEN_SEC:
+			OCR1A = TIMER_ONE_HZ_NUM;
+			sensorRate = RATE_TEN_SEC;
+			break;
+			
+		case RATE_THIRTY_SEC:
+			OCR1A = TIMER_ONE_HZ_NUM;
+			sensorRate = RATE_THIRTY_SEC;
 			break;
 		
 		case RATE_ONE_MIN:
@@ -105,9 +132,9 @@ void setSensorFreq(int arg_cnt, char **args) {
 			sensorRate = RATE_TEN_MIN;
 			break;
 		
-		case RATE_THRITY_MIN:
+		case RATE_THIRTY_MIN:
 			OCR1A = TIMER_ONE_HZ_NUM;
-			sensorRate = RATE_THRITY_MIN;
+			sensorRate = RATE_THIRTY_MIN;
 			break;
 		
 		case RATE_ONE_HOUR:

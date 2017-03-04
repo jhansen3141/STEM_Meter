@@ -35,14 +35,17 @@ typedef enum sensorType {
 #define TRUE 1
 #define FALSE 0
 
-typedef enum {
+typedef volatile enum {
 	RATE_OFF = 0,
 	RATE_TEN_HZ,
 	RATE_FIVE_HZ,
-	RATE_ONE_HZ,
+	RATE_ONE_SEC,
+	RATE_FIVE_SEC,
+	RATE_TEN_SEC,
+	RATE_THIRTY_SEC,
 	RATE_ONE_MIN,
 	RATE_TEN_MIN,
-	RATE_THRITY_MIN,
+	RATE_THIRTY_MIN,
 	RATE_ONE_HOUR
 }sensorRate_t;
 

@@ -10,7 +10,14 @@
 #include "i2c.h"
 #include "uart.h"
 
+#define NUM_CALIBRATE_SAMPLES 10
+
+static volatile int16_t gyroXOffset = 0;
+static volatile int16_t gyroYOffset = 0;
+static volatile int16_t gyroZOffset = 0;
+
 static void MPU6050_Write(uint8_t reg, uint8_t data);
+static void calibrateGryo();
 
 void initBoard(void) {
 	DDRC |= (1<<0); // LED as output
@@ -34,8 +41,33 @@ void initSensor(void) {
 	MPU6050_Write(PWR_MGMT_1, 0x00); // Sleep disable - internal 8Mhz clock source
 	MPU6050_Write(PWR_MGMT_2, 0x00); // All 6-axis out of standby mode
 	
+	calibrateGryo();
+	
 	moduleLED(OFF);
 }
+
+static void calibrateGryo() {
+		uint8_t IMUData[6];	
+		uint8_t i;
+		int16_t gyroXAccum = 0;
+		int16_t gyroYAccum = 0; 
+		int16_t gyroZAccum = 0;
+	
+		for(i=0; i<NUM_CALIBRATE_SAMPLES; i++) {
+			I2CReadMult(MPU6050_ADDRESS,GYRO_XOUT_H,IMUData,6);
+		
+			// combine the bytes together and add to accumulator
+			gyroXAccum += ( ( (int16_t)IMUData[0]<<8 ) | IMUData[1] );
+			gyroXAccum += ( ( (int16_t)IMUData[2]<<8 ) | IMUData[3] );
+			gyroXAccum += ( ( (int16_t)IMUData[4]<<8 ) | IMUData[5] );	
+			
+			_delay_ms(10);
+		}
+		
+		gyroXOffset = gyroXAccum / NUM_CALIBRATE_SAMPLES;
+		gyroYOffset = gyroYAccum / NUM_CALIBRATE_SAMPLES;
+		gyroZOffset = gyroZAccum / NUM_CALIBRATE_SAMPLES;
+	}
 
 static void MPU6050_Write(uint8_t reg, uint8_t data) {
 	I2CStart();
@@ -66,6 +98,9 @@ void readSensor(sensorData_t *data) {
 	gyroY = ( ( (int16_t)IMUData[2]<<8 ) | IMUData[3] );
 	gyroZ = ( ( (int16_t)IMUData[4]<<8 ) | IMUData[5] );
 	
+	gyroX -= gyroXOffset;
+	gyroY -= gyroYOffset;
+	gyroZ -= gyroZOffset;
 	
 	fGyroX = (float)gyroX / GYRO_SENSE;
 	fGyroY = (float)gyroY / GYRO_SENSE;
