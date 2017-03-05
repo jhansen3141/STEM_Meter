@@ -127,8 +127,15 @@ public class SensorsFragment extends ListFragment {
             // Only update the sensor data if sensor text box is showing
             if(setBooleanList.get(position).isSet()) {
                 sensorData.set(position, item);
-                // Only update the row we need to. Not the entire list
-                View v = getListView().getChildAt(position - getListView().getFirstVisiblePosition());
+                View v = null;
+                try {
+                    // Only update the row we need to. Not the entire list
+                    v = getListView().getChildAt(position - getListView().getFirstVisiblePosition());
+                }
+                catch (Exception e)
+                {
+
+                }
 
                 if(v == null) {
                     return;
