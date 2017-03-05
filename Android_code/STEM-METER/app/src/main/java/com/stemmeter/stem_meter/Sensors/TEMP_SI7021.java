@@ -37,10 +37,17 @@ public class TEMP_SI7021 extends Sensor {
 
         String[] dataStr = new String[2];
 
-        short humidityRaw = (short)((data[5]<<8)   | (data[6] & 0xFF));
-        short tempRaw = (short)((data[7]<<8)   | (data[8] & 0xFF));
+        short humidityRaw = (short)( ( (data[5] & 0xFF) <<8 ) | (data[6] & 0xFF) );
+        short tempRaw = (short)((data[7]<<8) | (data[8] & 0xFF));
 
-        humidity = ((125.0f*(float)humidityRaw) / 65536.0f) - 6.0f;
+        humidity = ( ( 125.0f*(float)humidityRaw ) / 65536.0f ) - 6.0f;
+
+        if(humidity < 0) {
+            humidity = 0;
+        }
+        else if(humidity > 100) {
+            humidity = 100;
+        }
         temp = ((175.72f*(float)tempRaw) / 65536.0f) - 46.85f;
 
         switch(units) {
@@ -79,6 +86,6 @@ public class TEMP_SI7021 extends Sensor {
         // TODO add units for humidity
         String unitsString = unitList.get(units);
         return "Temperature: " + sensorStringArray[0] + unitsString + "\n" +
-                "Humidity: " + sensorStringArray[1] + "";
+                "Humidity: " + sensorStringArray[1] + "% RH";
     }
 }
