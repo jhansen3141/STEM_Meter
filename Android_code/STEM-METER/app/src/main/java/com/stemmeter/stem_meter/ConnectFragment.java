@@ -15,7 +15,10 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
@@ -89,6 +92,7 @@ public class ConnectFragment extends ListFragment {
             for(int i=0;i<scanListAdapter.getCount();i++) {
                 if(bleDevice.getBluetoothDevice().getAddress().equals(scanListAdapter.getItem(i).getBluetoothDevice().getAddress())) {
                     deviceInList = true;
+                    scanListAdapter.updateItem(i,bleDevice);
                 }
             }
         }
@@ -101,6 +105,7 @@ public class ConnectFragment extends ListFragment {
     public void clearScanList() {
         scanListAdapter.clearList();
     }
+
 
     private class ScanListAdapter extends BaseAdapter {
 
@@ -118,6 +123,11 @@ public class ConnectFragment extends ListFragment {
 
         public void clearList( ) {
             bleDeviceList.clear();
+        }
+
+        public void updateItem(int index, final BLEDevice item) {
+            bleDeviceList.set(index,item);
+            notifyDataSetChanged();
         }
 
         @Override
@@ -142,6 +152,7 @@ public class ConnectFragment extends ListFragment {
             TextView rssiTextView;
             TextView addressTextView;
             final ImageButton connectButton;
+            ProgressBar rssiProgressBar;
 
             if (convertView == null) {
                 // if the view is null then inflate the custom item layout
@@ -150,25 +161,24 @@ public class ConnectFragment extends ListFragment {
 
             deviceStrTextView = (TextView) convertView.findViewById(R.id.scanItemTextView);
             rssiTextView = (TextView) convertView.findViewById(R.id.scanRSSITextView);
-            addressTextView = (TextView) convertView.findViewById(R.id.scanAddTextView);
             connectButton = (ImageButton) convertView.findViewById(R.id.connectButton);
+            addressTextView = (TextView) convertView.findViewById(R.id.scanAddressTextView);
+            rssiProgressBar = (ProgressBar) convertView.findViewById(R.id.rssiProgressBar);
 
-            if(deviceStrTextView != null) {
+            try {
                 // write the string to the text view
                 deviceStrTextView.setText(bleDeviceList.get(position).getBluetoothDevice().getName());
-            }
 
-            if(rssiTextView != null) {
                 // write the string to the text view
                 rssiTextView.setText(bleDeviceList.get(position).getRSSIStr());
-            }
 
-            if(addressTextView != null) {
-                // write the string to the text view
                 addressTextView.setText(bleDeviceList.get(position).getBluetoothDevice().getAddress());
+
+                rssiProgressBar.setProgress(100+bleDeviceList.get(position).getRssi());
             }
-
-
+            catch (NullPointerException npe) {
+                Log.i(TAG,"View Item Null");
+            }
 
             connectButton.setOnClickListener(new View.OnClickListener() {
 

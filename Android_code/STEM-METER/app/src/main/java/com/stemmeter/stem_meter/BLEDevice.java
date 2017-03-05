@@ -9,10 +9,12 @@ public class BLEDevice {
 
     private BluetoothDevice bluetoothDevice;
     private String RSSIStr;
+    private int rssi;
 
-    public BLEDevice(BluetoothDevice device, String RSSI) {
+    public BLEDevice(BluetoothDevice device, int RSSI) {
         this.bluetoothDevice = device;
-        this.RSSIStr = RSSI + " dBm";
+        this. rssi = RSSI;
+        this.RSSIStr = " " + Integer.toString(rssi) + "\ndBm";
     }
 
     public BLEDevice(){}
@@ -27,6 +29,10 @@ public class BLEDevice {
 
     public String getRSSIStr() {
         return RSSIStr;
+    }
+
+    public int getRssi() {
+        return rssi;
     }
 
     public void setRSSIStr(String RSSIStr) {

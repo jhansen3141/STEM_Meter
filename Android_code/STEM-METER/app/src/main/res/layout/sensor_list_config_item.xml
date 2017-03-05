@@ -10,7 +10,7 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_weight="1"
-		android:textSize="20sp"
+		android:textSize="18sp"
 		android:layout_gravity="center"
 		android:layout_marginTop="8dp"
 		android:checkMark="?android:attr/listChoiceIndicatorMultiple"
@@ -19,30 +19,12 @@
 		android:layout_marginEnd="16dp"
 		android:text="SD Card" />
 
-<!---<TextView
-            android:id="@+id/SDCard_Logged"
-			android:layout_marginTop="8dp"
-			android:layout_gravity="center"
-			android:textSize="20sp"
-            android:layout_width="wrap_content"
-            android:text="SD Card"
-			android:layout_centerVertical="true"
-            android:layout_height="wrap_content"
-            />
-
-	<CheckBox
-		android:id="@+id/checkbox_SDCARD"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-		android:layout_centerVertical="true"
-        android:layout_gravity="center"
-        />-->
 
 	<TextView
 		android:id="@+id/FrequencyText"
 		android:layout_marginTop="8dp"
 		android:layout_gravity="center"
-		android:textSize="20sp"
+		android:textSize="18sp"
 		android:layout_weight="1.2"
 		android:layout_width="wrap_content"
 		android:text="Rate"

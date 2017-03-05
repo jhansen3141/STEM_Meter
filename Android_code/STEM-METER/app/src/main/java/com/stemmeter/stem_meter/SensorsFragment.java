@@ -31,7 +31,7 @@ public class SensorsFragment extends ListFragment {
     private String TAG = "SensorFrag";
     private SensorListAdapter sensorListAdapter;
 
-    private int[] rateReducer = {0,0,0,0};
+
 
     // Container Activity must implement this interface
     public interface SensorFragInterface {
@@ -106,7 +106,7 @@ public class SensorsFragment extends ListFragment {
         private ArrayList<String> sensorData = new ArrayList<String>();
         private LayoutInflater mInflater;
         private final ArrayList<SetBoolean> setBooleanList = new ArrayList<SetBoolean>();
-        private String TAG = "CustomAdapter";
+        private String TAG = " SensorListAdapter";
         //private int currentSelectedPosition;
 
         public SensorListAdapter() {
@@ -190,7 +190,7 @@ public class SensorsFragment extends ListFragment {
                 });
 
                 if (position == sensorFragInterface.getGraphConfig().getSelectedSensor())
-                    convertView.setBackgroundColor(Color.BLUE);
+                    convertView.setBackgroundColor(SensorConst.SELECTION_COLOR);
 
                 // get the text view in the layout
                 sensorText = (TextView) convertView.findViewById(R.id.sensorDataTextView);
@@ -226,7 +226,7 @@ public class SensorsFragment extends ListFragment {
                     });
 
                 if (position == sensorFragInterface.getGraphConfig().getSelectedSensor()) {
-                    altView.setBackgroundColor(Color.BLUE);
+                    altView.setBackgroundColor(SensorConst.SELECTION_COLOR);
                 }
 
                 // set the SD card check box based on its SensorConfig object
@@ -241,6 +241,8 @@ public class SensorsFragment extends ListFragment {
                 frequencySpinner.setAdapter(adapter);
                 // Set the spinner based on its SensorConfig object
                 frequencySpinner.setSelection(sensorFragInterface.getSensorConfig(position+1).getFreq());
+
+                // Get the selected freq from spinner and send it to base unit
                 frequencySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     public void onItemSelected(AdapterView<?> parent, View view,
                                                int freqSelected, long id)
@@ -269,18 +271,20 @@ public class SensorsFragment extends ListFragment {
 
                     @Override
                     public void onClick(View arg0) {
-                        Log.i(TAG, "SD Checkbox clicked");
                         // Create a new config object
+                        // Add one to offset zero based number
                         SensorConfig config = new SensorConfig(finalPosition+1);
                         // Set the freq to what it was before
                         config.setFreq(sensorFragInterface.getSensorConfig(finalPosition+1).getFreq());
 
+                        // if it was checked then now its not
                         if (sdCheck.isChecked()) {
                             sdCheck.setChecked(false);
                             // Set the SD logging boolean to false
                             config.setSDLogging(false);
 
                         }
+                        // if it wasnt checked now it is
                         else {
                             sdCheck.setChecked(true);
                             // Set the SD logging boolean to false
