@@ -53,6 +53,7 @@
 		android:src="@drawable/ic_list_black_24dp"
         android:focusableInTouchMode="false"
         android:layout_gravity="center"
+		android:background="#0000"
         />
 
 </LinearLayout>

@@ -26,6 +26,7 @@
 		android:src="@drawable/ic_settings_black_24dp"
         android:focusableInTouchMode="false"
         android:layout_gravity="center"
-        android:contentDescription="Sensor Settings" />
+        android:contentDescription="Sensor Settings"
+        android:background="#0000"/>
 
 </LinearLayout>

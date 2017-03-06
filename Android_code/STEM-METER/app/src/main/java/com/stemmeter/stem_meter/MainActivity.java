@@ -221,7 +221,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
     public void BoardConnect(BluetoothDevice device) {
         printConnectionStat("Connecting to board...");
         boardDevice = device;
@@ -402,8 +401,10 @@ public class MainActivity extends AppCompatActivity
                         }
                         else if (characteristic == BoardBatteryInfoChar) {
                             String charString = characteristic.getStringValue(0);
-                            Log.i(TAG,"Bat Char: " + charString);
+
+                            // Convert byte array into battery value string
                             baseUnitBattery.updateBatteryValues(charString);
+
                             new Handler(Looper.getMainLooper()).post(new Runnable() {
                                 @Override
                                 public void run() {

@@ -38,6 +38,7 @@
         android:src="@drawable/ic_settings_black_24dp"
         android:focusableInTouchMode="false"
         android:layout_gravity="center"
+        android:background="#0000"
         />
 
     <ImageButton
@@ -51,6 +52,7 @@
         android:src="@drawable/ic_stop_black_24dp"
         android:focusableInTouchMode="false"
         android:layout_gravity="center"
+        android:background="#0000"
         />
 
     <ToggleButton
@@ -78,6 +80,7 @@
         android:src="@drawable/ic_exposure_zero_black_24dp"
         android:focusableInTouchMode="false"
         android:layout_gravity="center"
+        android:background="#0000"
         />
 
     <ImageButton
@@ -91,6 +94,7 @@
         android:src="@drawable/ic_save_black_24dp"
         android:focusableInTouchMode="false"
         android:layout_gravity="center"
+        android:background="#0000"
         />
 
 </LinearLayout>
