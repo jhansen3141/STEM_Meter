@@ -98,9 +98,9 @@ extern const PIN_Config BoardGpioInitTable[];
 #define Board_I2C0_SCL0             IOID_12
 #define Board_I2C0_SDA0             IOID_13
 
-#define Board_RED_LED				IOID_2
+#define Board_RED_LED				IOID_3
 #define Board_BLU_LED				IOID_4
-#define Board_GRN_LED				IOID_3
+#define Board_GRN_LED				IOID_2
 
 
 #define Board_SPI_INT				IOID_0

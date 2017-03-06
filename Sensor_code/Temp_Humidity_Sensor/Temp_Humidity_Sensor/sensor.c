@@ -65,11 +65,13 @@ void readSensor(sensorData_t *data) {
 	memset(data->sensorDataRaw,0,RAW_DATA_SIZE);
 	memset(data->sensorDataStr,0,STR_DATA_SIZE);
 	
+	memset(RDSensorData,0,2);
 	Si7021_Read(SENSOR_I2C_ADDRESS,MSR_HUMD_HOLD,RDSensorData);
 	humidity = ( ( (int16_t)RDSensorData[0]<<8 ) | RDSensorData[1] );
 	rawData[0] = RDSensorData[0];
 	rawData[1] = RDSensorData[1];
 
+	memset(RDSensorData,0,2);
 	Si7021_Read(SENSOR_I2C_ADDRESS,RD_TEMP_PAST_MSR,RDSensorData);
 	temp = ( ( (int16_t)RDSensorData[0]<<8 ) | RDSensorData[1] );
 	rawData[2] = RDSensorData[0];
