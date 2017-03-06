@@ -249,8 +249,8 @@ public class MainActivity extends AppCompatActivity
 
     private void scanLeDevice(final boolean enable) {
         Log.i(TAG, "Scanning...");
-        // Scan for 30 seconds only
-        final long SCAN_PERIOD = 30000;
+        // Scan for 10 seconds only
+        final long SCAN_PERIOD = 10000;
         mHandler = new Handler();
         if (enable) {
             // Stops scanning after a pre-defined scan period.
@@ -285,7 +285,7 @@ public class MainActivity extends AppCompatActivity
                             ConnectFragment connectFragment = (ConnectFragment)
                                     getSupportFragmentManager().findFragmentByTag(CONNECT_FRAG_TAG);
                             if (connectFragment != null) {
-                                BLEDevice bleDevice = new BLEDevice(device,rssi);
+                                BLEDevice bleDevice = new BLEDevice(device, rssi);
                                 connectFragment.addScanListItem(bleDevice);
                             }
                         }

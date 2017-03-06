@@ -125,7 +125,7 @@ public class ConnectFragment extends ListFragment {
             bleDeviceList.clear();
         }
 
-        public void updateItem(int index, final BLEDevice item) {
+        public void updateItem(final int index, final BLEDevice item) {
             bleDeviceList.set(index,item);
             notifyDataSetChanged();
         }

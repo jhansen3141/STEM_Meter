@@ -139,9 +139,6 @@ public class SensorsFragment extends ListFragment {
                 if(sensorText != null) {
                     sensorText.setText(item);
                 }
-                else {
-                    Log.i(TAG,"TB Null " + position);
-                }
             }
         }
 
@@ -206,8 +203,13 @@ public class SensorsFragment extends ListFragment {
                 });
 
                 if(sensorText != null) {
-                    // write the string to the text view
-                    sensorText.setText(sensorData.get(position));
+                    if(sensorFragInterface.getSensorConfig(finalPosition+1).getFreq() == SensorConst.RATE_OFF) {
+                        sensorText.setText("Sensor " + (finalPosition+1) + " - No Data");
+                    }
+                    else {
+                        // write the string to the text view
+                        sensorText.setText(sensorData.get(position));
+                    }
                 }
             }
             else {
