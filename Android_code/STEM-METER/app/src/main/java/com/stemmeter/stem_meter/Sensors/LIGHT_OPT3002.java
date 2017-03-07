@@ -15,7 +15,9 @@ import java.util.ArrayList;
 public class LIGHT_OPT3002 extends Sensor {
     private String[] sensorStringArray;
     private float opticalPower;
-    private String TAG = "Light OPT3002";
+
+    private float opticalPowerZero = 0;
+    private boolean shouldZero = false;
 
     private GraphSettings graphSettings;
     private int units = SensorConst.LIGHT_UNIT_UW;
@@ -42,6 +44,7 @@ public class LIGHT_OPT3002 extends Sensor {
 
         byte[] byteString = new byte[15];
 
+        // copy data minus string and new line term into byte array
         for(int i=0;i<15;i++) {
             if( (data[5 + i] == 0) || (data[5 + i] == '\n')) {
                 break;
@@ -50,12 +53,22 @@ public class LIGHT_OPT3002 extends Sensor {
         }
 
         try {
+            // convert byte array into string
             dataStr[0] =  new String(byteString, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            Log.i(TAG,"String format incorrect");
+            Log.i("LightSensor", "String format incorrect");
         }
 
+
+
         opticalPower = Float.parseFloat(dataStr[0]);
+
+        if(shouldZero) {
+            opticalPowerZero = -(opticalPower);
+        }
+
+        // add offset
+        opticalPower += opticalPowerZero;
 
         switch(units) {
             // Lux
@@ -96,5 +109,16 @@ public class LIGHT_OPT3002 extends Sensor {
     @Override
     public void setGraphUnits(int units) {
         this.units = units;
+    }
+
+    @Override
+    public void zeroSensor() {
+        shouldZero = true;
+    }
+
+    @Override
+    public void resetZero() {
+        opticalPowerZero = 0;
+        shouldZero = false;
     }
 }

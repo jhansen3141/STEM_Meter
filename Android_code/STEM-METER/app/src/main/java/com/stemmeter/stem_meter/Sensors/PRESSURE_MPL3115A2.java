@@ -14,6 +14,13 @@ public class PRESSURE_MPL3115A2 extends Sensor {
     private float airPressure;
     private double altitude;
 
+    private double altitudeOffsetWeather = 0;
+
+    private float pressureZero = 0;
+    private double altitudeZero = 0;
+
+    private boolean shouldZero = false;
+
     private GraphSettings graphSettings;
     private int units = SensorConst.PRESSURE_UNIT_PA;
     private ArrayList<String> unitList;
@@ -53,18 +60,32 @@ public class PRESSURE_MPL3115A2 extends Sensor {
         // Align it
         data[7] >>= 4;
 
+        // get the fractional part
         airPressure = (float)data[7] / 4.0f;
 
+        // add the integer part
         airPressure += (float)pressure;
+
+       // altitude = 7000.0f * Math.log(101325.0f/airPressure);
+
+        altitude = ( 44330.77 * ( 1- Math.pow( (airPressure / 101326), 0.1902632f) ) ) + altitudeOffsetWeather;
+
+        altitude *= 3.28084;
+
+        if(shouldZero) {
+            pressureZero = -(airPressure);
+            altitudeZero = -(altitude);
+            shouldZero = false;
+        }
+
+        altitude += altitudeZero;
+        airPressure += pressureZero;
 
         switch(units) {
             case SensorConst.PRESSURE_UNIT_HPA:
                 airPressure /= 100;
                 break;
         }
-        altitude = 7000.0f * Math.log(101325.0f/airPressure);
-
-        altitude *= 3.28084;
 
         dataStr[0] = String.format(java.util.Locale.US,"%.2f",airPressure);
         dataStr[1] = String.format(java.util.Locale.US,"%.2f",altitude);
@@ -102,5 +123,18 @@ public class PRESSURE_MPL3115A2 extends Sensor {
     @Override
     public void setGraphUnits(int units) {
         this.units = units;
+    }
+
+    @Override
+    public void zeroSensor() {
+       shouldZero = true;
+    }
+
+    @Override
+    public void resetZero() {
+        altitudeZero = 0;
+        pressureZero = 0;
+
+        shouldZero = false;
     }
 }

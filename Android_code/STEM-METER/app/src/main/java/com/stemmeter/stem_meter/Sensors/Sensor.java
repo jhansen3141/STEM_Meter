@@ -27,6 +27,13 @@ public abstract class Sensor {
 
     }
 
+    public void updateData(byte data[]) {
+        this.data = data;
+        //sensor rate is held is second byte
+        sensorRate = (int)data[1];
+        // the sync number (24 bits) is held in bytes 2-4
+        syncNumber = (((data[2] & 0xFF)<<16) | ((data[3] & 0xFF)<<8) | (data[4] & 0xFF));
+    }
     public int getSyncNumber() {
         return syncNumber;
     }
@@ -54,6 +61,10 @@ public abstract class Sensor {
     public abstract GraphSettings getGraphSettings();
 
     public abstract void setGraphUnits(int units);
+
+    public abstract void zeroSensor();
+
+    public abstract void resetZero();
 
     public int getNumberDataPoints() {
         return numberDataPoints;

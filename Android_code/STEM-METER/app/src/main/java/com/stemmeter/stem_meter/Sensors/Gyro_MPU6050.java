@@ -17,6 +17,12 @@ public class Gyro_MPU6050 extends Sensor {
     private String[] sensorStringArray;
     private float xGyroF,yGyroF,zGyroF;
 
+    private float xGyroZero = 0;
+    private float yGyroZero = 0;
+    private float zGyroZero = 0;
+
+    private boolean shouldZero = false;
+
     private GraphSettings graphSettings;
     private int units = SensorConst.GYRO_UNIT_DS;
     private ArrayList<String> unitList;
@@ -54,6 +60,18 @@ public class Gyro_MPU6050 extends Sensor {
         yGyroF = yGyro / GYRO_SENSE;
         zGyroF = zGyro / GYRO_SENSE;
 
+        if(shouldZero) {
+            xGyroZero = -(xGyroF);
+            yGyroZero = -(yGyroF);
+            zGyroZero = -(zGyroF);
+
+            shouldZero = false;
+        }
+
+        xGyroF += xGyroZero;
+        yGyroF += yGyroZero;
+        zGyroF += zGyroZero;
+
         switch(units) {
             // radians per second
             case SensorConst.GYRO_UNIT_RS:
@@ -89,6 +107,20 @@ public class Gyro_MPU6050 extends Sensor {
     @Override
     public void setGraphUnits(int units) {
         this.units = units;
+    }
+
+    @Override
+    public void zeroSensor() {
+        shouldZero = true;
+    }
+
+    @Override
+    public void resetZero() {
+        xGyroZero = 0;
+        yGyroZero = 0;
+        zGyroZero = 0;
+
+        shouldZero = false;
     }
 
     @Override

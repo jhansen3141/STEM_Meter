@@ -12,6 +12,11 @@ public class TEMP_SI7021 extends Sensor {
     private String[] sensorStringArray;
     private float temp, humidity;
 
+    private float tempZero = 0;
+    private float humidityZero = 0;
+
+    private boolean shouldZero = false;
+
     private GraphSettings graphSettings;
     private int units = SensorConst.TEMP_UNIT_C;
     private ArrayList<String> unitList;
@@ -50,6 +55,15 @@ public class TEMP_SI7021 extends Sensor {
         }
         temp = ((175.72f*(float)tempRaw) / 65536.0f) - 46.85f;
 
+        if(shouldZero) {
+            tempZero = -(temp);
+            humidityZero = -(humidity);
+            shouldZero = false;
+        }
+
+        temp += tempZero;
+         humidity += -(humidityZero);
+
         switch(units) {
             case SensorConst.TEMP_UNIT_F:
                 temp = ((temp * 1.8f) + 32.0f);
@@ -79,6 +93,19 @@ public class TEMP_SI7021 extends Sensor {
     @Override
     public void setGraphUnits(int units) {
         this.units = units;
+    }
+
+    @Override
+    public void zeroSensor() {
+        shouldZero = true;
+    }
+
+    @Override
+    public void resetZero() {
+        tempZero = 0;
+        humidityZero = 0;
+
+        shouldZero = false;
     }
 
     @Override

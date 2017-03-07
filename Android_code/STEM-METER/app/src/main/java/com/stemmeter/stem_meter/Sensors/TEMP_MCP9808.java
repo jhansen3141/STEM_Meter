@@ -14,6 +14,9 @@ public class Temp_MCP9808 extends Sensor {
     private String[] sensorStringArray;
     private float temp;
 
+    private float tempZero = 0;
+    private boolean shouldZero = false;
+
     private GraphSettings graphSettings;
     private int units = SensorConst.TEMP_UNIT_C;
     private ArrayList<String> unitList;
@@ -46,6 +49,13 @@ public class Temp_MCP9808 extends Sensor {
         }
         temp = (float)temperature;
 
+        if(shouldZero) {
+            tempZero = -(temp);
+            shouldZero = false;
+        }
+
+        temp += tempZero;
+
         switch(units) {
             case SensorConst.TEMP_UNIT_F:
                 temp = (float)((temperature * 1.8) + 32.0);
@@ -73,6 +83,17 @@ public class Temp_MCP9808 extends Sensor {
     @Override
     public void setGraphUnits(int units) {
         this.units = units;
+    }
+
+    @Override
+    public void zeroSensor() {
+        shouldZero = true;
+    }
+
+    @Override
+    public void resetZero() {
+        tempZero = 0;
+        shouldZero = false;
     }
 
     @Override

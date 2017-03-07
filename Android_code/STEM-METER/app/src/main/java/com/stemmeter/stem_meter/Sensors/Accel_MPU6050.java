@@ -18,6 +18,12 @@ public class Accel_MPU6050 extends Sensor {
     private String[] sensorStringArray;
     private float xAccelF,yAccelF,zAccelF;
 
+    private float xAccelZero = 0;
+    private float yAccelZero = 0;
+    private float zAccelZero = 0;
+
+    private boolean shouldZero = false;
+
     private GraphSettings graphSettings;
     private int units = SensorConst.ACCEL_UNIT_G;
     private ArrayList<String> unitList;
@@ -55,6 +61,18 @@ public class Accel_MPU6050 extends Sensor {
         xAccelF = xAccel / ACCEL_SENSE;
         yAccelF = yAccel / ACCEL_SENSE;
         zAccelF = zAccel / ACCEL_SENSE;
+
+        if(shouldZero) {
+            xAccelZero = -(xAccelF);
+            yAccelZero = -(yAccelF);
+            zAccelZero = -(zAccelF);
+
+            shouldZero = false;
+        }
+
+        xAccelF += xAccelZero;
+        yAccelF += yAccelZero;
+        zAccelF += zAccelZero;
 
         switch (units) {
             // meters per second squared
@@ -114,6 +132,19 @@ public class Accel_MPU6050 extends Sensor {
         else {
             return "NULL";
         }
+    }
+
+    @Override
+    public void zeroSensor() {
+        shouldZero = true;
+    }
+
+    @Override
+    public void resetZero() {
+        xAccelZero = 0;
+        yAccelZero = 0;
+        zAccelZero = 0;
+        shouldZero = false;
     }
 
 }

@@ -16,6 +16,12 @@ public class MAG_MAG3110 extends Sensor {
     private float xMagF,yMagF,zMagF;
     private final float MAG_SENSE = 10.0f;
 
+    private float xMagZero = 0;
+    private float yMagZero = 0;
+    private float zMagZero = 0;
+
+    private boolean shouldZero = false;
+
     private GraphSettings graphSettings;
     private int units = SensorConst.MAG_UNIT_T;
     private ArrayList<String> unitList;
@@ -48,6 +54,18 @@ public class MAG_MAG3110 extends Sensor {
         xMagF = (float)xMag / MAG_SENSE;
         yMagF = (float)yMag / MAG_SENSE;
         zMagF = (float)zMag / MAG_SENSE;
+
+        if(shouldZero) {
+            xMagZero = -(xMagF);
+            yMagZero = -(yMagF);
+            zMagZero = -(zMagF);
+
+            shouldZero = false;
+        }
+
+        xMagF += xMagZero;
+        yMagF += yMagZero;
+        zMagF += zMagZero;
 
 
         dataStr[0] = String.format(java.util.Locale.US,"%.2f",xMagF);
@@ -90,5 +108,19 @@ public class MAG_MAG3110 extends Sensor {
     @Override
     public void setGraphUnits(int units) {
         this.units = units;
+    }
+
+    @Override
+    public void zeroSensor() {
+        shouldZero = true;
+    }
+
+    @Override
+    public void resetZero() {
+        xMagZero = 0;
+        yMagZero = 0;
+        zMagZero = 0;
+
+        shouldZero = false;
     }
 }

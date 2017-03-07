@@ -2,7 +2,6 @@ package com.stemmeter.stem_meter;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ListFragment;
@@ -30,7 +29,8 @@ public class SensorsFragment extends ListFragment {
     SensorFragInterface sensorFragInterface;
     private String TAG = "SensorFrag";
     private SensorListAdapter sensorListAdapter;
-
+    private ImageButton zeroButton;
+    private int listItemSelected = 0;
 
 
     // Container Activity must implement this interface
@@ -63,6 +63,18 @@ public class SensorsFragment extends ListFragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.sensors_fragment, container, false);
+        zeroButton = (ImageButton) view.findViewById(R.id.ZeroButton);
+
+        zeroButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+                Log.i(TAG,"Zero button pressed");
+                sensorFragInterface.getSensor(listItemSelected+1).zeroSensor();
+
+            }
+        });
+
         return view;
     }
 
@@ -178,10 +190,11 @@ public class SensorsFragment extends ListFragment {
                 convertView.setOnClickListener(new View.OnClickListener() {
 
                     @Override
-                    public void onClick(View arg0)
-                    {
-                        if (sensorFragInterface.getGraphConfig().getSelectedSensor() != position)
+                    public void onClick(View arg0) {
+                        if (sensorFragInterface.getGraphConfig().getSelectedSensor() != position) {
                             sensorFragInterface.getGraphConfig().setSelectedSensor(position);
+                            listItemSelected = position;
+                        }
                         notifyDataSetChanged();
                     }
                 });
@@ -219,10 +232,11 @@ public class SensorsFragment extends ListFragment {
                 altView.setOnClickListener(new View.OnClickListener() {
 
                     @Override
-                    public void onClick(View arg0)
-                    {
-                        if (sensorFragInterface.getGraphConfig().getSelectedSensor() != position)
+                    public void onClick(View arg0) {
+                        if (sensorFragInterface.getGraphConfig().getSelectedSensor() != position) {
                             sensorFragInterface.getGraphConfig().setSelectedSensor(position);
+                            listItemSelected = position;
+                        }
                         notifyDataSetChanged();
                     }
                     });
