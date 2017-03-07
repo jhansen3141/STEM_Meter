@@ -109,12 +109,7 @@ public class MainActivity extends AppCompatActivity
     private final String GRAPH_FRAG_TAG = "GraphFragTag";
     private final String SENSOR_FRAG_TAG = "SensorFragTag";
 
-    private Sensor sensor1;
-    private Sensor sensor2;
-    private Sensor sensor3;
-    private Sensor sensor4;
-
-    private BaseUnitBattery baseUnitBattery;
+    private BaseUnit baseUnit;
 
     private ArrayList<SensorConfig> sensorConfigList;
 
@@ -146,7 +141,7 @@ public class MainActivity extends AppCompatActivity
         sensorConfigList.add(new SensorConfig(3));
         sensorConfigList.add(new SensorConfig(4));
 
-        baseUnitBattery = new BaseUnitBattery();
+        baseUnit = new BaseUnit();
 
         savedDataList = new ArrayList<LineData>();
         savedNameList = new ArrayList<String>();
@@ -401,13 +396,13 @@ public class MainActivity extends AppCompatActivity
                         }
                         else if (characteristic == BoardBatteryInfoChar) {
                             String charString = characteristic.getStringValue(0);
-                            Log.i(TAG,"Bat Char: " + charString);
-                            baseUnitBattery.updateBatteryValues(charString);
+                            Log.i(TAG, "Bat Char: " + charString);
+                            baseUnit.getBaseUnitBattery().updateBatteryValues(charString);
                             new Handler(Looper.getMainLooper()).post(new Runnable() {
                                 @Override
                                 public void run() {
                                     // TODO Change where the battery info is displayed
-                                    Toast.makeText(getApplicationContext(), baseUnitBattery.getBatStr(), Toast.LENGTH_LONG).show();
+                                    Toast.makeText(getApplicationContext(), baseUnit.getBaseUnitBattery().getBatStr(), Toast.LENGTH_LONG).show();
                                 }
                             });
                         }
@@ -423,13 +418,13 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
                     if (characteristic.equals(BoardSensor1DataChar)) {
-                        handleSensor1Data(characteristic.getValue());
+                        postSensorData( baseUnit.updateSensorData( SensorConst.SENSOR_1, characteristic.getValue() ) );
                     } else if (characteristic.equals(BoardSensor2DataChar)) {
-                        handleSensor2Data(characteristic.getValue());
+                        postSensorData( baseUnit.updateSensorData( SensorConst.SENSOR_2,characteristic.getValue() ) );
                     } else if (characteristic.equals(BoardSensor3DataChar)) {
-                        handleSensor3Data(characteristic.getValue());
+                        postSensorData( baseUnit.updateSensorData( SensorConst.SENSOR_3,characteristic.getValue() ) );
                     } else if (characteristic.equals(BoardSensor4DataChar)) {
-                        handleSensor4Data(characteristic.getValue());
+                        postSensorData( baseUnit.updateSensorData( SensorConst.SENSOR_4,characteristic.getValue() ) );
                     }
                 }
             };
@@ -506,164 +501,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    void handleSensor1Data(final byte sensor1Data[]) {
-//      Log.i(TAG, "HANDLE S1");
-        if (sensor1Data[0] == SensorConst.INVALID_SENSOR) {
-            return;
-        } else {
-            // check to see which sensor is connected
-            // sensor data type is held in first byte of sensor data
-            switch (sensor1Data[0]) {
-                case SensorConst.ACCEL_MPU6050:
-                    sensor1 = new Accel_MPU6050(sensor1Data, 1);
-                    break;
-                case SensorConst.TEMP_MCP9808:
-                    sensor1 = new Temp_MCP9808(sensor1Data, 1);
-                    break;
-                case SensorConst.GYRO_MPU6050:
-                    sensor1 = new Gyro_MPU6050(sensor1Data, 1);
-                    break;
-                case SensorConst.LIGHT_OPT3002:
-                    sensor1 = new LIGHT_OPT3002(sensor1Data, 1);
-                    break;
-                case SensorConst.MAG_MAG3110:
-                    sensor1 = new MAG_MAG3110(sensor1Data, 1);
-                    break;
-                case SensorConst.PRESSURE_MPL3115A2:
-                    sensor1 = new PRESSURE_MPL3115A2(sensor1Data, 1);
-                    break;
-                case SensorConst.TEMP_SI7021:
-                    sensor1 = new TEMP_SI7021(sensor1Data, 1);
-                    break;
-                default:
-                    Log.i(TAG,"Invalid sensor type detected");
-                    return;
-            }
-        }
-        // perform calculations on data
-        sensor1.calcSensorData();
-        // post the data to the screen
-        postSensorData(sensor1);
-
-    }
-
-    void handleSensor2Data(final byte sensor2Data[]) {
-    //  Log.i(TAG, "HANDLE S2");
-        if (sensor2Data[0] == SensorConst.INVALID_SENSOR) {
-            return;
-        } else {
-            switch (sensor2Data[0]) {
-                case SensorConst.ACCEL_MPU6050:
-                    sensor2 = new Accel_MPU6050(sensor2Data, 2);
-                    break;
-                case SensorConst.TEMP_MCP9808:
-                    sensor2 = new Temp_MCP9808(sensor2Data, 2);
-                    break;
-                case SensorConst.GYRO_MPU6050:
-                    sensor2 = new Gyro_MPU6050(sensor2Data, 2);
-                    break;
-                case SensorConst.LIGHT_OPT3002:
-                    sensor2 = new LIGHT_OPT3002(sensor2Data, 2);
-                    break;
-                case SensorConst.MAG_MAG3110:
-                    sensor2 = new MAG_MAG3110(sensor2Data, 2);
-                    break;
-                case SensorConst.PRESSURE_MPL3115A2:
-                    sensor2 = new PRESSURE_MPL3115A2(sensor2Data, 2);
-                    break;
-                case SensorConst.TEMP_SI7021:
-                    sensor2 = new TEMP_SI7021(sensor2Data, 2);
-                    break;
-                default:
-                    Log.i(TAG,"Invalid sensor type detected");
-                    return;
-            }
-        }
-        // perform calculations on data
-        sensor2.calcSensorData();
-        // post the data to the screen
-        postSensorData(sensor2);
-    }
-
-    void handleSensor3Data(final byte sensor3Data[]) {
-
-//      Log.i(TAG, "HANDLE S3");
-        if (sensor3Data[0] == SensorConst.INVALID_SENSOR) {
-            return;
-        } else {
-            // check to see which sensor is connected
-            // sensor data type is held in first byte of sensor data
-            switch (sensor3Data[0]) {
-                case SensorConst.ACCEL_MPU6050:
-                    sensor3 = new Accel_MPU6050(sensor3Data, 3);
-                    break;
-                case SensorConst.TEMP_MCP9808:
-                    sensor3 = new Temp_MCP9808(sensor3Data, 3);
-                    break;
-                case SensorConst.GYRO_MPU6050:
-                    sensor3 = new Gyro_MPU6050(sensor3Data, 3);
-                    break;
-                case SensorConst.LIGHT_OPT3002:
-                    sensor3 = new LIGHT_OPT3002(sensor3Data, 3);
-                    break;
-                case SensorConst.MAG_MAG3110:
-                    sensor3 = new MAG_MAG3110(sensor3Data, 3);
-                    break;
-                case SensorConst.PRESSURE_MPL3115A2:
-                    sensor3 = new PRESSURE_MPL3115A2(sensor3Data, 3);
-                    break;
-                case SensorConst.TEMP_SI7021:
-                    sensor3 = new TEMP_SI7021(sensor3Data, 3);
-                    break;
-                default:
-                    Log.i(TAG,"Invalid sensor type detected");
-                    return;
-            }
-        }
-        // perform calculations on data
-        sensor3.calcSensorData();
-        // post the data to the screen
-        postSensorData(sensor3);
-    }
-
-    void handleSensor4Data(final byte sensor4Data[]) {
-        if (sensor4Data[0] == SensorConst.INVALID_SENSOR) {
-            return;
-        } else {
-            // check to see which sensor is connected
-            // sensor data type is held in first byte of sensor data
-            switch (sensor4Data[0]) {
-                case SensorConst.ACCEL_MPU6050:
-                    sensor4 = new Accel_MPU6050(sensor4Data, 4);
-                    break;
-                case SensorConst.TEMP_MCP9808:
-                    sensor4 = new Temp_MCP9808(sensor4Data, 4);
-                    break;
-                case SensorConst.GYRO_MPU6050:
-                    sensor4 = new Gyro_MPU6050(sensor4Data, 4);
-                    break;
-                case SensorConst.LIGHT_OPT3002:
-                    sensor4 = new LIGHT_OPT3002(sensor4Data, 4);
-                    break;
-                case SensorConst.MAG_MAG3110:
-                    sensor4 = new MAG_MAG3110(sensor4Data, 4);
-                    break;
-                case SensorConst.PRESSURE_MPL3115A2:
-                    sensor4 = new PRESSURE_MPL3115A2(sensor4Data, 4);
-                    break;
-                case SensorConst.TEMP_SI7021:
-                    sensor4 = new TEMP_SI7021(sensor4Data, 4);
-                    break;
-                default:
-                    Log.i(TAG,"Invalid sensor type detected");
-                    return;
-            }
-        }
-        // perform calculations on data
-        sensor4.calcSensorData();
-        // post the data to the screen
-        postSensorData(sensor4);
-    }
 
     public void postSensorData(Sensor sensor) {
         SensorsFragment sensorsFragment = (SensorsFragment)
@@ -893,24 +730,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public Sensor getSensor(int sensorNumber) {
-        Sensor returnSesnor = null;
-
-        switch(sensorNumber) {
-            case SensorConst.SENSOR_1:
-                returnSesnor = sensor1;
-                break;
-            case SensorConst.SENSOR_2:
-                returnSesnor = sensor2;
-                break;
-            case SensorConst.SENSOR_3:
-                returnSesnor = sensor3;
-                break;
-            case SensorConst.SENSOR_4:
-                returnSesnor = sensor4;
-                break;
-
-        }
-        return returnSesnor;
+        return baseUnit.getSensor(sensorNumber);
     }
-
 }
