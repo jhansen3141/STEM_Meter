@@ -69,8 +69,13 @@ public class SensorsFragment extends ListFragment {
 
             @Override
             public void onClick(View arg0) {
-                Log.i(TAG,"Zero button pressed");
-                sensorFragInterface.getSensor(listItemSelected+1).zeroSensor();
+                Log.i(TAG, "Zero button pressed " + listItemSelected);
+                try {
+                    sensorFragInterface.getSensor(listItemSelected + 1).zeroSensor();
+                }
+                catch (NullPointerException npe) {
+                    Log.i(TAG,"Sensor Null - Cannot Zero");
+                }
 
             }
         });
