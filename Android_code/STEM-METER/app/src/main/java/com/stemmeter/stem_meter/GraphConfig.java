@@ -1,5 +1,7 @@
 package com.stemmeter.stem_meter;
 
+import java.util.ArrayList;
+
 /**
  * Created by monro on 2/14/2017.
  */
@@ -9,9 +11,14 @@ public class GraphConfig {
     private int state;
     private int selectedSensor;
     private int visibleDataNum;
+    private ArrayList<Boolean> dataPoints;
 
     public GraphConfig (int sensor, int visibleDataNum)
     {
+        dataPoints = new ArrayList<>();
+        dataPoints.add(true);
+        dataPoints.add(true);
+        dataPoints.add(true);
         state = 0;
         this.selectedSensor = selectedSensor;
         this.visibleDataNum = visibleDataNum;
@@ -19,6 +26,10 @@ public class GraphConfig {
 
     public GraphConfig ()
     {
+        dataPoints = new ArrayList<>();
+        dataPoints.add(true);
+        dataPoints.add(true);
+        dataPoints.add(true);
         state = 0;
         this.selectedSensor = 0;
         this.visibleDataNum = 10;
@@ -46,5 +57,13 @@ public class GraphConfig {
 
     public void setState(int state) {
         this.state = state;
+    }
+
+    public ArrayList<Boolean> getDataPoints() {
+        return dataPoints;
+    }
+
+    public void setDataPoints(ArrayList<Boolean> dataPoints) {
+        this.dataPoints = dataPoints;
     }
 }

@@ -212,7 +212,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
     public void BoardConnect(BluetoothDevice device) {
         printConnectionStat("Connecting to board...");
         boardDevice = device;
@@ -589,7 +588,7 @@ public class MainActivity extends AppCompatActivity
             transaction.commit();
         } else if (id == R.id.nav_display) {
             DisplayFragment displayFragment = new DisplayFragment();
-            transaction.replace(R.id.fragment_container, displayFragment, GRAPH_FRAG_TAG);
+            transaction.replace(R.id.fragment_container, displayFragment, DISPLAY_FRAG_TAG);
             //transaction.addToBackStack(null);
             transaction.commit();
         }
