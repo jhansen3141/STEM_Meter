@@ -30,11 +30,35 @@
             />
 
         <TextView
-            android:id="@+id/ZeroSensorButton"
+            android:id="@+id/ZeroSensorTextView"
             android:layout_height="wrap_content"
             android:textSize="20sp"
             android:layout_width="wrap_content"
             android:text="Zero Sensor"
+            android:textColor="@android:color/black"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="25dp"
+            />
+
+        <ImageButton
+            android:id="@+id/ResetZeroButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="15dp"
+            android:focusable="false"
+            android:layout_below="@+id/ZeroButton"
+            android:background="@drawable/rectangle_button"
+            android:focusableInTouchMode="false"
+            />
+
+        <TextView
+            android:id="@+id/ResetZeroTextView"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:layout_width="wrap_content"
+            android:text="Negate Zero"
+            android:layout_below="@+id/ZeroButton"
             android:textColor="@android:color/black"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="25dp"
