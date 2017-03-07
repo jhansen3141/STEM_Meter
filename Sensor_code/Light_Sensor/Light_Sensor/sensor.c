@@ -62,8 +62,8 @@ static uint16_t OPT3002_Read(uint8_t reg) {
 
 void readSensor(sensorData_t *data) {
 	uint16_t rawData;
-	uint16_t exponent;
-	uint16_t mantissa;
+	int16_t exponent;
+	int16_t mantissa;
 	float multiplier; 
 	float fOpticalPower;
 	char tempStr[15];

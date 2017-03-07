@@ -59,12 +59,11 @@ public class LIGHT_OPT3002 extends Sensor {
             Log.i("LightSensor", "String format incorrect");
         }
 
-
-
         opticalPower = Float.parseFloat(dataStr[0]);
 
         if(shouldZero) {
             opticalPowerZero = -(opticalPower);
+            shouldZero = false;
         }
 
         // add offset
@@ -77,6 +76,7 @@ public class LIGHT_OPT3002 extends Sensor {
                 break;
         }
 
+        dataStr[0] = String.format("%.2f",opticalPower);
         sensorStringArray = dataStr;
 
         return dataStr;

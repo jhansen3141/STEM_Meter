@@ -62,7 +62,7 @@ public class TEMP_SI7021 extends Sensor {
         }
 
         temp += tempZero;
-         humidity += -(humidityZero);
+        humidity += humidityZero;
 
         switch(units) {
             case SensorConst.TEMP_UNIT_F:
