@@ -105,6 +105,7 @@ public class MainActivity extends AppCompatActivity
     private final String CONNECT_FRAG_TAG = "ConnectFragTag";
     private final String GRAPH_FRAG_TAG = "GraphFragTag";
     private final String SENSOR_FRAG_TAG = "SensorFragTag";
+    private final String DISPLAY_FRAG_TAG = "DisplayFragTag";
 
     private BaseUnit baseUnit;
 
