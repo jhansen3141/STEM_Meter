@@ -33,7 +33,7 @@
 #include "FatSD.h"
 #include "Sensor.h"
 
-#define TASKSTACKSIZE       	1024
+#define TASKSTACKSIZE       	4000
 #define TASK_PRIORITY 			1
 #define SPI_BIT_RATE 			5000000
 #define SPI_CONFIG_DATA_MARKER	0xA5
@@ -65,6 +65,8 @@ static Queue_Handle hBleWritesMsgQ;
 
 static Semaphore_Struct semBLEWriteStruct;
 static Semaphore_Handle semBLEWriteHandle;
+
+static int32_t queueSize = 0;
 
 
 // Struct for task messages
@@ -169,7 +171,7 @@ static bool SPISendUpdate(uint8_t *txBuffer, uint8_t *rxBuffer) {
 	bool returnStatus;
 	// bring the CS line active to tell slave SPI transfer about to start
 	GPIO_write(Board_SPI_CS_INT, Board_CS_ACTIVE);
-	Task_sleep(25);
+	Task_sleep(2);
 
 	SPI_Transaction spiTransaction;
 	spiTransaction.count = 21;
@@ -178,7 +180,7 @@ static bool SPISendUpdate(uint8_t *txBuffer, uint8_t *rxBuffer) {
 	// do the SPI transfer
 	returnStatus = SPI_transfer(SPIHandle, &spiTransaction);
 
-	Task_sleep(25);
+	Task_sleep(2);
 	// deactivate the SPI CS line
 	GPIO_write(Board_SPI_CS_INT, Board_CS_DEACTIVE);
 	return returnStatus;
@@ -206,6 +208,7 @@ static void BLEWriteFxn(UArg arg0, UArg arg1) {
 			bleWrite_msg_t *pMsg = Queue_dequeue(hBleWritesMsgQ); // dequeue the message
 			user_processBLEWriteMessage(pMsg); // process the message
 			free(pMsg); // free mem
+			queueSize--;
 		}
 	}
 }
@@ -218,6 +221,7 @@ static void user_processBLEWriteMessage(bleWrite_msg_t *pMsg) {
 	bool oneByteMsg = false;
 	uint8_t txBufferUpdate[21];
 	uint8_t rxBuffer[21];
+
 	switch (pMsg->type) {
 		// Set sensor ID to be transmitted
 		case SENSOR_1_UPDATE_DATA_MSG:
@@ -348,6 +352,7 @@ void enqueueBLEWritetTaskMsg(bleWrite_msg_types_t msgType, uint8_t *buffer, uint
 		pMsg->type = msgType;
 		memcpy(pMsg->pdu,buffer,len); // copy the data into the message
 		Queue_enqueue(hBleWritesMsgQ, &pMsg->_elem); // enqueue the message
+		queueSize++;
 		Semaphore_post(semBLEWriteHandle);
 	}
 }
@@ -357,6 +362,7 @@ void enqueueBLEMsg(bleWrite_msg_types_t msgType) {
 	if (pMsg != NULL) {
 		pMsg->type = msgType;
 		Queue_enqueue(hBleWritesMsgQ, &pMsg->_elem); // enqueue the message
+		queueSize++;
 		Semaphore_post(semBLEWriteHandle);
 	}
 }

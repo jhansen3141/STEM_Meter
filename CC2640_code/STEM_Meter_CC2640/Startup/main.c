@@ -15,6 +15,8 @@
 #include <ti/drivers/UART.h>
 #include <uart_logs.h>
 
+#define POWER_SAVING
+
 #ifndef USE_DEFAULT_USER_CFG
 #include "bleUserConfig.h"
 // BLE user defined configuration
@@ -48,11 +50,13 @@ int main() {
     /* Kick off profile - Priority 3 */
     GAPRole_createTask();
 
-    /* User task - Priority 1 */
+    /* BLE Task - Priority 1 */
     STEMMeterBLE_createTask();
 
+    /* Battery Monitor / LED,Button Task - Priority 2 */
     BatMonitor_createTask();
 
+    /* SPI Transfer Task - Priority 1 */
     SPICommands_createTask();
 
     /* enable interrupts and start SYS/BIOS */

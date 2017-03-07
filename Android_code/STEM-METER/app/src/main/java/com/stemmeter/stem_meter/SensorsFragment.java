@@ -30,6 +30,7 @@ public class SensorsFragment extends ListFragment {
     private String TAG = "SensorFrag";
     private SensorListAdapter sensorListAdapter;
     private ImageButton zeroButton;
+    private ImageButton negateZeroButton;
     private int listItemSelected = 0;
 
 
@@ -64,14 +65,31 @@ public class SensorsFragment extends ListFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.sensors_fragment, container, false);
         zeroButton = (ImageButton) view.findViewById(R.id.ZeroButton);
+        negateZeroButton = (ImageButton) view.findViewById(R.id.ResetZeroButton);
 
         zeroButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View arg0) {
-                Log.i(TAG,"Zero button pressed");
-                sensorFragInterface.getSensor(listItemSelected+1).zeroSensor();
+                try {
+                    sensorFragInterface.getSensor(listItemSelected + 1).zeroSensor();
+                }
+                catch (NullPointerException npe) {
+                    Log.i(TAG,"Sensor Null - Cannot Zero");
+                }
 
+            }
+        });
+
+        negateZeroButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+                try {
+                    sensorFragInterface.getSensor(listItemSelected + 1).resetZero();
+                } catch (NullPointerException npe) {
+                    Log.i(TAG, "Sensor Null - Cannot Reset Zero");
+                }
             }
         });
 
@@ -139,8 +157,15 @@ public class SensorsFragment extends ListFragment {
             // Only update the sensor data if sensor text box is showing
             if(setBooleanList.get(position).isSet()) {
                 sensorData.set(position, item);
-                // Only update the row we need to. Not the entire list
-                View v = getListView().getChildAt(position - getListView().getFirstVisiblePosition());
+                View v = null;
+                try {
+                    // Only update the row we need to. Not the entire list
+                    v = getListView().getChildAt(position - getListView().getFirstVisiblePosition());
+                }
+                catch (Exception e)
+                {
+
+                }
 
                 if(v == null) {
                     return;

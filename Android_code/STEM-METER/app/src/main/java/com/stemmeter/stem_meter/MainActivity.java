@@ -105,6 +105,7 @@ public class MainActivity extends AppCompatActivity
     private final String CONNECT_FRAG_TAG = "ConnectFragTag";
     private final String GRAPH_FRAG_TAG = "GraphFragTag";
     private final String SENSOR_FRAG_TAG = "SensorFragTag";
+    private final String DISPLAY_FRAG_TAG = "DisplayFragTag";
 
     private BaseUnit baseUnit;
 
@@ -211,7 +212,6 @@ public class MainActivity extends AppCompatActivity
             }
         }
     }
-
 
     public void BoardConnect(BluetoothDevice device) {
         printConnectionStat("Connecting to board...");
@@ -589,7 +589,7 @@ public class MainActivity extends AppCompatActivity
             transaction.commit();
         } else if (id == R.id.nav_display) {
             DisplayFragment displayFragment = new DisplayFragment();
-            transaction.replace(R.id.fragment_container, displayFragment, GRAPH_FRAG_TAG);
+            transaction.replace(R.id.fragment_container, displayFragment, DISPLAY_FRAG_TAG);
             //transaction.addToBackStack(null);
             transaction.commit();
         }

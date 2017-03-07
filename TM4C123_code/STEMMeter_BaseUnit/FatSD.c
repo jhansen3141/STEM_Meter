@@ -42,7 +42,7 @@
 /* Drive number used for FatFs */
 #define DRIVE_NUM           0
 
-#define TASKSTACKSIZE       2048
+#define TASKSTACKSIZE       4000
 
 #define TIME_STR_LEN		18
 

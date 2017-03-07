@@ -51,6 +51,7 @@ public class DisplayFragment extends Fragment {
     }
 
     private LineChart mChart;
+    private String TAG = "DisplayFragTag";
     //@Override
     //public void onActivityCreated(Bundle savedInstanceState) {
     //    super.onActivityCreated(savedInstanceState);
