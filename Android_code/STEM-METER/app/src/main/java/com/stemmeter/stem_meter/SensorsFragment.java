@@ -30,6 +30,7 @@ public class SensorsFragment extends ListFragment {
     private String TAG = "SensorFrag";
     private SensorListAdapter sensorListAdapter;
     private ImageButton zeroButton;
+    private ImageButton negateZeroButton;
     private int listItemSelected = 0;
 
 
@@ -64,12 +65,12 @@ public class SensorsFragment extends ListFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.sensors_fragment, container, false);
         zeroButton = (ImageButton) view.findViewById(R.id.ZeroButton);
+        negateZeroButton = (ImageButton) view.findViewById(R.id.ResetZeroButton);
 
         zeroButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View arg0) {
-                Log.i(TAG, "Zero button pressed " + listItemSelected);
                 try {
                     sensorFragInterface.getSensor(listItemSelected + 1).zeroSensor();
                 }
@@ -77,6 +78,18 @@ public class SensorsFragment extends ListFragment {
                     Log.i(TAG,"Sensor Null - Cannot Zero");
                 }
 
+            }
+        });
+
+        negateZeroButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+                try {
+                    sensorFragInterface.getSensor(listItemSelected + 1).resetZero();
+                } catch (NullPointerException npe) {
+                    Log.i(TAG, "Sensor Null - Cannot Reset Zero");
+                }
             }
         });
 
