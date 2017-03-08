@@ -56,6 +56,7 @@ public class GraphSettingsFragment extends Fragment {
     private final String GRAPH_FRAG_TAG = "GraphFragTag";
     private TextView seekBarText;
     private ArrayList<Boolean> dataPoints;
+    private int selectedUnitPosition;
     // Container Activity must implement this interface
 
     // Container Activity must implement this interface
@@ -162,6 +163,9 @@ public class GraphSettingsFragment extends Fragment {
                 // Commit changes to visible data number in graph config
                 graphSettingsFragInterface.getGraphConfig().setVisibleDataNum(dataSeekBar.getProgress());
 
+                graphSettingsFragInterface.getGraphConfig().setSelectedUnitsPosition(selectedUnitPosition);
+                graphSettingsFragInterface.getSensor(graphSettingsFragInterface.getGraphConfig().getSelectedSensor() + 1).setGraphUnits(selectedUnitPosition);
+
                 // commit changes to data points boolean list in graph config
                 graphSettingsFragInterface.getGraphConfig().getDataPoints().set(0, dataPoints.get(0));
                 Log.i(TAG, "First:" + String.valueOf(dataPoints.get(0)));
@@ -197,6 +201,8 @@ public class GraphSettingsFragment extends Fragment {
         dataPoints.add(graphSettingsFragInterface.getGraphConfig().getDataPoints().get(0));
         dataPoints.add(graphSettingsFragInterface.getGraphConfig().getDataPoints().get(1));
         dataPoints.add(graphSettingsFragInterface.getGraphConfig().getDataPoints().get(2));
+
+        selectedUnitPosition = graphSettingsFragInterface.getGraphConfig().getSelectedUnitsPosition();
 
         return view;
     }
@@ -239,7 +245,7 @@ public class GraphSettingsFragment extends Fragment {
     private class DataListAdapter extends BaseAdapter {
         private ArrayList<String> dataPointName = new ArrayList<String>();
         private LayoutInflater mInflater;
-        private String TAG = "CustomAdapter";
+        private String TAG = "DataListAdapter";
         private int currentSelectedPosition;
         private int selectedPosition = -1;
 
@@ -294,7 +300,7 @@ public class GraphSettingsFragment extends Fragment {
                 dataNameText.setText(dataPointName.get(position));
 
             if (dataPoints.get(position))
-                convertView.setBackgroundColor(Color.BLUE);
+                convertView.setBackgroundColor(SensorConst.SELECTION_COLOR);
             else
                 convertView.setBackgroundColor(Color.WHITE);
 
@@ -323,9 +329,8 @@ public class GraphSettingsFragment extends Fragment {
     private class UnitListAdapter extends BaseAdapter {
         private ArrayList<String> unitName = new ArrayList<String>();
         private LayoutInflater mInflater;
-        private String TAG = "CustomAdapter";
+        private String TAG = "UnitListAdapter";
         private int currentSelectedPosition;
-        private int selectedPosition = -1;
 
         public UnitListAdapter() {
 
@@ -381,10 +386,17 @@ public class GraphSettingsFragment extends Fragment {
 
                 @Override
                 public void onClick(View arg0) {
-                    selectedPosition = position;
-                    notifyDataSetChanged();
+                    if (position != selectedUnitPosition) {
+                        selectedUnitPosition = position;
+                        notifyDataSetChanged();
+                    }
                 }
             });
+
+            if (position == selectedUnitPosition)
+                convertView.setBackgroundColor(SensorConst.SELECTION_COLOR);
+            else
+                convertView.setBackgroundColor(Color.WHITE);
 
             return convertView;
 
