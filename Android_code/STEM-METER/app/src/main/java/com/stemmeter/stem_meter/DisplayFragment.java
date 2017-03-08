@@ -2,6 +2,7 @@ package com.stemmeter.stem_meter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.support.v4.app.Fragment;
@@ -29,6 +30,8 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,8 +49,10 @@ public class DisplayFragment extends Fragment {
 
     // Container Activity must implement this interface
     public interface DisplayFragInterface {
-        ArrayList<LineData> getSavedList();
-        ArrayList<String> getSavedNameList();
+//        public ArrayList<LineData> getSavedList();
+//        public ArrayList<String> getSavedNameList();
+        public ArrayList<SavedGraphData> getSavedGraphDataList();
+        public void setSavedGraphDataList(ArrayList<SavedGraphData> savedGraphData);
     }
 
     private LineChart mChart;
@@ -117,7 +122,13 @@ public class DisplayFragment extends Fragment {
         rightAxis.setEnabled(false);
 
         DataListAdapter dataListAdapter = new DataListAdapter();
-        List<String> dataNameList = displayFragInterface.getSavedNameList();
+        List<SavedGraphData> savedGraphData = displayFragInterface.getSavedGraphDataList();
+        List<String> dataNameList = new ArrayList<String>();
+
+        for (int i = 0; i < savedGraphData.size(); i++)
+            dataNameList.add(savedGraphData.get(i).getName());
+
+        //List<String> dataNameList = displayFragInterface.getSavedNameList();
         if (dataNameList.size() > 0)
         {
             for (int i = 0; i < dataNameList.size(); i++)
@@ -139,6 +150,36 @@ public class DisplayFragment extends Fragment {
                     + " must implement DisplayFragInterface");
         }
     }
+
+//    @Override
+//    public void onPause() {
+//        super.onPause();
+//        if (displayFragInterface.getSavedGraphDataList() != null) {
+//            SharedPreferences pref = this.getActivity().getSharedPreferences("info", Context.MODE_PRIVATE);
+//            SharedPreferences.Editor editor = pref.edit();
+//            Gson gson = new Gson();
+//            String json = gson.toJson(displayFragInterface.getSavedGraphDataList());
+//            editor.putString(TAG, json);
+//            editor.commit();
+//        }
+//    }
+
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//        SharedPreferences pref = this.getActivity().getSharedPreferences("info", Context.MODE_PRIVATE);
+//        String json = pref.getString(TAG,"");
+//        if (!json.isEmpty())
+//        {
+//            Log.i(TAG, "Getting Saved Data");
+//            Gson gson = new Gson();
+//            ArrayList<SavedGraphData> savedGraphDataList = (ArrayList<SavedGraphData>) gson.fromJson(json, new TypeToken<ArrayList<SavedGraphData>>(){}.getType());
+//            if (savedGraphDataList != null && savedGraphDataList.size() > 0)
+//                displayFragInterface.setSavedGraphDataList(savedGraphDataList);
+//        }
+//
+//
+//    }
 
     private LineDataSet createSet() {
 
@@ -253,8 +294,10 @@ public class DisplayFragment extends Fragment {
                 @Override
                 public void onClick(View arg0) {
                     graphName.remove(position);
-                    displayFragInterface.getSavedNameList().remove(position);
-                    displayFragInterface.getSavedList().remove(position);
+
+                    displayFragInterface.getSavedGraphDataList().remove(position);
+//                    displayFragInterface.getSavedNameList().remove(position);
+//                    displayFragInterface.getSavedList().remove(position);
 
                     if (selectedPosition == position) {
                         mChart.clear();
@@ -280,7 +323,7 @@ public class DisplayFragment extends Fragment {
 
                 @Override
                 public void onClick(View arg0) {
-                    addEntry(displayFragInterface.getSavedList().get(position));
+                    addEntry(displayFragInterface.getSavedGraphDataList().get(position).getData());
                     Log.i(TAG, "Graph List Item clicked");
                     selectedPosition = position;
                     notifyDataSetChanged();

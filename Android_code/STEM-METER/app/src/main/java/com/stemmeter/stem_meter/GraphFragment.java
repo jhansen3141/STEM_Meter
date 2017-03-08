@@ -59,8 +59,9 @@ public class GraphFragment extends Fragment {
 
     // Container Activity must implement this interface
     public interface GraphFragInterface {
-        public ArrayList<LineData> getSavedList();
-        public ArrayList<String> getSavedNameList();
+        //public ArrayList<LineData> getSavedList();
+        //public ArrayList<String> getSavedNameList();
+        public ArrayList<SavedGraphData> getSavedGraphDataList();
         public GraphConfig getGraphConfig();
         public Sensor getSensor(int sensorNumber);
     }
@@ -90,7 +91,7 @@ public class GraphFragment extends Fragment {
         //mChart.setOnChartValueSelectedListener(this);
 
         // enable description text
-        //mChart.getDescription().setEnabled(true);
+        mChart.getDescription().setEnabled(false);
 
         // enable touch gestures
         mChart.setTouchEnabled(true);
@@ -121,6 +122,7 @@ public class GraphFragment extends Fragment {
         l.setForm(Legend.LegendForm.LINE);
         l.setTypeface(Typeface.DEFAULT);
         l.setTextColor(Color.BLACK);
+        l.setTextSize(12f);
 
         XAxis xl = mChart.getXAxis();
         xl.setTypeface(Typeface.DEFAULT);
@@ -128,12 +130,13 @@ public class GraphFragment extends Fragment {
         xl.setDrawGridLines(false);
         xl.setAvoidFirstLastClipping(true);
         xl.setEnabled(true);
+        xl.setPosition(XAxis.XAxisPosition.BOTTOM);
 
         YAxis leftAxis = mChart.getAxisLeft();
         leftAxis.setTypeface(Typeface.DEFAULT);
         leftAxis.setTextColor(Color.BLACK);
-        leftAxis.setAxisMaximum(-9999999.2f);
-        leftAxis.setAxisMinimum(9999999.2f);
+        //leftAxis.setAxisMaximum(0);
+        //leftAxis.setAxisMinimum(0);
         leftAxis.setDrawGridLines(true);
 
         YAxis rightAxis = mChart.getAxisRight();
@@ -187,9 +190,10 @@ public class GraphFragment extends Fragment {
                         .setCancelable(false)
                         .setPositiveButton("OK",new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog,int id) {
-
-                                graphFragInterface.getSavedList().add(mChart.getData());
-                                graphFragInterface.getSavedNameList().add(input.getText().toString());
+                                SavedGraphData savedGraphData = new SavedGraphData(input.getText().toString(), mChart.getData(), 1, graphFragInterface.getGraphConfig().getSelectedUnitsPosition());
+//                                graphFragInterface.getSavedList().add(mChart.getData());
+//                                graphFragInterface.getSavedNameList().add(input.getText().toString());
+                                graphFragInterface.getSavedGraphDataList().add(savedGraphData);
                                 dialog.cancel();
                             }
                         })
@@ -269,13 +273,13 @@ public class GraphFragment extends Fragment {
     private void addEntry(float num1) {
 
         if (num1 > (mChart.getYChartMax() - 0.5)) {
-            mChart.getAxisLeft().setAxisMaximum(num1 + (float)0.5);
-            //mChart.getAxisLeft().resetAxisMaximum();
+            //mChart.getAxisLeft().setAxisMaximum(num1 + (float)0.5);
+            mChart.getAxisLeft().resetAxisMaximum();
         }
 
         if (num1 < (mChart.getYChartMin() + 0.5)) {
-            mChart.getAxisLeft().setAxisMinimum(num1 - (float)0.5);
-            //mChart.getAxisLeft().resetAxisMinimum();
+            //mChart.getAxisLeft().setAxisMinimum(num1 - (float)0.5);
+            mChart.getAxisLeft().resetAxisMinimum();
         }
 
         LineData data = mChart.getData();
@@ -293,6 +297,9 @@ public class GraphFragment extends Fragment {
             data.addEntry(new Entry(set.getEntryCount(), num1), 0);
 
             if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP) {
+
+                mChart.getXAxis().setEnabled(false);
+
                 Entry entry;
 
                 if (set.getEntryCount() == graphFragInterface.getGraphConfig().getVisibleDataNum()) {
@@ -304,6 +311,8 @@ public class GraphFragment extends Fragment {
                     }
                 }
             }
+            else
+                mChart.getXAxis().setEnabled(true);
 
             data.notifyDataChanged();
 
@@ -364,6 +373,9 @@ public class GraphFragment extends Fragment {
             data.addEntry(new Entry(set2.getEntryCount(), num2), 1);
 
             if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP) {
+
+                mChart.getXAxis().setEnabled(false);
+
                 Entry entry;
 
                 if (set1.getEntryCount() == graphFragInterface.getGraphConfig().getVisibleDataNum()) {
@@ -384,6 +396,8 @@ public class GraphFragment extends Fragment {
                     }
                 }
             }
+            else
+                mChart.getXAxis().setEnabled(true);
 
             data.notifyDataChanged();
 
@@ -405,28 +419,7 @@ public class GraphFragment extends Fragment {
 
     private void addEntry(float num1, float num2, float num3) {
         //mChart.setVisibleXRangeMaximum(10);
-
-        float maxValue = -9999999;
-        float minValue =  9999999;
-
-        maxValue = Math.max(num1,num2);
-        if (num3 > maxValue)
-            maxValue = num3;
-
-        minValue = Math.min(num1, num2);
-        if (num3 < minValue)
-            minValue = num3;
-
-        if (maxValue > (mChart.getYChartMax() - 0.5)) {
-            mChart.getAxisLeft().setAxisMaximum(maxValue + (float)0.5);
-            //mChart.getAxisLeft().resetAxisMaximum();
-        }
-
-        if (minValue < (mChart.getYChartMin() + 0.5)) {
-            mChart.getAxisLeft().setAxisMinimum(minValue - (float)0.5);
-            //mChart.getAxisLeft().resetAxisMinimum();
-        }
-
+        //boolean firstTime = false;
         LineData data = mChart.getData();
 
         if (data != null) {
@@ -439,6 +432,7 @@ public class GraphFragment extends Fragment {
             if (set1 == null) {
                 set1 = createSet(Color.BLUE, ColorTemplate.getHoloBlue(), dataSetName1);
                 data.addDataSet(set1);
+                //firstTime = true;
             }
 
             if (set2 == null)
@@ -458,6 +452,7 @@ public class GraphFragment extends Fragment {
             data.addEntry(new Entry(set3.getEntryCount(), num3), 2);
 
             if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP) {
+                mChart.getXAxis().setEnabled(false);
                 Entry entry;
 //removing last element from the chart and finding max and min visible value
                 if (set1.getEntryCount() == graphFragInterface.getGraphConfig().getVisibleDataNum()) {
@@ -487,7 +482,31 @@ public class GraphFragment extends Fragment {
                     }
                 }
             }
+            else
+                mChart.getXAxis().setEnabled(true);
+
             data.notifyDataChanged();
+
+            float maxValue = -9999999;
+            float minValue =  9999999;
+
+            maxValue = Math.max(num1,num2);
+            if (num3 > maxValue)
+                maxValue = num3;
+
+            minValue = Math.min(num1, num2);
+            if (num3 < minValue)
+                minValue = num3;
+
+            if (maxValue > (mChart.getYChartMax() - 0.5)) {
+                mChart.getAxisLeft().setAxisMaximum(maxValue + (float)0.5);
+                //mChart.getAxisLeft().resetAxisMaximum();
+            }
+
+            if (minValue < (mChart.getYChartMin() + 0.5)) {
+                mChart.getAxisLeft().setAxisMinimum(minValue - (float)0.5);
+                //mChart.getAxisLeft().resetAxisMinimum();
+            }
 
             // let the chart know it's data has changed
             mChart.notifyDataSetChanged();

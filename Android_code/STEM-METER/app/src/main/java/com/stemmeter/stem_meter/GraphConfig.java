@@ -12,20 +12,23 @@ public class GraphConfig {
     private int selectedSensor;
     private int visibleDataNum;
     private ArrayList<Boolean> dataPoints;
+    private int selectedUnitsPosition;
 
     public GraphConfig (int sensor, int visibleDataNum)
     {
+        selectedUnitsPosition = 0;
         dataPoints = new ArrayList<>();
         dataPoints.add(true);
         dataPoints.add(true);
         dataPoints.add(true);
         state = 0;
-        this.selectedSensor = selectedSensor;
+        this.selectedSensor = sensor;
         this.visibleDataNum = visibleDataNum;
     }
 
     public GraphConfig ()
     {
+        selectedUnitsPosition = 0;
         dataPoints = new ArrayList<>();
         dataPoints.add(true);
         dataPoints.add(true);
@@ -66,4 +69,8 @@ public class GraphConfig {
     public void setDataPoints(ArrayList<Boolean> dataPoints) {
         this.dataPoints = dataPoints;
     }
+
+    public int getSelectedUnitsPosition() { return selectedUnitsPosition; }
+
+    public void setSelectedUnitsPosition(int selectedUnits) { this.selectedUnitsPosition = selectedUnits; }
 }

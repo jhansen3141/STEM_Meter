@@ -42,6 +42,7 @@ import com.stemmeter.stem_meter.Sensors.Sensor;
 import com.stemmeter.stem_meter.Sensors.TEMP_SI7021;
 import com.stemmeter.stem_meter.Sensors.Temp_MCP9808;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -111,8 +112,9 @@ public class MainActivity extends AppCompatActivity
 
     private ArrayList<SensorConfig> sensorConfigList;
 
-    private ArrayList<LineData> savedDataList;
-    private ArrayList<String> savedNameList;
+    //private ArrayList<LineData> savedDataList;
+    //private ArrayList<String> savedNameList;
+    private ArrayList<SavedGraphData> savedGraphDataList;
 
     private GraphConfig graphConfig;
 
@@ -141,8 +143,9 @@ public class MainActivity extends AppCompatActivity
 
         baseUnit = new BaseUnit();
 
-        savedDataList = new ArrayList<LineData>();
-        savedNameList = new ArrayList<String>();
+        //savedDataList = new ArrayList<LineData>();
+        //savedNameList = new ArrayList<String>();
+        savedGraphDataList = new ArrayList<SavedGraphData>();
 
         graphConfig = new GraphConfig();
 
@@ -632,16 +635,28 @@ public class MainActivity extends AppCompatActivity
         return sensorConfigList.get(sensorNumber-1);
     }
 
-    @Override
-    public ArrayList<LineData> getSavedList(){
+//    @Override
+//    public ArrayList<LineData> getSavedList(){
+//
+//        return savedDataList;
+//    }
+//
+//    @Override
+//    public ArrayList<String> getSavedNameList(){
+//
+//        return savedNameList;
+//    }
 
-        return savedDataList;
+    @Override
+    public ArrayList<SavedGraphData> getSavedGraphDataList(){
+
+        return savedGraphDataList;
     }
 
     @Override
-    public ArrayList<String> getSavedNameList(){
+    public void setSavedGraphDataList(ArrayList<SavedGraphData> savedGraphData){
 
-        return savedNameList;
+        savedGraphDataList = savedGraphData;
     }
 
     @Override
