@@ -214,7 +214,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void BoardConnect(BluetoothDevice device) {
-        printConnectionStat("Connecting to board...");
+        printConnectionStat("Connecting to STEM-Meter...");
         boardDevice = device;
         mainMenu.findItem(R.id.connection_icon).setIcon(R.drawable.ble_connecting);
         mBluetoothGatt = boardDevice.connectGatt(getApplicationContext(), true, mGattCallback);

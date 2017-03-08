@@ -96,7 +96,6 @@ public class ConnectFragment extends ListFragment {
                 }
             }
         }
-
         if(!deviceInList) {
             scanListAdapter.addItem(bleDevice);
         }

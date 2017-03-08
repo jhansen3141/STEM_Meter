@@ -72,6 +72,7 @@ public class GraphFragment extends Fragment {
     private ToggleButton playPauseBtn;
     private ImageButton saveBtn;
     private ImageButton settingsBtn;
+    private ImageButton zeroBtn;
     private long currentIndex = 0;
     private String dataSetName1;
     private String dataSetName2;
@@ -114,6 +115,8 @@ public class GraphFragment extends Fragment {
         // get the legend (only possible after setting data)
         Legend l = mChart.getLegend();
 
+      //  mChart.getLegend().setTextSize(11f);
+
         // modify the legend ...
         l.setForm(Legend.LegendForm.LINE);
         l.setTypeface(Typeface.DEFAULT);
@@ -135,6 +138,15 @@ public class GraphFragment extends Fragment {
 
         YAxis rightAxis = mChart.getAxisRight();
         rightAxis.setEnabled(false);
+
+        zeroBtn = (ImageButton) view.findViewById(R.id.ZeroBtn);
+        zeroBtn.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+
+            }
+        });
 
         //mChart.setVisibleXRangeMaximum(10);
         settingsBtn = (ImageButton) view.findViewById(R.id.GraphSettingsBtn);
@@ -163,9 +175,9 @@ public class GraphFragment extends Fragment {
                 alertDialogBuilder.setTitle("Graph Name");
 
                 final EditText input = new EditText(getActivity());
-                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.MATCH_PARENT);
+                        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.MATCH_PARENT);
                 input.setLayoutParams(lp);
                 alertDialogBuilder.setView(input);
 

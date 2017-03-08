@@ -46,8 +46,8 @@ public class DisplayFragment extends Fragment {
 
     // Container Activity must implement this interface
     public interface DisplayFragInterface {
-        public ArrayList<LineData> getSavedList();
-        public ArrayList<String> getSavedNameList();
+        ArrayList<LineData> getSavedList();
+        ArrayList<String> getSavedNameList();
     }
 
     private LineChart mChart;
