@@ -79,11 +79,16 @@ public class GraphFragment extends Fragment {
     private String dataSetName2;
     private String dataSetName3;
 
+    private GraphFileStorage graphFileStorage;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.graph_fragment, container, false);
+
+        graphFileStorage = new GraphFileStorage();
+
         //plot = (XYPlot) view.findViewById(plot);
         mChart = (LineChart) view.findViewById(chart);
         mChart.setNoDataText("No data for the moment");
@@ -194,6 +199,7 @@ public class GraphFragment extends Fragment {
 //                                graphFragInterface.getSavedList().add(mChart.getData());
 //                                graphFragInterface.getSavedNameList().add(input.getText().toString());
                                 graphFragInterface.getSavedGraphDataList().add(savedGraphData);
+                                graphFileStorage.saveGraphFile(getActivity(),graphFragInterface.getSavedGraphDataList());
                                 dialog.cancel();
                             }
                         })
@@ -522,7 +528,7 @@ public class GraphFragment extends Fragment {
             // this automatically refreshes the chart (calls invalidate())
             // mChart.moveViewTo(data.getXValCount()-7, 55f,
             // AxisDependency.LEFT);
-            Log.i(TAG,"Set1, Set2, Set3" + set1.getEntryCount() + set2.getEntryCount() + set3.getEntryCount());
+            //Log.i(TAG,"Set1, Set2, Set3" + set1.getEntryCount() + set2.getEntryCount() + set3.getEntryCount());
         }
     }
 

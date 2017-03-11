@@ -5,7 +5,7 @@ import com.github.mikephil.charting.data.LineData;
 import java.io.Serializable;
 
 
-public class SavedGraphData implements Serializable {
+public class SavedGraphData {
 
     private String name;
     private LineData data;

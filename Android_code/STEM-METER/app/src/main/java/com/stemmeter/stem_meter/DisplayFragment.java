@@ -30,8 +30,6 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +54,7 @@ public class DisplayFragment extends Fragment {
     }
 
     private LineChart mChart;
+    private GraphFileStorage graphFileStorage;
     private String TAG = "DisplayFragTag";
     //@Override
     //public void onActivityCreated(Bundle savedInstanceState) {
@@ -67,7 +66,7 @@ public class DisplayFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.display_fragment, container, false);
-
+        graphFileStorage = new GraphFileStorage();
         mChart = (LineChart) view.findViewById(chart);
         mChart.setNoDataText("No data for the moment");
 
@@ -122,6 +121,8 @@ public class DisplayFragment extends Fragment {
         rightAxis.setEnabled(false);
 
         DataListAdapter dataListAdapter = new DataListAdapter();
+        // Update the list with the graph files stored in internal memeory
+        displayFragInterface.setSavedGraphDataList(graphFileStorage.readGraphFiles(getActivity()));
         List<SavedGraphData> savedGraphData = displayFragInterface.getSavedGraphDataList();
         List<String> dataNameList = new ArrayList<String>();
 
@@ -296,6 +297,9 @@ public class DisplayFragment extends Fragment {
                     graphName.remove(position);
 
                     displayFragInterface.getSavedGraphDataList().remove(position);
+
+                    // Save the updated graph list to internal storage
+                    graphFileStorage.saveGraphFile(getActivity(),displayFragInterface.getSavedGraphDataList());
 //                    displayFragInterface.getSavedNameList().remove(position);
 //                    displayFragInterface.getSavedList().remove(position);
 

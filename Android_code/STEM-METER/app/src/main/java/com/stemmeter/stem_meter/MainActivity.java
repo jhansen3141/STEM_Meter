@@ -518,7 +518,6 @@ public class MainActivity extends AppCompatActivity
             if (graphFragment != null && graphFragment.isVisible()) {
                 // TODO post the ArrayList of graph data to the graph fragment
                 // get ArrayList of graph floats
-                Log.i(TAG,"Adding data to graph");
                 ArrayList<Float> graphDataList = sensor.getGraphData();
                 graphFragment.addGraphEntry(graphDataList, sensor.getNumberDataPoints());
             }
