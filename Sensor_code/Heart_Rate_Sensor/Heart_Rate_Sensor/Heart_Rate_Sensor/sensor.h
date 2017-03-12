@@ -20,6 +20,15 @@
 // Sensor Specific Register Addresses
 #define SENSOR_I2C_ADDRESS 0x40
 
+#define INT_STATUS_REG	0x00
+#define INT_ENABLE_REG	0x01
+#define FIFO_REG		0x02
+#define MODE_CONFIG_REG 0x06
+#define SP02_CONFIG_REG	0x07
+#define LED_CONFIG_REG	0x09
+#define TEMP_REG		0x16
+
+
 
 
 void initBoard(void);
