@@ -59,11 +59,10 @@ public class GraphFragment extends Fragment {
 
     // Container Activity must implement this interface
     public interface GraphFragInterface {
-        //public ArrayList<LineData> getSavedList();
-        //public ArrayList<String> getSavedNameList();
-        public ArrayList<SavedGraphData> getSavedGraphDataList();
-        public GraphConfig getGraphConfig();
-        public Sensor getSensor(int sensorNumber);
+        ArrayList<SavedGraphData> getSavedGraphDataList();
+        GraphConfig getGraphConfig();
+        Sensor getSensor(int sensorNumber);
+        void setSavedGraphDataList(ArrayList<SavedGraphData> savedGraphData);
     }
 
     GraphFragInterface graphFragInterface;
@@ -73,16 +72,23 @@ public class GraphFragment extends Fragment {
     private ToggleButton playPauseBtn;
     private ImageButton saveBtn;
     private ImageButton settingsBtn;
+    private ImageButton zeroBtn;
     private long currentIndex = 0;
     private String dataSetName1;
     private String dataSetName2;
     private String dataSetName3;
+
+    private GraphFileStorage graphFileStorage;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.graph_fragment, container, false);
+
+        graphFileStorage = new GraphFileStorage();
+        graphFragInterface.setSavedGraphDataList(graphFileStorage.readGraphFiles(getActivity()));
+
         //plot = (XYPlot) view.findViewById(plot);
         mChart = (LineChart) view.findViewById(chart);
         mChart.setNoDataText("No data for the moment");
@@ -115,6 +121,8 @@ public class GraphFragment extends Fragment {
         // get the legend (only possible after setting data)
         Legend l = mChart.getLegend();
 
+      //  mChart.getLegend().setTextSize(11f);
+
         // modify the legend ...
         l.setForm(Legend.LegendForm.LINE);
         l.setTypeface(Typeface.DEFAULT);
@@ -138,6 +146,15 @@ public class GraphFragment extends Fragment {
 
         YAxis rightAxis = mChart.getAxisRight();
         rightAxis.setEnabled(false);
+
+        zeroBtn = (ImageButton) view.findViewById(R.id.ZeroBtn);
+        zeroBtn.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+
+            }
+        });
 
         //mChart.setVisibleXRangeMaximum(10);
         settingsBtn = (ImageButton) view.findViewById(R.id.GraphSettingsBtn);
@@ -166,9 +183,9 @@ public class GraphFragment extends Fragment {
                 alertDialogBuilder.setTitle("Graph Name");
 
                 final EditText input = new EditText(getActivity());
-                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.MATCH_PARENT);
+                        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.MATCH_PARENT);
                 input.setLayoutParams(lp);
                 alertDialogBuilder.setView(input);
 
@@ -179,9 +196,9 @@ public class GraphFragment extends Fragment {
                         .setPositiveButton("OK",new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog,int id) {
                                 SavedGraphData savedGraphData = new SavedGraphData(input.getText().toString(), mChart.getData(), 1, graphFragInterface.getGraphConfig().getSelectedUnitsPosition());
-//                                graphFragInterface.getSavedList().add(mChart.getData());
-//                                graphFragInterface.getSavedNameList().add(input.getText().toString());
+
                                 graphFragInterface.getSavedGraphDataList().add(savedGraphData);
+                                graphFileStorage.saveGraphFile(getActivity(),graphFragInterface.getSavedGraphDataList());
                                 dialog.cancel();
                             }
                         })
@@ -510,7 +527,7 @@ public class GraphFragment extends Fragment {
             // this automatically refreshes the chart (calls invalidate())
             // mChart.moveViewTo(data.getXValCount()-7, 55f,
             // AxisDependency.LEFT);
-            Log.i(TAG,"Set1, Set2, Set3" + set1.getEntryCount() + set2.getEntryCount() + set3.getEntryCount());
+            //Log.i(TAG,"Set1, Set2, Set3" + set1.getEntryCount() + set2.getEntryCount() + set3.getEntryCount());
         }
     }
 

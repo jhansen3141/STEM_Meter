@@ -30,8 +30,6 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +54,7 @@ public class DisplayFragment extends Fragment {
     }
 
     private LineChart mChart;
+    private GraphFileStorage graphFileStorage;
     private String TAG = "DisplayFragTag";
     //@Override
     //public void onActivityCreated(Bundle savedInstanceState) {
@@ -67,7 +66,7 @@ public class DisplayFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.display_fragment, container, false);
-
+        graphFileStorage = new GraphFileStorage();
         mChart = (LineChart) view.findViewById(chart);
         mChart.setNoDataText("No data for the moment");
 
@@ -122,6 +121,7 @@ public class DisplayFragment extends Fragment {
         rightAxis.setEnabled(false);
 
         DataListAdapter dataListAdapter = new DataListAdapter();
+
         List<SavedGraphData> savedGraphData = displayFragInterface.getSavedGraphDataList();
         List<String> dataNameList = new ArrayList<String>();
 
@@ -151,66 +151,8 @@ public class DisplayFragment extends Fragment {
         }
     }
 
-//    @Override
-//    public void onPause() {
-//        super.onPause();
-//        if (displayFragInterface.getSavedGraphDataList() != null) {
-//            SharedPreferences pref = this.getActivity().getSharedPreferences("info", Context.MODE_PRIVATE);
-//            SharedPreferences.Editor editor = pref.edit();
-//            Gson gson = new Gson();
-//            String json = gson.toJson(displayFragInterface.getSavedGraphDataList());
-//            editor.putString(TAG, json);
-//            editor.commit();
-//        }
-//    }
-
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//        SharedPreferences pref = this.getActivity().getSharedPreferences("info", Context.MODE_PRIVATE);
-//        String json = pref.getString(TAG,"");
-//        if (!json.isEmpty())
-//        {
-//            Log.i(TAG, "Getting Saved Data");
-//            Gson gson = new Gson();
-//            ArrayList<SavedGraphData> savedGraphDataList = (ArrayList<SavedGraphData>) gson.fromJson(json, new TypeToken<ArrayList<SavedGraphData>>(){}.getType());
-//            if (savedGraphDataList != null && savedGraphDataList.size() > 0)
-//                displayFragInterface.setSavedGraphDataList(savedGraphDataList);
-//        }
-//
-//
-//    }
-
-    private LineDataSet createSet() {
-
-        LineDataSet set = new LineDataSet(null, "Dynamic Data");
-        set.setAxisDependency(YAxis.AxisDependency.LEFT);
-        set.setColor(ColorTemplate.getHoloBlue());
-        set.setCircleColor(Color.BLUE);
-        set.setLineWidth(2f);
-        set.setCircleRadius(4f);
-        set.setFillAlpha(65);
-        set.setFillColor(ColorTemplate.getHoloBlue());
-        set.setHighLightColor(Color.rgb(244, 117, 117));
-        set.setValueTextColor(Color.WHITE);
-        set.setValueTextSize(9f);
-        set.setDrawValues(false);
-        return set;
-    }
-
     private void addEntry(LineData data) {
 
-        //LineData data = mChart.getData();
-
-        //if (data != null) {
-
-            //ILineDataSet set = data.getDataSetByIndex(0);
-            // set.addEntry(...); // can be called as well
-
-            //if (set == null) {
-            //    set = createSet();
-            //    data.addDataSet(set);
-            //}
 
             mChart.setData(data);
             data.notifyDataChanged();
@@ -296,6 +238,9 @@ public class DisplayFragment extends Fragment {
                     graphName.remove(position);
 
                     displayFragInterface.getSavedGraphDataList().remove(position);
+
+                    // Save the updated graph list to internal storage
+                    graphFileStorage.saveGraphFile(getActivity(),displayFragInterface.getSavedGraphDataList());
 //                    displayFragInterface.getSavedNameList().remove(position);
 //                    displayFragInterface.getSavedList().remove(position);
 

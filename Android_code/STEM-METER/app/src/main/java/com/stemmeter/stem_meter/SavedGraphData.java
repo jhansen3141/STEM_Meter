@@ -2,9 +2,8 @@ package com.stemmeter.stem_meter;
 
 import com.github.mikephil.charting.data.LineData;
 
-/**
- * Created by monro on 3/7/2017.
- */
+import java.io.Serializable;
+
 
 public class SavedGraphData {
 

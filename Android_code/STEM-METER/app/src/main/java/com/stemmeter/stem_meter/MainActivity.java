@@ -143,9 +143,8 @@ public class MainActivity extends AppCompatActivity
 
         baseUnit = new BaseUnit();
 
-        //savedDataList = new ArrayList<LineData>();
-        //savedNameList = new ArrayList<String>();
-        savedGraphDataList = new ArrayList<SavedGraphData>();
+        savedGraphDataList = new ArrayList<>();
+        // Update the stored graph files from internal memeory
 
         graphConfig = new GraphConfig();
 
@@ -217,7 +216,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void BoardConnect(BluetoothDevice device) {
-        printConnectionStat("Connecting to board...");
+        printConnectionStat("Connecting to STEM-Meter...");
         boardDevice = device;
         mainMenu.findItem(R.id.connection_icon).setIcon(R.drawable.ble_connecting);
         mBluetoothGatt = boardDevice.connectGatt(getApplicationContext(), true, mGattCallback);
@@ -518,7 +517,6 @@ public class MainActivity extends AppCompatActivity
             if (graphFragment != null && graphFragment.isVisible()) {
                 // TODO post the ArrayList of graph data to the graph fragment
                 // get ArrayList of graph floats
-                Log.i(TAG,"Adding data to graph");
                 ArrayList<Float> graphDataList = sensor.getGraphData();
                 graphFragment.addGraphEntry(graphDataList, sensor.getNumberDataPoints());
             }
@@ -649,14 +647,14 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public ArrayList<SavedGraphData> getSavedGraphDataList(){
-
         return savedGraphDataList;
     }
 
     @Override
     public void setSavedGraphDataList(ArrayList<SavedGraphData> savedGraphData){
-
-        savedGraphDataList = savedGraphData;
+        if(savedGraphData != null) {
+            savedGraphDataList = savedGraphData;
+        }
     }
 
     @Override
