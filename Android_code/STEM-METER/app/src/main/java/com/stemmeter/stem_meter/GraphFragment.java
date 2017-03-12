@@ -152,7 +152,7 @@ public class GraphFragment extends Fragment {
 
             @Override
             public void onClick(View arg0) {
-
+                graphFragInterface.getSensor((graphFragInterface.getGraphConfig().getSelectedSensor()+1)).zeroSensor();
             }
         });
 
