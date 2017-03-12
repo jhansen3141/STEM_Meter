@@ -121,8 +121,7 @@ public class DisplayFragment extends Fragment {
         rightAxis.setEnabled(false);
 
         DataListAdapter dataListAdapter = new DataListAdapter();
-        // Update the list with the graph files stored in internal memeory
-        displayFragInterface.setSavedGraphDataList(graphFileStorage.readGraphFiles(getActivity()));
+
         List<SavedGraphData> savedGraphData = displayFragInterface.getSavedGraphDataList();
         List<String> dataNameList = new ArrayList<String>();
 
@@ -152,66 +151,8 @@ public class DisplayFragment extends Fragment {
         }
     }
 
-//    @Override
-//    public void onPause() {
-//        super.onPause();
-//        if (displayFragInterface.getSavedGraphDataList() != null) {
-//            SharedPreferences pref = this.getActivity().getSharedPreferences("info", Context.MODE_PRIVATE);
-//            SharedPreferences.Editor editor = pref.edit();
-//            Gson gson = new Gson();
-//            String json = gson.toJson(displayFragInterface.getSavedGraphDataList());
-//            editor.putString(TAG, json);
-//            editor.commit();
-//        }
-//    }
-
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//        SharedPreferences pref = this.getActivity().getSharedPreferences("info", Context.MODE_PRIVATE);
-//        String json = pref.getString(TAG,"");
-//        if (!json.isEmpty())
-//        {
-//            Log.i(TAG, "Getting Saved Data");
-//            Gson gson = new Gson();
-//            ArrayList<SavedGraphData> savedGraphDataList = (ArrayList<SavedGraphData>) gson.fromJson(json, new TypeToken<ArrayList<SavedGraphData>>(){}.getType());
-//            if (savedGraphDataList != null && savedGraphDataList.size() > 0)
-//                displayFragInterface.setSavedGraphDataList(savedGraphDataList);
-//        }
-//
-//
-//    }
-
-    private LineDataSet createSet() {
-
-        LineDataSet set = new LineDataSet(null, "Dynamic Data");
-        set.setAxisDependency(YAxis.AxisDependency.LEFT);
-        set.setColor(ColorTemplate.getHoloBlue());
-        set.setCircleColor(Color.BLUE);
-        set.setLineWidth(2f);
-        set.setCircleRadius(4f);
-        set.setFillAlpha(65);
-        set.setFillColor(ColorTemplate.getHoloBlue());
-        set.setHighLightColor(Color.rgb(244, 117, 117));
-        set.setValueTextColor(Color.WHITE);
-        set.setValueTextSize(9f);
-        set.setDrawValues(false);
-        return set;
-    }
-
     private void addEntry(LineData data) {
 
-        //LineData data = mChart.getData();
-
-        //if (data != null) {
-
-            //ILineDataSet set = data.getDataSetByIndex(0);
-            // set.addEntry(...); // can be called as well
-
-            //if (set == null) {
-            //    set = createSet();
-            //    data.addDataSet(set);
-            //}
 
             mChart.setData(data);
             data.notifyDataChanged();

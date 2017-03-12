@@ -59,11 +59,10 @@ public class GraphFragment extends Fragment {
 
     // Container Activity must implement this interface
     public interface GraphFragInterface {
-        //public ArrayList<LineData> getSavedList();
-        //public ArrayList<String> getSavedNameList();
-        public ArrayList<SavedGraphData> getSavedGraphDataList();
-        public GraphConfig getGraphConfig();
-        public Sensor getSensor(int sensorNumber);
+        ArrayList<SavedGraphData> getSavedGraphDataList();
+        GraphConfig getGraphConfig();
+        Sensor getSensor(int sensorNumber);
+        void setSavedGraphDataList(ArrayList<SavedGraphData> savedGraphData);
     }
 
     GraphFragInterface graphFragInterface;
@@ -88,6 +87,7 @@ public class GraphFragment extends Fragment {
         final View view = inflater.inflate(R.layout.graph_fragment, container, false);
 
         graphFileStorage = new GraphFileStorage();
+        graphFragInterface.setSavedGraphDataList(graphFileStorage.readGraphFiles(getActivity()));
 
         //plot = (XYPlot) view.findViewById(plot);
         mChart = (LineChart) view.findViewById(chart);
@@ -196,8 +196,7 @@ public class GraphFragment extends Fragment {
                         .setPositiveButton("OK",new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog,int id) {
                                 SavedGraphData savedGraphData = new SavedGraphData(input.getText().toString(), mChart.getData(), 1, graphFragInterface.getGraphConfig().getSelectedUnitsPosition());
-//                                graphFragInterface.getSavedList().add(mChart.getData());
-//                                graphFragInterface.getSavedNameList().add(input.getText().toString());
+
                                 graphFragInterface.getSavedGraphDataList().add(savedGraphData);
                                 graphFileStorage.saveGraphFile(getActivity(),graphFragInterface.getSavedGraphDataList());
                                 dialog.cancel();

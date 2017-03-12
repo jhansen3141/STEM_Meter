@@ -143,9 +143,8 @@ public class MainActivity extends AppCompatActivity
 
         baseUnit = new BaseUnit();
 
-        //savedDataList = new ArrayList<LineData>();
-        //savedNameList = new ArrayList<String>();
-        savedGraphDataList = new ArrayList<SavedGraphData>();
+        savedGraphDataList = new ArrayList<>();
+        // Update the stored graph files from internal memeory
 
         graphConfig = new GraphConfig();
 
@@ -648,14 +647,14 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public ArrayList<SavedGraphData> getSavedGraphDataList(){
-
         return savedGraphDataList;
     }
 
     @Override
     public void setSavedGraphDataList(ArrayList<SavedGraphData> savedGraphData){
-
-        savedGraphDataList = savedGraphData;
+        if(savedGraphData != null) {
+            savedGraphDataList = savedGraphData;
+        }
     }
 
     @Override

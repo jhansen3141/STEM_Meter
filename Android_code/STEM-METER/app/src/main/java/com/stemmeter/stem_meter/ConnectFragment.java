@@ -173,7 +173,7 @@ public class ConnectFragment extends ListFragment {
 
                 addressTextView.setText(bleDeviceList.get(position).getBluetoothDevice().getAddress());
 
-                rssiProgressBar.setProgress(100+bleDeviceList.get(position).getRssi());
+                rssiProgressBar.setProgress(140+bleDeviceList.get(position).getRssi());
             }
             catch (NullPointerException npe) {
                 Log.i(TAG,"View Item Null");
