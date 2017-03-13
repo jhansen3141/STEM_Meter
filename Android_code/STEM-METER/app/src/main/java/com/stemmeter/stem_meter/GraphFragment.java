@@ -70,6 +70,7 @@ public class GraphFragment extends Fragment {
     //private XYPlot plot;
     private LineChart mChart;
     private ToggleButton playPauseBtn;
+    private ImageButton stopBtn;
     private ImageButton saveBtn;
     private ImageButton settingsBtn;
     private ImageButton zeroBtn;
@@ -172,6 +173,8 @@ public class GraphFragment extends Fragment {
 
 
         saveBtn = (ImageButton) view.findViewById(R.id.SaveBtn);
+        saveBtn.setEnabled(false);
+        saveBtn.setColorFilter(Color.GRAY);
         saveBtn.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -215,11 +218,10 @@ public class GraphFragment extends Fragment {
 
                 // show it
                 alertDialog.show();
-                LineData data = mChart.getData();
+                //LineData data = mChart.getData();
             }
 
         });
-
 
         playPauseBtn = (ToggleButton) view.findViewById(R.id.PlayPauseBtn);
         playPauseBtn.setOnClickListener(new View.OnClickListener() {
@@ -234,19 +236,37 @@ public class GraphFragment extends Fragment {
                         graphFragInterface.getGraphConfig().setState(GRAPH_STATE_PLAY);
                         mChart.clearValues();
                         mChart.fitScreen();
-                        saveBtn.setVisibility(View.GONE);
+                        saveBtn.setEnabled(false);
+                        saveBtn.setColorFilter(Color.GRAY);
                     }
                 }
                 else
                 {
-                    playPauseBtn.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp);
+                    playPauseBtn.setBackgroundResource(R.drawable.ic_fiber_manual_record_black_24dp);
                     playPauseBtn.setChecked(false);
                     Log.i(TAG,"Pause Button Clicked");
                     if (graphFragInterface.getGraphConfig().getState() != GRAPH_STATE_PAUSE) {
                         graphFragInterface.getGraphConfig().setState(GRAPH_STATE_PAUSE);
-                        saveBtn.setVisibility(View.VISIBLE);
+                        saveBtn.setEnabled(true);
+                        saveBtn.setColorFilter(Color.BLACK);
                     }
                 }
+            }
+        });
+
+        stopBtn = (ImageButton) view.findViewById(R.id.GraphStopBtn);
+        stopBtn.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+                if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP)
+                    return;
+
+                playPauseBtn.setBackgroundResource(R.drawable.ic_fiber_manual_record_black_24dp);
+                playPauseBtn.setChecked(false);
+                graphFragInterface.getGraphConfig().setState(GRAPH_STATE_STOP);
+                mChart.clearValues();
+                mChart.fitScreen();
             }
         });
 
@@ -272,6 +292,7 @@ public class GraphFragment extends Fragment {
             dataSetName3 = dataSetNames.get(2);
         }
 
+        graphFragInterface.getGraphConfig().setState(GRAPH_STATE_STOP);
         return view;
     }
 

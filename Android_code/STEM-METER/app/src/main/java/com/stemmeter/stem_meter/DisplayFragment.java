@@ -1,7 +1,9 @@
 package com.stemmeter.stem_meter;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -235,24 +237,45 @@ public class DisplayFragment extends Fragment {
 
                 @Override
                 public void onClick(View arg0) {
-                    graphName.remove(position);
 
-                    displayFragInterface.getSavedGraphDataList().remove(position);
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                            getActivity());
+                    alertDialogBuilder
+                            .setTitle("Delete entry")
+                            .setMessage("Are you sure you want to delete this entry?")
+                            .setPositiveButton("Yes",new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog,int id) {
+                                    graphName.remove(position);
 
-                    // Save the updated graph list to internal storage
-                    graphFileStorage.saveGraphFile(getActivity(),displayFragInterface.getSavedGraphDataList());
-//                    displayFragInterface.getSavedNameList().remove(position);
-//                    displayFragInterface.getSavedList().remove(position);
+                                    displayFragInterface.getSavedGraphDataList().remove(position);
 
-                    if (selectedPosition == position) {
-                        mChart.clear();
-                        selectedPosition = -1;
-                    }
+                                    // Save the updated graph list to internal storage
+                                    graphFileStorage.saveGraphFile(getActivity(),displayFragInterface.getSavedGraphDataList());
 
-                    if (position < selectedPosition)
-                        --selectedPosition;
+                                    if (selectedPosition == position) {
+                                        mChart.clear();
+                                        selectedPosition = -1;
+                                    }
 
-                    notifyDataSetChanged();
+                                    if (position < selectedPosition)
+                                        --selectedPosition;
+
+                                    notifyDataSetChanged();
+                                }
+                            })
+                            .setNegativeButton("No",new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog,int id) {
+                                    // if this button is clicked, just close
+                                    // the dialog box and do nothing
+                                    dialog.cancel();
+                                }
+                            });
+
+                    // create alert dialog
+                    AlertDialog alertDialog = alertDialogBuilder.create();
+
+                    // show it
+                    alertDialog.show();
                 }
             });
 
