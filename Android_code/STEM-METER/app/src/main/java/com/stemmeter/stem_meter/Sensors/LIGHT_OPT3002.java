@@ -95,10 +95,10 @@ public class LIGHT_OPT3002 extends Sensor {
     }
 
     @Override
-    public ArrayList<Float> getGraphData() {
-        ArrayList<Float> graphData = new ArrayList<>();
-        graphData.add(opticalPower);
-        return graphData;
+    public SensorReading getGraphData() {
+        SensorReading sensorReading= new SensorReading(this.getSensorTime());
+        sensorReading.addGraphData(opticalPower);
+        return sensorReading;
     }
 
     @Override

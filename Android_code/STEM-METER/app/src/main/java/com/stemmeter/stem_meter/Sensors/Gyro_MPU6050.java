@@ -91,12 +91,12 @@ public class Gyro_MPU6050 extends Sensor {
     }
 
     @Override
-    public ArrayList<Float> getGraphData() {
-        ArrayList<Float> graphData = new ArrayList<>();
-        graphData.add(xGyroF);
-        graphData.add(yGyroF);
-        graphData.add(zGyroF);
-        return graphData;
+    public SensorReading getGraphData() {
+        SensorReading sensorReading= new SensorReading(this.getSensorTime());
+        sensorReading.addGraphData(xGyroF);
+        sensorReading.addGraphData(yGyroF);
+        sensorReading.addGraphData(zGyroF);
+        return sensorReading;
     }
 
     @Override

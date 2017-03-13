@@ -69,10 +69,10 @@ public class Temp_MCP9808 extends Sensor {
     }
 
     @Override
-    public ArrayList<Float> getGraphData() {
-        ArrayList<Float> graphData = new ArrayList<>();
-        graphData.add(temp);
-        return graphData;
+    public SensorReading getGraphData() {
+        SensorReading sensorReading= new SensorReading(this.getSensorTime());
+        sensorReading.addGraphData(temp);
+        return sensorReading;
     }
 
     @Override

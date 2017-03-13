@@ -78,11 +78,11 @@ public class TEMP_SI7021 extends Sensor {
     }
 
     @Override
-    public ArrayList<Float> getGraphData() {
-        ArrayList<Float> graphData = new ArrayList<>();
-        graphData.add(temp);
-        graphData.add(humidity);
-        return graphData;
+    public SensorReading getGraphData() {
+        SensorReading sensorReading= new SensorReading(this.getSensorTime());
+        sensorReading.addGraphData(temp);
+        sensorReading.addGraphData(humidity);
+        return sensorReading;
     }
 
     @Override

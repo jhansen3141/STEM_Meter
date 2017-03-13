@@ -35,9 +35,9 @@ public class GraphFileStorage implements Serializable {
         colorList = new ArrayList<>();
         // If a sensor is added that has more than 5 graphable data
         // points, more colors need to be added
-        colorList.add(Color.RED);
         colorList.add(Color.BLUE);
-        colorList.add(Color.BLACK);
+        colorList.add(Color.RED);
+        colorList.add(Color.DKGRAY);
         colorList.add(Color.GREEN);
         colorList.add(Color.CYAN);
 

@@ -32,6 +32,7 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.stemmeter.stem_meter.Sensors.Sensor;
+import com.stemmeter.stem_meter.Sensors.SensorReading;
 
 import java.text.FieldPosition;
 import java.text.Format;
@@ -70,7 +71,6 @@ public class GraphFragment extends Fragment {
     //private XYPlot plot;
     private LineChart mChart;
     private ToggleButton playPauseBtn;
-    private ImageButton stopBtn;
     private ImageButton saveBtn;
     private ImageButton settingsBtn;
     private ImageButton zeroBtn;
@@ -144,7 +144,6 @@ public class GraphFragment extends Fragment {
         //leftAxis.setAxisMaximum(0);
         //leftAxis.setAxisMinimum(0);
         leftAxis.setDrawGridLines(true);
-        leftAxis.setTitle(graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1).getGraphSettings().getUnits().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition()));
 
         YAxis rightAxis = mChart.getAxisRight();
         rightAxis.setEnabled(false);
@@ -174,8 +173,6 @@ public class GraphFragment extends Fragment {
 
 
         saveBtn = (ImageButton) view.findViewById(R.id.SaveBtn);
-        saveBtn.setEnabled(false);
-        saveBtn.setColorFilter(Color.GRAY);
         saveBtn.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -199,7 +196,7 @@ public class GraphFragment extends Fragment {
                         .setCancelable(false)
                         .setPositiveButton("OK",new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog,int id) {
-                                SavedGraphData savedGraphData = new SavedGraphData(input.getText().toString(), mChart.getData(), 1, graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1).getGraphSettings().getUnits().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition()));
+                                SavedGraphData savedGraphData = new SavedGraphData(input.getText().toString(), mChart.getData(), 1, graphFragInterface.getGraphConfig().getSelectedUnitsPosition());
 
                                 graphFragInterface.getSavedGraphDataList().add(savedGraphData);
                                 graphFileStorage.saveGraphFile(getActivity(),graphFragInterface.getSavedGraphDataList());
@@ -219,10 +216,11 @@ public class GraphFragment extends Fragment {
 
                 // show it
                 alertDialog.show();
-                //LineData data = mChart.getData();
+                LineData data = mChart.getData();
             }
 
         });
+
 
         playPauseBtn = (ToggleButton) view.findViewById(R.id.PlayPauseBtn);
         playPauseBtn.setOnClickListener(new View.OnClickListener() {
@@ -237,37 +235,21 @@ public class GraphFragment extends Fragment {
                         graphFragInterface.getGraphConfig().setState(GRAPH_STATE_PLAY);
                         mChart.clearValues();
                         mChart.fitScreen();
-                        saveBtn.setEnabled(false);
-                        saveBtn.setColorFilter(Color.GRAY);
+                        saveBtn.setVisibility(View.GONE);
+                        // Zero out the x axis
+                        graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor()+1).zeroX();
                     }
                 }
                 else
                 {
-                    playPauseBtn.setBackgroundResource(R.drawable.ic_fiber_manual_record_black_24dp);
+                    playPauseBtn.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp);
                     playPauseBtn.setChecked(false);
                     Log.i(TAG,"Pause Button Clicked");
                     if (graphFragInterface.getGraphConfig().getState() != GRAPH_STATE_PAUSE) {
                         graphFragInterface.getGraphConfig().setState(GRAPH_STATE_PAUSE);
-                        saveBtn.setEnabled(true);
-                        saveBtn.setColorFilter(Color.BLACK);
+                        saveBtn.setVisibility(View.VISIBLE);
                     }
                 }
-            }
-        });
-
-        stopBtn = (ImageButton) view.findViewById(R.id.GraphStopBtn);
-        stopBtn.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View arg0) {
-                if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP)
-                    return;
-
-                playPauseBtn.setBackgroundResource(R.drawable.ic_fiber_manual_record_black_24dp);
-                playPauseBtn.setChecked(false);
-                graphFragInterface.getGraphConfig().setState(GRAPH_STATE_STOP);
-                mChart.clearValues();
-                mChart.fitScreen();
             }
         });
 
@@ -293,18 +275,24 @@ public class GraphFragment extends Fragment {
             dataSetName3 = dataSetNames.get(2);
         }
 
-        graphFragInterface.getGraphConfig().setState(GRAPH_STATE_STOP);
         return view;
     }
 
-    private void addEntry(float num1) {
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Zero out the x axis every time graph screen is shown
+        graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor()+1).zeroX();
+    }
 
-        if (num1 > (mChart.getYChartMax() - 0.5)) {
+    private void addEntry(float yValue, float xValue) {
+
+        if (yValue > (mChart.getYChartMax() - 0.5)) {
             //mChart.getAxisLeft().setAxisMaximum(num1 + (float)0.5);
             mChart.getAxisLeft().resetAxisMaximum();
         }
 
-        if (num1 < (mChart.getYChartMin() + 0.5)) {
+        if (yValue < (mChart.getYChartMin() + 0.5)) {
             //mChart.getAxisLeft().setAxisMinimum(num1 - (float)0.5);
             mChart.getAxisLeft().resetAxisMinimum();
         }
@@ -320,8 +308,8 @@ public class GraphFragment extends Fragment {
                 set = createSet(Color.BLUE, ColorTemplate.getHoloBlue(), dataSetName1);
                 data.addDataSet(set);
             }
-
-            data.addEntry(new Entry(set.getEntryCount(), num1), 0);
+            
+            data.addEntry(new Entry(xValue, yValue), 0);
 
             if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP) {
 
@@ -359,13 +347,13 @@ public class GraphFragment extends Fragment {
         }
     }
 
-    private void addEntry(float num1, float num2) {
+    private void addEntry(float yValue1, float yValue2, float xValue) {
 
         float maxValue = -9999999;
         float minValue =  9999999;
 
-        maxValue = Math.max(num1,num2);
-        minValue = Math.min(num1, num2);
+        maxValue = Math.max(yValue1,yValue2);
+        minValue = Math.min(yValue1, yValue2);
 
         if (maxValue > (mChart.getYChartMax() - 0.5)) {
             mChart.getAxisLeft().setAxisMaximum(maxValue + (float)0.5);
@@ -396,8 +384,8 @@ public class GraphFragment extends Fragment {
                 data.addDataSet(set2);
             }
 
-            data.addEntry(new Entry(set1.getEntryCount(), num1), 0);
-            data.addEntry(new Entry(set2.getEntryCount(), num2), 1);
+            data.addEntry(new Entry(xValue, yValue1), 0);
+            data.addEntry(new Entry(xValue, yValue2), 1);
 
             if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP) {
 
@@ -415,7 +403,7 @@ public class GraphFragment extends Fragment {
                 }
 
                 if (set2.getEntryCount() == graphFragInterface.getGraphConfig().getVisibleDataNum()) {
-                    data.removeEntry(0, 1);
+                    set2.removeEntry(0);
 
                     for (int i = 0; i < set2.getEntryCount(); i++) {
                         entry = set2.getEntryForIndex(i);
@@ -444,7 +432,7 @@ public class GraphFragment extends Fragment {
         }
     }
 
-    private void addEntry(float num1, float num2, float num3) {
+    private void addEntry(float yValue1, float yValue2, float yValue3, float xValue) {
         //mChart.setVisibleXRangeMaximum(10);
         //boolean firstTime = false;
         LineData data = mChart.getData();
@@ -474,14 +462,14 @@ public class GraphFragment extends Fragment {
                 data.addDataSet(set3);
             }
 
-            data.addEntry(new Entry(set1.getEntryCount(), num1), 0);
-            data.addEntry(new Entry(set2.getEntryCount(), num2), 1);
-            data.addEntry(new Entry(set3.getEntryCount(), num3), 2);
+            data.addEntry(new Entry(xValue, yValue1), 0);
+            data.addEntry(new Entry(xValue, yValue2), 1);
+            data.addEntry(new Entry(xValue, yValue3), 2);
 
             if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP) {
                 mChart.getXAxis().setEnabled(false);
                 Entry entry;
-//removing last element from the chart and finding max and min visible value
+                //removing last element from the chart and finding max and min visible value
                 if (set1.getEntryCount() == graphFragInterface.getGraphConfig().getVisibleDataNum()) {
                     set1.removeEntry(0);
 
@@ -492,7 +480,7 @@ public class GraphFragment extends Fragment {
                 }
 
                 if (set2.getEntryCount() == graphFragInterface.getGraphConfig().getVisibleDataNum()) {
-                    data.removeEntry(0, 1);
+                    set2.removeEntry(0);
 
                     for (int i = 0; i < set2.getEntryCount(); i++) {
                         entry = set2.getEntryForIndex(i);
@@ -501,7 +489,7 @@ public class GraphFragment extends Fragment {
                 }
 
                 if (set3.getEntryCount() == graphFragInterface.getGraphConfig().getVisibleDataNum()) {
-                    data.removeEntry(0, 2);
+                    set3.removeEntry(0);
 
                     for (int i = 0; i < set3.getEntryCount(); i++) {
                         entry = set3.getEntryForIndex(i);
@@ -509,21 +497,22 @@ public class GraphFragment extends Fragment {
                     }
                 }
             }
-            else
+            else {
                 mChart.getXAxis().setEnabled(true);
+            }
 
             data.notifyDataChanged();
 
             float maxValue = -9999999;
             float minValue =  9999999;
 
-            maxValue = Math.max(num1,num2);
-            if (num3 > maxValue)
-                maxValue = num3;
+            maxValue = Math.max(yValue1,yValue2);
+            if (yValue3 > maxValue)
+                maxValue = yValue3;
 
-            minValue = Math.min(num1, num2);
-            if (num3 < minValue)
-                minValue = num3;
+            minValue = Math.min(yValue1, yValue2);
+            if (yValue3 < minValue)
+                minValue = yValue3;
 
             if (maxValue > (mChart.getYChartMax() - 0.5)) {
                 mChart.getAxisLeft().setAxisMaximum(maxValue + (float)0.5);
@@ -617,7 +606,7 @@ public class GraphFragment extends Fragment {
     }
 
 
-    public void addGraphEntry(ArrayList<Float> sensorDataList, int numberDataPoints) {
+    public void addGraphEntry(SensorReading sensorReading, int numberDataPoints) {
 
         if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_PAUSE )
             return;
@@ -626,31 +615,31 @@ public class GraphFragment extends Fragment {
         {
             case 1:
                 if (graphFragInterface.getGraphConfig().getDataPoints().get(0))
-                    addEntry(sensorDataList.get(0));
+                    addEntry(sensorReading.getGraphData().get(0), sensorReading.getSensorReadingTime());
                 break;
             case 2:
                 if (graphFragInterface.getGraphConfig().getDataPoints().get(0) && graphFragInterface.getGraphConfig().getDataPoints().get(1))
-                    addEntry(sensorDataList.get(0), sensorDataList.get(1));
+                    addEntry(sensorReading.getGraphData().get(0), sensorReading.getGraphData().get(1), sensorReading.getSensorReadingTime());
                 else if (graphFragInterface.getGraphConfig().getDataPoints().get(0))
-                    addEntry(sensorDataList.get(0));
+                    addEntry(sensorReading.getGraphData().get(0), sensorReading.getSensorReadingTime());
                 else if (graphFragInterface.getGraphConfig().getDataPoints().get(1))
-                    addEntry(sensorDataList.get(1));
+                    addEntry(sensorReading.getGraphData().get(1), sensorReading.getSensorReadingTime());
                 break;
             case 3:
                 if (graphFragInterface.getGraphConfig().getDataPoints().get(0) && graphFragInterface.getGraphConfig().getDataPoints().get(1) && graphFragInterface.getGraphConfig().getDataPoints().get(2))
-                    addEntry(sensorDataList.get(0), sensorDataList.get(1), sensorDataList.get(2));
+                    addEntry(sensorReading.getGraphData().get(0), sensorReading.getGraphData().get(1), sensorReading.getGraphData().get(2), sensorReading.getSensorReadingTime());
                 else if (!graphFragInterface.getGraphConfig().getDataPoints().get(0) && graphFragInterface.getGraphConfig().getDataPoints().get(1) && graphFragInterface.getGraphConfig().getDataPoints().get(2))
-                    addEntry(sensorDataList.get(1), sensorDataList.get(2));
+                    addEntry(sensorReading.getGraphData().get(1), sensorReading.getGraphData().get(2), sensorReading.getSensorReadingTime());
                 else if (graphFragInterface.getGraphConfig().getDataPoints().get(0) && !graphFragInterface.getGraphConfig().getDataPoints().get(1) && graphFragInterface.getGraphConfig().getDataPoints().get(2))
-                    addEntry(sensorDataList.get(0), sensorDataList.get(2));
+                    addEntry(sensorReading.getGraphData().get(0), sensorReading.getGraphData().get(2), sensorReading.getSensorReadingTime());
                 else if (!graphFragInterface.getGraphConfig().getDataPoints().get(0) && !graphFragInterface.getGraphConfig().getDataPoints().get(1) && graphFragInterface.getGraphConfig().getDataPoints().get(2))
-                    addEntry(sensorDataList.get(2));
+                    addEntry(sensorReading.getGraphData().get(2), sensorReading.getSensorReadingTime());
                 else if (graphFragInterface.getGraphConfig().getDataPoints().get(0) && graphFragInterface.getGraphConfig().getDataPoints().get(1) && !graphFragInterface.getGraphConfig().getDataPoints().get(2))
-                    addEntry(sensorDataList.get(0), sensorDataList.get(1));
+                    addEntry(sensorReading.getGraphData().get(0), sensorReading.getGraphData().get(1), sensorReading.getSensorReadingTime());
                 else if (!graphFragInterface.getGraphConfig().getDataPoints().get(0) && graphFragInterface.getGraphConfig().getDataPoints().get(1) && !graphFragInterface.getGraphConfig().getDataPoints().get(2))
-                    addEntry(sensorDataList.get(1));
+                    addEntry(sensorReading.getGraphData().get(1), sensorReading.getSensorReadingTime());
                 else if (graphFragInterface.getGraphConfig().getDataPoints().get(0) && !graphFragInterface.getGraphConfig().getDataPoints().get(1) && !graphFragInterface.getGraphConfig().getDataPoints().get(2))
-                    addEntry(sensorDataList.get(0));
+                    addEntry(sensorReading.getGraphData().get(0), sensorReading.getSensorReadingTime());
                 break;
         }
     }

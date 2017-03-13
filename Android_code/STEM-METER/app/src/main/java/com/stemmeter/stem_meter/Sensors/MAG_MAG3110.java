@@ -92,12 +92,12 @@ public class MAG_MAG3110 extends Sensor {
     }
 
     @Override
-    public ArrayList<Float> getGraphData() {
-        ArrayList<Float> graphData = new ArrayList<>();
-        graphData.add(xMagF);
-        graphData.add(yMagF);
-        graphData.add(zMagF);
-        return graphData;
+    public SensorReading getGraphData() {
+        SensorReading sensorReading= new SensorReading(this.getSensorTime());
+        sensorReading.addGraphData(xMagF);
+        sensorReading.addGraphData(yMagF);
+        sensorReading.addGraphData(zMagF);
+        return sensorReading;
     }
 
     @Override
