@@ -22,6 +22,7 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.Legend;
@@ -58,6 +59,7 @@ public class DisplayFragment extends Fragment {
     private LineChart mChart;
     private GraphFileStorage graphFileStorage;
     private String TAG = "DisplayFragTag";
+    private String units;
     //@Override
     //public void onActivityCreated(Bundle savedInstanceState) {
     //    super.onActivityCreated(savedInstanceState);
@@ -153,7 +155,7 @@ public class DisplayFragment extends Fragment {
         }
     }
 
-    private void addEntry(LineData data) {
+    private void addEntry(LineData data, int position) {
 
 
             mChart.setData(data);
@@ -163,6 +165,9 @@ public class DisplayFragment extends Fragment {
 
             mChart.getAxisLeft().resetAxisMinimum();
             mChart.getAxisLeft().resetAxisMaximum();
+            mChart.getAxisLeft().setTitle(displayFragInterface.getSavedGraphDataList().get(position).getUnits());
+
+            mChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
 
             // let the chart know it's data has changed
             mChart.notifyDataSetChanged();
@@ -225,11 +230,23 @@ public class DisplayFragment extends Fragment {
         public View getView(final int position, View convertView, ViewGroup parent) {
             final TextView dataNameText;
             final ImageButton deleteBtn;
+            final ImageButton cameraBtn;
 
             if (convertView == null) {
                 // if the view is null then inflate the custom item layout
                 convertView = mInflater.inflate(R.layout.data_list_item, null);
             }
+
+
+            cameraBtn = (ImageButton) convertView.findViewById(R.id.CamBtn);
+            cameraBtn.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View arg0) {
+                    mChart.saveToGallery(graphName.get(position),50);
+                    Toast.makeText(getActivity().getApplicationContext(), "Graph " + "\"" + graphName.get(position) + "\"" + " saved to Gallery!", Toast.LENGTH_LONG).show();
+                }
+            });
 
             dataNameText = (TextView) convertView.findViewById(R.id.dataNameTextView);
             deleteBtn = (ImageButton) convertView.findViewById(R.id.DeleteBtn);
@@ -280,7 +297,7 @@ public class DisplayFragment extends Fragment {
             });
 
             if (position == selectedPosition)
-                convertView.setBackgroundColor(Color.BLUE);
+                convertView.setBackgroundColor(SensorConst.SELECTION_COLOR);
             else
                 convertView.setBackgroundColor(Color.WHITE);
 
@@ -291,7 +308,7 @@ public class DisplayFragment extends Fragment {
 
                 @Override
                 public void onClick(View arg0) {
-                    addEntry(displayFragInterface.getSavedGraphDataList().get(position).getData());
+                    addEntry(displayFragInterface.getSavedGraphDataList().get(position).getData(), position);
                     Log.i(TAG, "Graph List Item clicked");
                     selectedPosition = position;
                     notifyDataSetChanged();
