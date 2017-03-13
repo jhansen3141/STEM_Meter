@@ -100,12 +100,13 @@ public class Accel_MPU6050 extends Sensor {
     }
 
     @Override
-    public ArrayList<Float> getGraphData() {
-        ArrayList<Float> graphData = new ArrayList<>();
-        graphData.add(xAccelF);
-        graphData.add(yAccelF);
-        graphData.add(zAccelF);
-        return graphData;
+    public SensorReading getGraphData() {
+        SensorReading sensorReading= new SensorReading(this.getSensorTime());
+
+        sensorReading.addGraphData(xAccelF);
+        sensorReading.addGraphData(yAccelF);
+        sensorReading.addGraphData(zAccelF);
+        return sensorReading;
     }
 
     @Override

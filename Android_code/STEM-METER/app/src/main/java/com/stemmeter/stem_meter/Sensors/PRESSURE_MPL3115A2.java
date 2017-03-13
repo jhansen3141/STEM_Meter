@@ -108,11 +108,11 @@ public class PRESSURE_MPL3115A2 extends Sensor {
     }
 
     @Override
-    public ArrayList<Float> getGraphData() {
-        ArrayList<Float> graphData = new ArrayList<>();
-        graphData.add(airPressure);
-        graphData.add((float)altitude);
-        return graphData;
+    public SensorReading getGraphData() {
+        SensorReading sensorReading= new SensorReading(this.getSensorTime());
+        sensorReading.addGraphData(airPressure);
+        sensorReading.addGraphData((float) altitude);
+        return sensorReading;
     }
 
     @Override

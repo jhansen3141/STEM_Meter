@@ -1,6 +1,9 @@
 package com.stemmeter.stem_meter.Sensors;
 
+import android.util.Log;
+
 import com.stemmeter.stem_meter.GraphSettings;
+import com.stemmeter.stem_meter.SensorConst;
 
 import java.util.ArrayList;
 
@@ -15,6 +18,7 @@ public abstract class Sensor {
     private int sensorRate;
     private int color;
     private int numberDataPoints;
+    private int syncNumberOffset = 0;
 
     public Sensor(byte data[], int sensorNumber, int numberDataPoints) {
         this.numberDataPoints = numberDataPoints;
@@ -35,7 +39,53 @@ public abstract class Sensor {
         syncNumber = (((data[2] & 0xFF)<<16) | ((data[3] & 0xFF)<<8) | (data[4] & 0xFF));
     }
     public int getSyncNumber() {
-        return syncNumber;
+        return syncNumber - syncNumberOffset;
+    }
+
+    public void zeroX() {
+        syncNumberOffset = syncNumber;
+    }
+
+    public float getSensorTime() {
+        float rateMult = 0;
+
+        switch(sensorRate) {
+            case SensorConst.RATE_OFF:
+                rateMult = 0;
+                break;
+            case SensorConst.RATE_FIVE_HZ:
+                rateMult = 0.2f;
+                break;
+            case SensorConst.RATE_TEN_HZ:
+                rateMult = 0.1f;
+                break;
+            case SensorConst.RATE_ONE_SEC:
+                rateMult = 1.0f;
+                break;
+            case SensorConst.RATE_FIVE_SEC:
+                rateMult = 5.0f;
+                break;
+            case SensorConst.RATE_TEN_SEC:
+                rateMult = 10.0f;
+                break;
+            case SensorConst.RATE_THIRTY_SEC:
+                rateMult = 30.0f;
+                break;
+            case SensorConst.RATE_ONE_MIN:
+                rateMult = 60.0f;
+                break;
+            case SensorConst.RATE_TEN_MIN:
+                rateMult = 60.0f * 10;
+                break;
+            case SensorConst.RATE_THIRTY_MIN:
+                rateMult = 60.0f * 30;
+                break;
+            case SensorConst.RATE_ONE_HOUR:
+                rateMult = 60.0f * 60;
+                break;
+        }
+
+        return ( (float)getSyncNumber() * rateMult );
     }
 
     public int getSensorRate() {
@@ -56,7 +106,7 @@ public abstract class Sensor {
 
     public abstract String[] calcSensorData();
 
-    public abstract ArrayList<Float> getGraphData();
+    public abstract SensorReading getGraphData();
 
     public abstract GraphSettings getGraphSettings();
 

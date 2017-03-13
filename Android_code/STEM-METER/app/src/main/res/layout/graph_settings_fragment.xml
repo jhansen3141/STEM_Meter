@@ -9,7 +9,7 @@
         android:layout_gravity="center_horizontal"
         android:textSize="20sp"
         android:layout_width="wrap_content"
-        android:text="Select Number of Visible Data Points"
+        android:text="Select Number of Visible Seconds"
         android:layout_height="wrap_content"
         />
 
