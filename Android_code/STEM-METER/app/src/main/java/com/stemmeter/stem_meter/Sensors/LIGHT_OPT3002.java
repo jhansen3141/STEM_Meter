@@ -14,9 +14,9 @@ import java.util.ArrayList;
  */
 public class LIGHT_OPT3002 extends Sensor {
     private String[] sensorStringArray;
-    private float opticalPower;
+    private double opticalPower;
 
-    private float opticalPowerZero = 0;
+    private double opticalPowerZero = 0.0;
     private boolean shouldZero = false;
 
     private GraphSettings graphSettings;
@@ -59,7 +59,7 @@ public class LIGHT_OPT3002 extends Sensor {
             Log.i("LightSensor", "String format incorrect");
         }
 
-        opticalPower = Float.parseFloat(dataStr[0]);
+        opticalPower = Double.parseDouble(dataStr[0]);
 
         if(shouldZero) {
             opticalPowerZero = -(opticalPower);
@@ -72,7 +72,7 @@ public class LIGHT_OPT3002 extends Sensor {
         switch(units) {
             // Lux
             case SensorConst.LIGHT_UNIT_LUX:
-                opticalPower *= 6.83f;
+                opticalPower *= 6.83;
                 break;
         }
 
@@ -97,7 +97,7 @@ public class LIGHT_OPT3002 extends Sensor {
     @Override
     public SensorReading getGraphData() {
         SensorReading sensorReading= new SensorReading(this.getSensorTime());
-        sensorReading.addGraphData(opticalPower);
+        sensorReading.addGraphData((float)opticalPower);
         return sensorReading;
     }
 

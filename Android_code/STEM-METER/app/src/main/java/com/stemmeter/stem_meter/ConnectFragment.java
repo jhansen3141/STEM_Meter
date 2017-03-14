@@ -32,12 +32,13 @@ public class ConnectFragment extends ListFragment {
     ConnectFragInterface connectFragInterface;
     private TextView connectTextView;
     private ScanListAdapter scanListAdapter;
-
+    private GraphFileStorage graphFileStorage;
 
     // Container Activity must implement this interface
     public interface ConnectFragInterface {
-        public void BoardConnect(BluetoothDevice device);
-        public void BLEScan();
+        void BoardConnect(BluetoothDevice device);
+        void BLEScan();
+        void setSavedGraphDataList(ArrayList<SavedGraphData> savedGraphData);
     }
 
     @Override
@@ -51,6 +52,8 @@ public class ConnectFragment extends ListFragment {
         super.onActivityCreated(savedInstanceState);
         scanListAdapter = new ScanListAdapter();
         setListAdapter(scanListAdapter);
+        graphFileStorage = new GraphFileStorage();
+        connectFragInterface.setSavedGraphDataList(graphFileStorage.readGraphFiles(getActivity()));
     }
 
     @Override
@@ -109,6 +112,7 @@ public class ConnectFragment extends ListFragment {
     private class ScanListAdapter extends BaseAdapter {
 
         private ArrayList<BLEDevice> bleDeviceList = new ArrayList<BLEDevice>();
+        private ArrayList<Integer> displayCounter = new ArrayList<>();
         private LayoutInflater mInflater;
 
         public ScanListAdapter() {
@@ -117,16 +121,24 @@ public class ConnectFragment extends ListFragment {
 
         public void addItem(final BLEDevice item) {
             bleDeviceList.add(item);
+            displayCounter.add(0);
             notifyDataSetChanged();
         }
 
         public void clearList( ) {
             bleDeviceList.clear();
+            displayCounter.clear();
         }
 
         public void updateItem(final int index, final BLEDevice item) {
-            bleDeviceList.set(index,item);
-            notifyDataSetChanged();
+            int previousValue = displayCounter.get(index);
+            previousValue++;
+            displayCounter.set(index, previousValue);
+            if(previousValue > 5) {
+                displayCounter.set(index,0);
+                bleDeviceList.set(index,item);
+                notifyDataSetChanged();
+            }
         }
 
         @Override
