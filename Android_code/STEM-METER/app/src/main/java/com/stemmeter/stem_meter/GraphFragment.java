@@ -409,8 +409,9 @@ public class GraphFragment extends Fragment {
                     }
                 }
             }
-            else
+            else {
                 mChart.getXAxis().setEnabled(true);
+            }
 
             data.notifyDataChanged();
 
