@@ -71,4 +71,6 @@ public final class SensorConst {
     public static final int PRESSURE_DP_ALT = 1;
 
     public static final int SELECTION_COLOR = Color.rgb(66, 215, 244); // Light blue
+
+    public static final int SCAN_TIME_MS = 30000; // 30 second scan time
 }

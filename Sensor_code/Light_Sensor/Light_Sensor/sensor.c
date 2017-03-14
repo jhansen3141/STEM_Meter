@@ -62,8 +62,8 @@ void readSensor(sensorData_t *data) {
 	uint16_t rawData;
 	int16_t exponent;
 	int16_t mantissa;
-	float multiplier; 
-	float fOpticalPower;
+	double multiplier; 
+	double fOpticalPower;
 	char tempStr[15];
 
 	
@@ -81,11 +81,11 @@ void readSensor(sensorData_t *data) {
 	mantissa = rawData & 0x0FFF;
 	
 	
-	multiplier = (uint16_t)(1<<exponent) * mantissa ;
+	multiplier = (uint32_t)(1<<exponent) * mantissa ;
 	
 	// optical power = 
 	// 2^(B15:B12) * (B11:B0) * 1.2 nW/cm^2
-	fOpticalPower = (float)multiplier * 1.2f;
+	fOpticalPower = (double)multiplier * 1.2f;
 		
 	
 	sprintf(tempStr,"%.1f\n",fOpticalPower);

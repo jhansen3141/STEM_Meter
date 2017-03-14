@@ -63,7 +63,6 @@ public class GraphFragment extends Fragment {
         ArrayList<SavedGraphData> getSavedGraphDataList();
         GraphConfig getGraphConfig();
         Sensor getSensor(int sensorNumber);
-        void setSavedGraphDataList(ArrayList<SavedGraphData> savedGraphData);
     }
 
     GraphFragInterface graphFragInterface;
@@ -90,7 +89,6 @@ public class GraphFragment extends Fragment {
         final View view = inflater.inflate(R.layout.graph_fragment, container, false);
 
         graphFileStorage = new GraphFileStorage();
-        graphFragInterface.setSavedGraphDataList(graphFileStorage.readGraphFiles(getActivity()));
 
         //plot = (XYPlot) view.findViewById(plot);
         mChart = (LineChart) view.findViewById(chart);
