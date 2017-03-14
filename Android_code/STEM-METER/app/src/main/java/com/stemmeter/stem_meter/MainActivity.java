@@ -121,6 +121,7 @@ public class MainActivity extends AppCompatActivity
     private Menu mainMenu;
 
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
+    private static final int PERMISSION_REQUEST_WRITE_EXTERNAL = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -173,6 +174,21 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onDismiss(DialogInterface dialogInterface) {
                         requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION);
+                    }
+                });
+                builder.show();
+            }
+            if(this.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+            {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("This app needs external write acess");
+                builder.setMessage("Please grant external write access so this app can save graph images to gallery.");
+                builder.setPositiveButton(android.R.string.ok, null);
+                builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @TargetApi(23)
+                    @Override
+                    public void onDismiss(DialogInterface dialogInterface) {
+                        requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_WRITE_EXTERNAL);
                     }
                 });
                 builder.show();

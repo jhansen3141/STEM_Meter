@@ -167,10 +167,10 @@ public class GraphFileStorage implements Serializable {
         private String fileName;
         private String name;
         private int rate;
-        private int units;
+        private String units;
 
 
-        private GraphPlot(String name,String fileName, int rate, int units) {
+        private GraphPlot(String name,String fileName, int rate, String units) {
             graphEntries = new ArrayList<>();
             this.fileName = fileName;
             this.name = name;
@@ -194,7 +194,7 @@ public class GraphFileStorage implements Serializable {
             return rate;
         }
 
-        public int getUnits() {
+        public String getUnits() {
             return units;
         }
 

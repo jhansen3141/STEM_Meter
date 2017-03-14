@@ -70,6 +70,7 @@ public class GraphFragment extends Fragment {
     //private XYPlot plot;
     private LineChart mChart;
     private ToggleButton playPauseBtn;
+    private ImageButton stopBtn;
     private ImageButton saveBtn;
     private ImageButton settingsBtn;
     private ImageButton zeroBtn;
@@ -77,6 +78,7 @@ public class GraphFragment extends Fragment {
     private String dataSetName1;
     private String dataSetName2;
     private String dataSetName3;
+    private Sensor selectedSensor;
 
     private GraphFileStorage graphFileStorage;
 
@@ -135,6 +137,7 @@ public class GraphFragment extends Fragment {
         xl.setAvoidFirstLastClipping(true);
         xl.setEnabled(true);
         xl.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xl.setTitle("Seconds");
 
         YAxis leftAxis = mChart.getAxisLeft();
         leftAxis.setTypeface(Typeface.DEFAULT);
@@ -142,6 +145,7 @@ public class GraphFragment extends Fragment {
         //leftAxis.setAxisMaximum(0);
         //leftAxis.setAxisMinimum(0);
         leftAxis.setDrawGridLines(true);
+        leftAxis.setTitle(graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1).getGraphSettings().getUnits().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition()));
 
         YAxis rightAxis = mChart.getAxisRight();
         rightAxis.setEnabled(false);
@@ -171,6 +175,8 @@ public class GraphFragment extends Fragment {
 
 
         saveBtn = (ImageButton) view.findViewById(R.id.SaveBtn);
+        saveBtn.setEnabled(false);
+        saveBtn.setColorFilter(Color.GRAY);
         saveBtn.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -194,7 +200,7 @@ public class GraphFragment extends Fragment {
                         .setCancelable(false)
                         .setPositiveButton("OK",new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog,int id) {
-                                SavedGraphData savedGraphData = new SavedGraphData(input.getText().toString(), mChart.getData(), 1, graphFragInterface.getGraphConfig().getSelectedUnitsPosition());
+                                SavedGraphData savedGraphData = new SavedGraphData(input.getText().toString(), mChart.getData(), 1, graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1).getGraphSettings().getUnits().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition()));
 
                                 graphFragInterface.getSavedGraphDataList().add(savedGraphData);
                                 graphFileStorage.saveGraphFile(getActivity(),graphFragInterface.getSavedGraphDataList());
@@ -214,7 +220,7 @@ public class GraphFragment extends Fragment {
 
                 // show it
                 alertDialog.show();
-                LineData data = mChart.getData();
+                //LineData data = mChart.getData();
             }
 
         });
@@ -233,21 +239,39 @@ public class GraphFragment extends Fragment {
                         graphFragInterface.getGraphConfig().setState(GRAPH_STATE_PLAY);
                         mChart.clearValues();
                         mChart.fitScreen();
-                        saveBtn.setVisibility(View.GONE);
+                        saveBtn.setEnabled(false);
+                        saveBtn.setColorFilter(Color.GRAY);
                         // Zero out the x axis
                         graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor()+1).zeroX();
                     }
                 }
                 else
                 {
-                    playPauseBtn.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp);
+                    playPauseBtn.setBackgroundResource(R.drawable.ic_fiber_manual_record_black_24dp);
                     playPauseBtn.setChecked(false);
                     Log.i(TAG,"Pause Button Clicked");
                     if (graphFragInterface.getGraphConfig().getState() != GRAPH_STATE_PAUSE) {
                         graphFragInterface.getGraphConfig().setState(GRAPH_STATE_PAUSE);
-                        saveBtn.setVisibility(View.VISIBLE);
+                        saveBtn.setEnabled(true);
+                        saveBtn.setColorFilter(Color.BLACK);
                     }
                 }
+            }
+        });
+
+        stopBtn = (ImageButton) view.findViewById(R.id.GraphStopBtn);
+        stopBtn.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+                if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP)
+                    return;
+
+                playPauseBtn.setBackgroundResource(R.drawable.ic_fiber_manual_record_black_24dp);
+                playPauseBtn.setChecked(false);
+                graphFragInterface.getGraphConfig().setState(GRAPH_STATE_STOP);
+                mChart.clearValues();
+                mChart.fitScreen();
             }
         });
 
@@ -273,6 +297,8 @@ public class GraphFragment extends Fragment {
             dataSetName3 = dataSetNames.get(2);
         }
 
+        selectedSensor = graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1);
+        graphFragInterface.getGraphConfig().setState(GRAPH_STATE_STOP);
         return view;
     }
 
@@ -280,7 +306,7 @@ public class GraphFragment extends Fragment {
     public void onResume() {
         super.onResume();
         // Zero out the x axis every time graph screen is shown
-        graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor()+1).zeroX();
+        selectedSensor.zeroX();
     }
 
     private void addEntry(float yValue, float xValue) {
@@ -306,7 +332,10 @@ public class GraphFragment extends Fragment {
                 set = createSet(Color.BLUE, ColorTemplate.getHoloBlue(), dataSetName1);
                 data.addDataSet(set);
             }
-            
+
+            if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP && (xValue > (graphFragInterface.getGraphConfig().getVisibleDataNum() * selectedSensor.getRateMult())))
+                xValue = graphFragInterface.getGraphConfig().getVisibleDataNum() * selectedSensor.getRateMult();
+
             data.addEntry(new Entry(xValue, yValue), 0);
 
             if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP) {
@@ -320,7 +349,7 @@ public class GraphFragment extends Fragment {
 
                     for (int i = 0; i < set.getEntryCount(); i++) {
                         entry = set.getEntryForIndex(i);
-                        entry.setX(entry.getX() - 1);
+                        entry.setX(entry.getX() - selectedSensor.getRateMult());
                     }
                 }
             }
@@ -333,11 +362,12 @@ public class GraphFragment extends Fragment {
             mChart.notifyDataSetChanged();
 
             // limit the number of visible entries
-            mChart.setVisibleXRangeMaximum(graphFragInterface.getGraphConfig().getVisibleDataNum());
+            mChart.setVisibleXRangeMaximum(graphFragInterface.getGraphConfig().getVisibleDataNum() * selectedSensor.getRateMult());
+            //Log.i(TAG, String.valueOf(graphFragInterface.getGraphConfig().getVisibleDataNum()));
             // mChart.setVisibleYRange(30, AxisDependency.LEFT);
 
             // move to the latest entry
-            mChart.moveViewToX(data.getEntryCount());
+            mChart.moveViewToX(xValue);
 
             // this automatically refreshes the chart (calls invalidate())
             // mChart.moveViewTo(data.getXValCount()-7, 55f,
@@ -382,6 +412,9 @@ public class GraphFragment extends Fragment {
                 data.addDataSet(set2);
             }
 
+            if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP && (xValue > (graphFragInterface.getGraphConfig().getVisibleDataNum() * selectedSensor.getRateMult())))
+                xValue = graphFragInterface.getGraphConfig().getVisibleDataNum() * selectedSensor.getRateMult();
+
             data.addEntry(new Entry(xValue, yValue1), 0);
             data.addEntry(new Entry(xValue, yValue2), 1);
 
@@ -396,7 +429,7 @@ public class GraphFragment extends Fragment {
 
                     for (int i = 0; i < set1.getEntryCount(); i++) {
                         entry = set1.getEntryForIndex(i);
-                        entry.setX(entry.getX() - 1);
+                        entry.setX(entry.getX() - selectedSensor.getRateMult());
                     }
                 }
 
@@ -405,7 +438,7 @@ public class GraphFragment extends Fragment {
 
                     for (int i = 0; i < set2.getEntryCount(); i++) {
                         entry = set2.getEntryForIndex(i);
-                        entry.setX(entry.getX() - 1);
+                        entry.setX(entry.getX() - selectedSensor.getRateMult());
                     }
                 }
             }
@@ -419,11 +452,11 @@ public class GraphFragment extends Fragment {
             mChart.notifyDataSetChanged();
 
             // limit the number of visible entries
-            mChart.setVisibleXRangeMaximum(graphFragInterface.getGraphConfig().getVisibleDataNum());
+            mChart.setVisibleXRangeMaximum(graphFragInterface.getGraphConfig().getVisibleDataNum() * selectedSensor.getRateMult());
             // mChart.setVisibleYRange(30, AxisDependency.LEFT);
 
             // move to the latest entry
-            mChart.moveViewToX(data.getEntryCount());
+            mChart.moveViewToX(xValue);
 
             // this automatically refreshes the chart (calls invalidate())
             // mChart.moveViewTo(data.getXValCount()-7, 55f,
@@ -461,6 +494,9 @@ public class GraphFragment extends Fragment {
                 data.addDataSet(set3);
             }
 
+            if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP && (xValue > (graphFragInterface.getGraphConfig().getVisibleDataNum() * selectedSensor.getRateMult())))
+                xValue = graphFragInterface.getGraphConfig().getVisibleDataNum() * selectedSensor.getRateMult();
+
             data.addEntry(new Entry(xValue, yValue1), 0);
             data.addEntry(new Entry(xValue, yValue2), 1);
             data.addEntry(new Entry(xValue, yValue3), 2);
@@ -474,7 +510,7 @@ public class GraphFragment extends Fragment {
 
                     for (int i = 0; i < set1.getEntryCount(); i++) {
                         entry = set1.getEntryForIndex(i);
-                        entry.setX(entry.getX() - 1);
+                        entry.setX(entry.getX() - selectedSensor.getRateMult());
                     }
                 }
 
@@ -483,7 +519,7 @@ public class GraphFragment extends Fragment {
 
                     for (int i = 0; i < set2.getEntryCount(); i++) {
                         entry = set2.getEntryForIndex(i);
-                        entry.setX(entry.getX() - 1);
+                        entry.setX(entry.getX() - selectedSensor.getRateMult());
                     }
                 }
 
@@ -492,7 +528,7 @@ public class GraphFragment extends Fragment {
 
                     for (int i = 0; i < set3.getEntryCount(); i++) {
                         entry = set3.getEntryForIndex(i);
-                        entry.setX(entry.getX() - 1);
+                        entry.setX(entry.getX() - selectedSensor.getRateMult());
                     }
                 }
             }
@@ -528,11 +564,11 @@ public class GraphFragment extends Fragment {
             //mChart.invalidate();
 
             // limit the number of visible entries
-            mChart.setVisibleXRangeMaximum(graphFragInterface.getGraphConfig().getVisibleDataNum());
+            mChart.setVisibleXRangeMaximum(graphFragInterface.getGraphConfig().getVisibleDataNum() * selectedSensor.getRateMult());
             // mChart.setVisibleYRange(30, AxisDependency.LEFT);
 
             // move to the latest entry
-            mChart.moveViewToX(data.getEntryCount());
+            mChart.moveViewToX(xValue);
 
             // this automatically refreshes the chart (calls invalidate())
             // mChart.moveViewTo(data.getXValCount()-7, 55f,
