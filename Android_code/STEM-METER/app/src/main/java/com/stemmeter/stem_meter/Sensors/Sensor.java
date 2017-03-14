@@ -19,6 +19,7 @@ public abstract class Sensor {
     private int color;
     private int numberDataPoints;
     private int syncNumberOffset = 0;
+    private float rateMult;
 
     public Sensor(byte data[], int sensorNumber, int numberDataPoints) {
         this.numberDataPoints = numberDataPoints;
@@ -47,7 +48,7 @@ public abstract class Sensor {
     }
 
     public float getSensorTime() {
-        float rateMult = 0;
+        rateMult = 0;
 
         switch(sensorRate) {
             case SensorConst.RATE_OFF:
@@ -119,4 +120,6 @@ public abstract class Sensor {
     public int getNumberDataPoints() {
         return numberDataPoints;
     }
+
+    public float getRateMult() { return rateMult; }
 }
