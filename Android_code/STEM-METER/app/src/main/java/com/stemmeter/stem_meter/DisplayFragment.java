@@ -50,20 +50,13 @@ public class DisplayFragment extends Fragment {
 
     // Container Activity must implement this interface
     public interface DisplayFragInterface {
-//        public ArrayList<LineData> getSavedList();
-//        public ArrayList<String> getSavedNameList();
-        public ArrayList<SavedGraphData> getSavedGraphDataList();
-        public void setSavedGraphDataList(ArrayList<SavedGraphData> savedGraphData);
+        ArrayList<SavedGraphData> getSavedGraphDataList();
+        void setSavedGraphDataList(ArrayList<SavedGraphData> savedGraphData);
     }
 
     private LineChart mChart;
     private GraphFileStorage graphFileStorage;
     private String TAG = "DisplayFragTag";
-    private String units;
-    //@Override
-    //public void onActivityCreated(Bundle savedInstanceState) {
-    //    super.onActivityCreated(savedInstanceState);
-    //}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -84,8 +77,7 @@ public class DisplayFragment extends Fragment {
 
         // set an alternative background color
         mChart.setBackgroundColor(Color.WHITE);
-
-
+        
         // get the legend (only possible after setting data)
         Legend l = mChart.getLegend();
 
@@ -144,7 +136,6 @@ public class DisplayFragment extends Fragment {
     }
 
     private void addEntry(LineData data, int position) {
-
 
             mChart.setData(data);
             data.notifyDataChanged();

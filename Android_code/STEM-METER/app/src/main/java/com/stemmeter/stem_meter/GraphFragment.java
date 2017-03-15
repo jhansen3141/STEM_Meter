@@ -562,7 +562,7 @@ public class GraphFragment extends Fragment {
         set.setColor(color);
         set.setCircleColor(circleColor);
         set.setLineWidth(2f);
-        set.setCircleRadius(4f);
+        set.setCircleRadius(2f);
         set.setFillAlpha(65);
         set.setFillColor(color);
         set.setHighLightColor(Color.rgb(244, 117, 117));
