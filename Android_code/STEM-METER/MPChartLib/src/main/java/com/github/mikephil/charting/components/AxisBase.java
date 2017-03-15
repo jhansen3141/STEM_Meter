@@ -153,7 +153,6 @@ public abstract class AxisBase extends ComponentBase {
     private String title = "";
 
     /*
-    * default constructor
      */
     public AxisBase() {
         this.mTextSize = Utils.convertDpToPixel(10f);

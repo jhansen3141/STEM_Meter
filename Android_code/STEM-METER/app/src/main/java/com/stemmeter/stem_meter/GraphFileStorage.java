@@ -84,6 +84,9 @@ public class GraphFileStorage implements Serializable {
         } catch (IOException e) {
             Log.i(TAG, "IO Exception while reading: " + e);
             return null;
+        } catch (IllegalArgumentException e) {
+            Log.i(TAG,"IllegalArgument:" + e);
+            return null;
         }
 
 
