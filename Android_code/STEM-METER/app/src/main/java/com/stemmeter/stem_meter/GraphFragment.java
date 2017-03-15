@@ -73,7 +73,6 @@ public class GraphFragment extends Fragment {
     private ImageButton saveBtn;
     private ImageButton settingsBtn;
     private ImageButton zeroBtn;
-    private long currentIndex = 0;
     private String dataSetName1;
     private String dataSetName2;
     private String dataSetName3;
@@ -285,16 +284,6 @@ public class GraphFragment extends Fragment {
 
     private void addEntry(float yValue, float xValue) {
 
-        if (yValue > (mChart.getYChartMax() - 0.5)) {
-            //mChart.getAxisLeft().setAxisMaximum(num1 + (float)0.5);
-            mChart.getAxisLeft().resetAxisMaximum();
-        }
-
-        if (yValue < (mChart.getYChartMin() + 0.5)) {
-            //mChart.getAxisLeft().setAxisMinimum(num1 - (float)0.5);
-            mChart.getAxisLeft().resetAxisMinimum();
-        }
-
         LineData data = mChart.getData();
 
         if (data != null) {
@@ -324,8 +313,17 @@ public class GraphFragment extends Fragment {
                     }
                 }
             }
-            else
+            else {
                 mChart.getXAxis().setEnabled(true);
+            }
+
+            if (yValue > (mChart.getYChartMax() - 0.5)) {
+                mChart.getAxisLeft().resetAxisMaximum();
+            }
+
+            if (yValue < (mChart.getYChartMin() + 0.5)) {
+                mChart.getAxisLeft().resetAxisMinimum();
+            }
 
             data.notifyDataChanged();
 
@@ -339,29 +337,10 @@ public class GraphFragment extends Fragment {
             // move to the latest entry
             mChart.moveViewToX(data.getEntryCount());
 
-            // this automatically refreshes the chart (calls invalidate())
-            // mChart.moveViewTo(data.getXValCount()-7, 55f,
-            // AxisDependency.LEFT);
         }
     }
 
     private void addEntry(float yValue1, float yValue2, float xValue) {
-
-        float maxValue = -9999999;
-        float minValue =  9999999;
-
-        maxValue = Math.max(yValue1,yValue2);
-        minValue = Math.min(yValue1, yValue2);
-
-        if (maxValue > (mChart.getYChartMax() - 0.5)) {
-            mChart.getAxisLeft().setAxisMaximum(maxValue + (float)0.5);
-            //mChart.getAxisLeft().resetAxisMaximum();
-        }
-
-        if (minValue < (mChart.getYChartMin() + 0.5)) {
-            mChart.getAxisLeft().setAxisMinimum(minValue - (float)0.5);
-            //mChart.getAxisLeft().resetAxisMinimum();
-        }
 
         LineData data = mChart.getData();
 
@@ -411,6 +390,17 @@ public class GraphFragment extends Fragment {
             }
             else {
                 mChart.getXAxis().setEnabled(true);
+            }
+
+            float maxValue = Math.max(yValue1,yValue2);
+            float minValue = Math.min(yValue1, yValue2);
+
+            if (maxValue > (mChart.getYChartMax())) {
+                mChart.getAxisLeft().setAxisMaximum(maxValue + (Math.abs(maxValue*0.2f)));
+            }
+
+            if (minValue < (mChart.getYChartMin())) {
+                mChart.getAxisLeft().setAxisMinimum(minValue - (Math.abs(minValue*0.2f)));
             }
 
             data.notifyDataChanged();
@@ -502,25 +492,22 @@ public class GraphFragment extends Fragment {
 
             data.notifyDataChanged();
 
-            float maxValue = -9999999;
-            float minValue =  9999999;
-
-            maxValue = Math.max(yValue1,yValue2);
-            if (yValue3 > maxValue)
+            float maxValue = Math.max(yValue1,yValue2);
+            if (yValue3 > maxValue) {
                 maxValue = yValue3;
-
-            minValue = Math.min(yValue1, yValue2);
-            if (yValue3 < minValue)
-                minValue = yValue3;
-
-            if (maxValue > (mChart.getYChartMax() - 0.5)) {
-                mChart.getAxisLeft().setAxisMaximum(maxValue + (float)0.5);
-                //mChart.getAxisLeft().resetAxisMaximum();
             }
 
-            if (minValue < (mChart.getYChartMin() + 0.5)) {
-                mChart.getAxisLeft().setAxisMinimum(minValue - (float)0.5);
-                //mChart.getAxisLeft().resetAxisMinimum();
+            float minValue = Math.min(yValue1, yValue2);
+            if (yValue3 < minValue) {
+                minValue = yValue3;
+            }
+
+            if (maxValue > (mChart.getYChartMax())) {
+                mChart.getAxisLeft().setAxisMaximum(maxValue + (Math.abs(maxValue*0.2f)));
+            }
+
+            if (minValue < (mChart.getYChartMin())) {
+                mChart.getAxisLeft().setAxisMinimum(minValue - (Math.abs(minValue*0.2f)));
             }
 
             // let the chart know it's data has changed
@@ -529,15 +516,9 @@ public class GraphFragment extends Fragment {
 
             // limit the number of visible entries
             mChart.setVisibleXRangeMaximum(graphFragInterface.getGraphConfig().getVisibleDataNum());
-            // mChart.setVisibleYRange(30, AxisDependency.LEFT);
 
             // move to the latest entry
             mChart.moveViewToX(data.getEntryCount());
-
-            // this automatically refreshes the chart (calls invalidate())
-            // mChart.moveViewTo(data.getXValCount()-7, 55f,
-            // AxisDependency.LEFT);
-            //Log.i(TAG,"Set1, Set2, Set3" + set1.getEntryCount() + set2.getEntryCount() + set3.getEntryCount());
         }
     }
 
