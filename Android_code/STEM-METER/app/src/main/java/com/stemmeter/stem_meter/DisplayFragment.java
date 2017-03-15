@@ -72,12 +72,7 @@ public class DisplayFragment extends Fragment {
         View view = inflater.inflate(R.layout.display_fragment, container, false);
         graphFileStorage = new GraphFileStorage();
         mChart = (LineChart) view.findViewById(chart);
-        mChart.setNoDataText("No data for the moment");
-
-        //mChart.setOnChartValueSelectedListener(this);
-
-        // enable description text
-        //mChart.getDescription().setEnabled(true);
+        mChart.setNoDataText("Select a graph from list");
 
         // enable touch gestures
         mChart.setTouchEnabled(true);
@@ -87,17 +82,9 @@ public class DisplayFragment extends Fragment {
         mChart.setScaleEnabled(true);
         mChart.setDrawGridBackground(false);
 
-        // if disabled, scaling can be done on x- and y-axis separately
-        mChart.setPinchZoom(true);
-
         // set an alternative background color
         mChart.setBackgroundColor(Color.WHITE);
 
-        //LineData data = new LineData();
-        //data.setValueTextColor(Color.BLUE);
-
-        // add empty data
-        //mChart.setData(data);
 
         // get the legend (only possible after setting data)
         Legend l = mChart.getLegend();
@@ -118,8 +105,8 @@ public class DisplayFragment extends Fragment {
         YAxis leftAxis = mChart.getAxisLeft();
         leftAxis.setTypeface(Typeface.DEFAULT);
         leftAxis.setTextColor(Color.BLACK);
-        leftAxis.setAxisMaximum(100f);
-        leftAxis.setAxisMinimum(0f);
+       // leftAxis.setAxisMaximum(100f);
+       // leftAxis.setAxisMinimum(0f);
         leftAxis.setDrawGridLines(true);
 
         YAxis rightAxis = mChart.getAxisRight();
@@ -161,8 +148,6 @@ public class DisplayFragment extends Fragment {
 
             mChart.setData(data);
             data.notifyDataChanged();
-            //data.addEntry(new Entry(set.getEntryCount(), (float) (Math.random() * 40) + 30f), 0);
-            //data.notifyDataChanged();
 
             mChart.getAxisLeft().resetAxisMinimum();
             mChart.getAxisLeft().resetAxisMaximum();
@@ -173,19 +158,7 @@ public class DisplayFragment extends Fragment {
             // let the chart know it's data has changed
             mChart.notifyDataSetChanged();
             mChart.animateXY(1000,1000);
-            //mChart.invalidate();
 
-            // limit the number of visible entries
-            mChart.setVisibleXRangeMaximum(10);
-            // mChart.setVisibleYRange(30, AxisDependency.LEFT);
-
-            // move to the latest entry
-            //mChart.moveViewToX(data.getEntryCount());
-
-            // this automatically refreshes the chart (calls invalidate())
-            // mChart.moveViewTo(data.getXValCount()-7, 55f,
-            // AxisDependency.LEFT);
-        //}
     }
 
     private class DataListAdapter extends BaseAdapter {
@@ -194,7 +167,6 @@ public class DisplayFragment extends Fragment {
         private LayoutInflater mInflater;
         //private final ArrayList<SensorsFragment.SensorListAdapter.SetBoolean> setBooleanList = new ArrayList<SensorsFragment.SensorListAdapter.SetBoolean>();
         private String TAG = "CustomAdapter";
-        private int currentSelectedPosition;
         private int selectedPosition = -1;
 
         public DataListAdapter() {

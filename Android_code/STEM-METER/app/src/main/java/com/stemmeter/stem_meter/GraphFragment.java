@@ -106,9 +106,6 @@ public class GraphFragment extends Fragment {
         mChart.setScaleEnabled(true);
         mChart.setDrawGridBackground(false);
 
-        // if disabled, scaling can be done on x- and y-axis separately
-        mChart.setPinchZoom(true);
-
         // set an alternative background color
         mChart.setBackgroundColor(Color.WHITE);
 
@@ -346,12 +343,12 @@ public class GraphFragment extends Fragment {
                 mChart.getXAxis().setEnabled(true);
             }
 
-            if (yValue > (mChart.getYChartMax() - 0.5)) {
-                mChart.getAxisLeft().resetAxisMaximum();
+            if (yValue > (mChart.getYChartMax())) {
+                mChart.getAxisLeft().setAxisMaximum(yValue + (Math.abs(yValue * 0.5f)));
             }
 
-            if (yValue < (mChart.getYChartMin() + 0.5)) {
-                mChart.getAxisLeft().resetAxisMinimum();
+            if (yValue < (mChart.getYChartMax())) {
+                mChart.getAxisLeft().setAxisMinimum(yValue - (Math.abs(yValue * 0.5f)));
             }
 
             data.notifyDataChanged();
@@ -367,9 +364,6 @@ public class GraphFragment extends Fragment {
             // move to the latest entry
             mChart.moveViewToX(xValue);
 
-            // this automatically refreshes the chart (calls invalidate())
-            // mChart.moveViewTo(data.getXValCount()-7, 55f,
-            // AxisDependency.LEFT);
         }
     }
 
