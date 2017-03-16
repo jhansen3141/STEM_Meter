@@ -121,6 +121,7 @@ public class SensorsFragment extends ListFragment {
             @Override
             public void onClick(View arg0) {
                 sensorFragInterface.sensorConfigAllOff();
+                sensorListAdapter.notifyDataSetChanged();
             }
         });
 

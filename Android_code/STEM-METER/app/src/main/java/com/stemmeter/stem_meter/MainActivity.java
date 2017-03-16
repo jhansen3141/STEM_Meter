@@ -614,22 +614,34 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean sensorConfigAllOn() {
-        return true;
+        for(SensorConfig config : sensorConfigList) {
+            config.setFreq(SensorConst.RATE_FIVE_HZ);
+        }
+        return writeAllSensorConfigs();
     }
 
     @Override
     public boolean sensorConfigAllOff() {
-        return true;
+        for(SensorConfig config : sensorConfigList) {
+            config.setFreq(SensorConst.RATE_OFF);
+        }
+        return writeAllSensorConfigs();
     }
 
     @Override
     public boolean sensorConfigSDAllOn() {
-        return true;
+        for(SensorConfig config : sensorConfigList) {
+            config.setSDLogging(true);
+        }
+        return writeAllSensorConfigs();
     }
 
     @Override
     public boolean sensorConfigSDAllOff() {
-        return true;
+        for(SensorConfig config : sensorConfigList) {
+            config.setSDLogging(false);
+        }
+        return writeAllSensorConfigs();
     }
 
 
@@ -639,6 +651,30 @@ public class MainActivity extends AppCompatActivity
         // Set the appropriate config to the new settings
         sensorConfigList.get(config.getSensorNumber()-1).setFreq(config.getFreq());
         sensorConfigList.get(config.getSensorNumber()-1).setSDLogging(config.isSDLogging());
+
+        // Byte 0 = S1 Freq | Byte 1 = S1 SD Log
+        // Byte 2 = S2 Freq | Byte 3 = S2 SD Log
+        // Byte 4 = S3 Freq | Byte 5 = S3 SD Log
+        // Byte 6 = S4 Freq | Byte 7 = S4 SD Log
+
+        byte[] configData = new byte[8];
+
+        configData[0] = (byte)sensorConfigList.get(0).getFreq();
+        configData[1] = (byte)((sensorConfigList.get(0).isSDLogging()) ? 1 : 0);
+
+        configData[2] = (byte)sensorConfigList.get(1).getFreq();
+        configData[3] = (byte)((sensorConfigList.get(1).isSDLogging()) ? 1 : 0);
+
+        configData[4] = (byte)sensorConfigList.get(2).getFreq();
+        configData[5] = (byte)((sensorConfigList.get(2).isSDLogging()) ? 1 : 0);
+
+        configData[6] = (byte)sensorConfigList.get(3).getFreq();
+        configData[7] = (byte)((sensorConfigList.get(3).isSDLogging()) ? 1 : 0);
+
+        return writeCharacteristic(BoardSensorConfigChar, configData);
+    }
+
+    public boolean writeAllSensorConfigs() {
 
         // Byte 0 = S1 Freq | Byte 1 = S1 SD Log
         // Byte 2 = S2 Freq | Byte 3 = S2 SD Log
