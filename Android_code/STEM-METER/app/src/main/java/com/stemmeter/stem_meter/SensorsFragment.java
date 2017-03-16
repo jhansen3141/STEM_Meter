@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.CheckedTextView;
 import android.widget.ImageButton;
 import android.widget.Spinner;
@@ -29,8 +30,13 @@ public class SensorsFragment extends ListFragment {
     SensorFragInterface sensorFragInterface;
     private String TAG = "SensorFrag";
     private SensorListAdapter sensorListAdapter;
-    private ImageButton zeroButton;
-    private ImageButton negateZeroButton;
+    private Button zeroButton;
+    private Button negateZeroButton;
+    private Button allSensorsOnButton;
+    private Button allSensorsOffButton;
+    private Button sdLogAllButton;
+    private Button sdLogNoneButton;
+
     private int listItemSelected = 0;
 
 
@@ -42,6 +48,10 @@ public class SensorsFragment extends ListFragment {
         boolean updateBaseUnitTime();
         void readSensorConfigData();
         Sensor getSensor(int sensorNumber);
+        boolean sensorConfigAllOn();
+        boolean sensorConfigAllOff();
+        boolean sensorConfigSDAllOn();
+        boolean sensorConfigSDAllOff();
     }
 
     @Override
@@ -64,8 +74,13 @@ public class SensorsFragment extends ListFragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.sensors_fragment, container, false);
-        zeroButton = (ImageButton) view.findViewById(R.id.ZeroButton);
-        negateZeroButton = (ImageButton) view.findViewById(R.id.ResetZeroButton);
+        zeroButton = (Button) view.findViewById(R.id.ZeroButton);
+        negateZeroButton = (Button) view.findViewById(R.id.ResetZeroButton);
+
+        allSensorsOnButton = (Button) view.findViewById(R.id.AllOnButton);
+        allSensorsOffButton = (Button) view.findViewById(R.id.AllOffButton);
+        sdLogAllButton = (Button) view.findViewById(R.id.AllSDLogButton);
+        sdLogNoneButton = (Button) view.findViewById(R.id.AllStopSDButton);
 
         zeroButton.setOnClickListener(new View.OnClickListener() {
 
@@ -90,6 +105,38 @@ public class SensorsFragment extends ListFragment {
                 } catch (NullPointerException npe) {
                     Log.i(TAG, "Sensor Null - Cannot Reset Zero");
                 }
+            }
+        });
+
+        allSensorsOnButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+                sensorFragInterface.sensorConfigAllOn();
+            }
+        });
+
+        allSensorsOffButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+                sensorFragInterface.sensorConfigAllOff();
+            }
+        });
+
+        sdLogAllButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+                sensorFragInterface.sensorConfigSDAllOn();
+            }
+        });
+
+        sdLogNoneButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+                sensorFragInterface.sensorConfigSDAllOff();
             }
         });
 

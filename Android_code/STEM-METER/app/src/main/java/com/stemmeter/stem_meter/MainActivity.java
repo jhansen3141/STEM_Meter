@@ -613,6 +613,28 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public boolean sensorConfigAllOn() {
+        return true;
+    }
+
+    @Override
+    public boolean sensorConfigAllOff() {
+        return true;
+    }
+
+    @Override
+    public boolean sensorConfigSDAllOn() {
+        return true;
+    }
+
+    @Override
+    public boolean sensorConfigSDAllOff() {
+        return true;
+    }
+
+
+
+    @Override
     public boolean sensorConfigWrite(SensorConfig config) {
         // Set the appropriate config to the new settings
         sensorConfigList.get(config.getSensorNumber()-1).setFreq(config.getFreq());

@@ -3,66 +3,113 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="8"
-        android:orientation="vertical">
     <ListView
         android:id="@android:id/list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="251dp" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/ZeroButton"
+                        android:layout_width="125dp"
+                        android:layout_height="65dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_gravity="center"
+                        android:focusable="false"
+                        android:text="Zero Sensor"
+                        android:textSize="16sp"
+                        android:focusableInTouchMode="false" />
+
+                    <Button
+                        android:id="@+id/ResetZeroButton"
+                        android:layout_width="125dp"
+                        android:layout_height="65dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginStart="20dp"
+                        android:layout_gravity="center"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:text="Negate Zero"
+                        android:textSize="16sp"/>
 
 
-    <RelativeLayout
-        android:orientation="vertical" android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/AllOnButton"
+                        android:layout_width="125dp"
+                        android:layout_height="65dp"
+                        android:layout_marginTop="15dp"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:text="All Sensors On"
+                        android:textSize="16sp"/>
+
+                    <Button
+                        android:id="@+id/AllOffButton"
+                        android:layout_width="125dp"
+                        android:layout_height="65dp"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginTop="15dp"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:text="All Sensors Off"
+                        android:textSize="16sp"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/AllSDLogButton"
+                        android:layout_width="125dp"
+                        android:layout_height="65dp"
+                        android:layout_marginTop="15dp"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:text="SD Log All"
+                        android:textSize="16sp"/>
+
+                    <Button
+                        android:id="@+id/AllStopSDButton"
+                        android:layout_width="125dp"
+                        android:layout_height="65dp"
+                        android:layout_marginTop="15dp"
+                        android:layout_marginStart="20dp"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:text="SD Log None"
+                        android:textSize="16sp"/>
+
+                </LinearLayout>
+            </LinearLayout>
+    </ScrollView>
 
 
-        <ImageButton
-            android:id="@+id/ZeroButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="15dp"
-            android:focusable="false"
-            android:background="@drawable/rectangle_button"
-            android:focusableInTouchMode="false"
-            />
-
-        <TextView
-            android:id="@+id/ZeroSensorTextView"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:layout_width="wrap_content"
-            android:text="Zero Sensor"
-            android:textColor="@android:color/black"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="25dp"
-            />
-
-        <ImageButton
-            android:id="@+id/ResetZeroButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="15dp"
-            android:focusable="false"
-            android:layout_below="@+id/ZeroButton"
-            android:background="@drawable/rectangle_button"
-            android:focusableInTouchMode="false"
-            />
-
-        <TextView
-            android:id="@+id/ResetZeroTextView"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:layout_width="wrap_content"
-            android:text="Negate Zero"
-            android:layout_below="@+id/ZeroButton"
-            android:textColor="@android:color/black"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="25dp"
-            />
-    </RelativeLayout>
 
 </LinearLayout>

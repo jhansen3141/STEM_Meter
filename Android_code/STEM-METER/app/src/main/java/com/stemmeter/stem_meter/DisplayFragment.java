@@ -77,7 +77,7 @@ public class DisplayFragment extends Fragment {
 
         // set an alternative background color
         mChart.setBackgroundColor(Color.WHITE);
-        
+
         // get the legend (only possible after setting data)
         Legend l = mChart.getLegend();
 

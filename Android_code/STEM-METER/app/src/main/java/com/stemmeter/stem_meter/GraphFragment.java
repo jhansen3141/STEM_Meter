@@ -572,40 +572,6 @@ public class GraphFragment extends Fragment {
         return set;
     }
 
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//        final Runnable runnable = new Runnable() {
-//
-//            @Override
-//            public void run() {
-//                addEntry();
-//            }
-//        };
-//
-//        Thread thread = new Thread(new Runnable() {
-//
-//            @Override
-//            public void run() {
-//                for (int i = 0; i < 100; i++) {
-//
-//                    // Don't generate garbage runnables inside the loop.
-//                    getActivity().runOnUiThread(runnable);
-//
-//                    try {
-//                        Thread.sleep(25);
-//                    } catch (InterruptedException e) {
-//                        // TODO Auto-generated catch block
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }
-//        });
-//
-//        thread.start();
-//
-//        //plot.redraw();
-//    }
 
     @Override
     public void onAttach(Activity activity) {
