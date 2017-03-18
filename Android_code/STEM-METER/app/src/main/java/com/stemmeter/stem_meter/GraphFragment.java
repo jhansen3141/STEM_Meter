@@ -124,7 +124,7 @@ public class GraphFragment extends Fragment {
         l.setForm(Legend.LegendForm.LINE);
         l.setTypeface(Typeface.DEFAULT);
         l.setTextColor(Color.BLACK);
-        l.setTextSize(12f);
+        //l.setTextSize(12f);
 
         XAxis xl = mChart.getXAxis();
         xl.setTypeface(Typeface.DEFAULT);
@@ -319,8 +319,8 @@ public class GraphFragment extends Fragment {
                 data.addDataSet(set);
             }
 
-            if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP && (xValue > (graphFragInterface.getGraphConfig().getVisibleDataNum() * selectedSensor.getRateMult())))
-                xValue = graphFragInterface.getGraphConfig().getVisibleDataNum() * selectedSensor.getRateMult();
+            if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP && (xValue > ((graphFragInterface.getGraphConfig().getVisibleDataNum() + 1) * selectedSensor.getRateMult())))
+                xValue = (graphFragInterface.getGraphConfig().getVisibleDataNum() + 1) * selectedSensor.getRateMult();
 
             data.addEntry(new Entry(xValue, yValue), 0);
 
@@ -330,7 +330,7 @@ public class GraphFragment extends Fragment {
 
                 Entry entry;
 
-                if (set.getEntryCount() == graphFragInterface.getGraphConfig().getVisibleDataNum()) {
+                if ((set.getEntryCount() - 1) > graphFragInterface.getGraphConfig().getVisibleDataNum()) {
                     set.removeEntry(0);
 
                     for (int i = 0; i < set.getEntryCount(); i++) {
@@ -343,11 +343,11 @@ public class GraphFragment extends Fragment {
                 mChart.getXAxis().setEnabled(true);
             }
 
-            if (yValue > (mChart.getYChartMax())) {
+            if (yValue > (mChart.getYMax())) {
                 mChart.getAxisLeft().setAxisMaximum(yValue + (Math.abs(yValue * 0.5f)));
             }
 
-            if (yValue < (mChart.getYChartMax())) {
+            if (yValue < (mChart.getYMin())) {
                 mChart.getAxisLeft().setAxisMinimum(yValue - (Math.abs(yValue * 0.5f)));
             }
 
@@ -356,8 +356,11 @@ public class GraphFragment extends Fragment {
             // let the chart know it's data has changed
             mChart.notifyDataSetChanged();
 
+            if (xValue == selectedSensor.getRateMult())
+                mChart.fitScreen();
+
             // limit the number of visible entries
-            mChart.setVisibleXRangeMaximum(graphFragInterface.getGraphConfig().getVisibleDataNum() * selectedSensor.getRateMult());
+            mChart.setVisibleXRangeMaximum((graphFragInterface.getGraphConfig().getVisibleDataNum() - 1) * selectedSensor.getRateMult());
             //Log.i(TAG, String.valueOf(graphFragInterface.getGraphConfig().getVisibleDataNum()));
             // mChart.setVisibleYRange(30, AxisDependency.LEFT);
 
@@ -388,8 +391,8 @@ public class GraphFragment extends Fragment {
                 data.addDataSet(set2);
             }
 
-            if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP && (xValue > (graphFragInterface.getGraphConfig().getVisibleDataNum() * selectedSensor.getRateMult())))
-                xValue = graphFragInterface.getGraphConfig().getVisibleDataNum() * selectedSensor.getRateMult();
+            if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP && (xValue > ((graphFragInterface.getGraphConfig().getVisibleDataNum() + 1) * selectedSensor.getRateMult())))
+                xValue = (graphFragInterface.getGraphConfig().getVisibleDataNum() + 1) * selectedSensor.getRateMult();
 
             data.addEntry(new Entry(xValue, yValue1), 0);
             data.addEntry(new Entry(xValue, yValue2), 1);
@@ -400,7 +403,7 @@ public class GraphFragment extends Fragment {
 
                 Entry entry;
 
-                if (set1.getEntryCount() == graphFragInterface.getGraphConfig().getVisibleDataNum()) {
+                if ((set1.getEntryCount() - 1) > graphFragInterface.getGraphConfig().getVisibleDataNum()) {
                     set1.removeEntry(0);
 
                     for (int i = 0; i < set1.getEntryCount(); i++) {
@@ -409,7 +412,7 @@ public class GraphFragment extends Fragment {
                     }
                 }
 
-                if (set2.getEntryCount() == graphFragInterface.getGraphConfig().getVisibleDataNum()) {
+                if ((set2.getEntryCount() - 1) > graphFragInterface.getGraphConfig().getVisibleDataNum()) {
                     set2.removeEntry(0);
 
                     for (int i = 0; i < set2.getEntryCount(); i++) {
@@ -425,11 +428,11 @@ public class GraphFragment extends Fragment {
             float maxValue = Math.max(yValue1,yValue2);
             float minValue = Math.min(yValue1, yValue2);
 
-            if (maxValue > (mChart.getYChartMax())) {
+            if (maxValue > (mChart.getYMax())) {
                 mChart.getAxisLeft().setAxisMaximum(maxValue + (Math.abs(maxValue*0.5f)));
             }
 
-            if (minValue < (mChart.getYChartMin())) {
+            if (minValue < (mChart.getYMin())) {
                 mChart.getAxisLeft().setAxisMinimum(minValue - (Math.abs(minValue*0.5f)));
             }
 
@@ -438,8 +441,11 @@ public class GraphFragment extends Fragment {
             // let the chart know it's data has changed
             mChart.notifyDataSetChanged();
 
+            if (xValue == selectedSensor.getRateMult())
+                mChart.fitScreen();
+
             // limit the number of visible entries
-            mChart.setVisibleXRangeMaximum(graphFragInterface.getGraphConfig().getVisibleDataNum() * selectedSensor.getRateMult());
+            mChart.setVisibleXRangeMaximum((graphFragInterface.getGraphConfig().getVisibleDataNum() - 1) * selectedSensor.getRateMult());
             // mChart.setVisibleYRange(30, AxisDependency.LEFT);
 
             // move to the latest entry
@@ -481,27 +487,30 @@ public class GraphFragment extends Fragment {
                 data.addDataSet(set3);
             }
 
-            if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP && (xValue > (graphFragInterface.getGraphConfig().getVisibleDataNum() * selectedSensor.getRateMult())))
-                xValue = graphFragInterface.getGraphConfig().getVisibleDataNum() * selectedSensor.getRateMult();
+            if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP && (xValue > ((graphFragInterface.getGraphConfig().getVisibleDataNum() + 1) * selectedSensor.getRateMult())))
+                xValue = (graphFragInterface.getGraphConfig().getVisibleDataNum() + 1) * selectedSensor.getRateMult();
 
             data.addEntry(new Entry(xValue, yValue1), 0);
             data.addEntry(new Entry(xValue, yValue2), 1);
             data.addEntry(new Entry(xValue, yValue3), 2);
 
             if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP) {
-                mChart.getXAxis().setEnabled(false);
+                mChart.getXAxis().setEnabled(true);
                 Entry entry;
                 //removing last element from the chart and finding max and min visible value
-                if (set1.getEntryCount() == graphFragInterface.getGraphConfig().getVisibleDataNum()) {
+                if ((set1.getEntryCount() - 1) > graphFragInterface.getGraphConfig().getVisibleDataNum()) {
                     set1.removeEntry(0);
 
                     for (int i = 0; i < set1.getEntryCount(); i++) {
                         entry = set1.getEntryForIndex(i);
+                        float before = entry.getX();
                         entry.setX(entry.getX() - selectedSensor.getRateMult());
+                        float after = entry.getX();
+                        Log.i(TAG, "Before: " + String.valueOf(before) + " After: " + String.valueOf(after));
                     }
                 }
 
-                if (set2.getEntryCount() == graphFragInterface.getGraphConfig().getVisibleDataNum()) {
+                if ((set2.getEntryCount() - 1) > graphFragInterface.getGraphConfig().getVisibleDataNum()) {
                     set2.removeEntry(0);
 
                     for (int i = 0; i < set2.getEntryCount(); i++) {
@@ -510,7 +519,7 @@ public class GraphFragment extends Fragment {
                     }
                 }
 
-                if (set3.getEntryCount() == graphFragInterface.getGraphConfig().getVisibleDataNum()) {
+                if ((set3.getEntryCount() - 1) > graphFragInterface.getGraphConfig().getVisibleDataNum()) {
                     set3.removeEntry(0);
 
                     for (int i = 0; i < set3.getEntryCount(); i++) {
@@ -535,11 +544,11 @@ public class GraphFragment extends Fragment {
                 minValue = yValue3;
             }
 
-            if (maxValue > (mChart.getYChartMax())) {
+            if (maxValue > (mChart.getYMax())) {
                 mChart.getAxisLeft().setAxisMaximum(maxValue + (Math.abs(maxValue*0.5f)));
             }
 
-            if (minValue < (mChart.getYChartMin())) {
+            if (minValue < (mChart.getYMin())) {
                 mChart.getAxisLeft().setAxisMinimum(minValue - (Math.abs(minValue*0.5f)));
             }
 
@@ -547,8 +556,12 @@ public class GraphFragment extends Fragment {
             mChart.notifyDataSetChanged();
             //mChart.invalidate();
 
+            if (xValue == selectedSensor.getRateMult())
+                mChart.fitScreen();
+
             // limit the number of visible entries
-            mChart.setVisibleXRangeMaximum(graphFragInterface.getGraphConfig().getVisibleDataNum() * selectedSensor.getRateMult());
+            if (graphFragInterface.getGraphConfig().getState() != GRAPH_STATE_STOP)
+                mChart.setVisibleXRangeMaximum((graphFragInterface.getGraphConfig().getVisibleDataNum() - 1) * selectedSensor.getRateMult());
 
             // move to the latest entry
             mChart.moveViewToX(xValue);

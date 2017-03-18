@@ -44,7 +44,7 @@ public abstract class Sensor {
     }
 
     public void zeroX() {
-        syncNumberOffset = syncNumber;
+        syncNumberOffset = syncNumber + 1;
     }
 
     public float getSensorTime() {
