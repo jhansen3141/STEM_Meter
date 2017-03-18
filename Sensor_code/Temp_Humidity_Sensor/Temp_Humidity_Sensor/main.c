@@ -92,6 +92,15 @@ void setSensorFreq(int arg_cnt, char **args) {
 		case RATE_OFF:
 			return;
 			break;
+			
+		case RATE_INFO:
+			memset(data.sensorDataRaw,0,RAW_DATA_SIZE);
+			memset(data.sensorDataStr,0,STR_DATA_SIZE);
+			sensorRate = RATE_INFO;
+			writeBaseUnitData(&data);
+			sensorRate = RATE_OFF;
+			return;
+			break;
 		
 		case RATE_TEN_HZ:
 			OCR1A = TIMER_TEN_HZ_NUM;

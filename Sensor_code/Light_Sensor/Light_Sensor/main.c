@@ -90,57 +90,68 @@ void setSensorFreq(int arg_cnt, char **args) {
 	
 	switch (freqCommand) {
 		case RATE_OFF:
-		return;
-		break;
+			sensorRate = RATE_OFF;
+			return;
+			break;
+			
+		case RATE_INFO:
+			memset(data.sensorDataRaw,0,RAW_DATA_SIZE);
+			memset(data.sensorDataStr,0,STR_DATA_SIZE);
+			sensorRate = RATE_INFO;
+			writeBaseUnitData(&data);
+			sensorRate = RATE_OFF;
+			return;
+			break;
+			
 		case RATE_TEN_HZ:
-		OCR1A = TIMER_TEN_HZ_NUM;
-		sensorRate = RATE_TEN_HZ;
-		break;
+			OCR1A = TIMER_TEN_HZ_NUM;
+			sensorRate = RATE_TEN_HZ;
+			break;
 		
 		case RATE_FIVE_HZ:
-		OCR1A = TIMER_FIVE_HZ_NUM;
-		sensorRate = RATE_FIVE_HZ;
-		break;
+			OCR1A = TIMER_FIVE_HZ_NUM;
+			sensorRate = RATE_FIVE_HZ;
+			break;
 		
 		case RATE_ONE_SEC:
-		OCR1A = TIMER_ONE_HZ_NUM;
-		sensorRate = RATE_ONE_SEC;
-		break;
+			OCR1A = TIMER_ONE_HZ_NUM;
+			sensorRate = RATE_ONE_SEC;
+			break;
 		
 		case RATE_FIVE_SEC:
-		OCR1A = TIMER_ONE_HZ_NUM;
-		sensorRate = RATE_FIVE_SEC;
-		break;
+			OCR1A = TIMER_ONE_HZ_NUM;
+			sensorRate = RATE_FIVE_SEC;
+			break;
 		
 		case RATE_TEN_SEC:
-		OCR1A = TIMER_ONE_HZ_NUM;
-		sensorRate = RATE_TEN_SEC;
-		break;
+			OCR1A = TIMER_ONE_HZ_NUM;
+			sensorRate = RATE_TEN_SEC;
+			break;
 		
 		case RATE_THIRTY_SEC:
-		OCR1A = TIMER_ONE_HZ_NUM;
-		sensorRate = RATE_THIRTY_SEC;
-		break;
+			OCR1A = TIMER_ONE_HZ_NUM;
+			sensorRate = RATE_THIRTY_SEC;
+			break;
 		
 		case RATE_ONE_MIN:
-		OCR1A = TIMER_ONE_HZ_NUM;
-		sensorRate = RATE_ONE_MIN;
-		break;
+			OCR1A = TIMER_ONE_HZ_NUM;
+			sensorRate = RATE_ONE_MIN;
+			break;
 		
 		case RATE_TEN_MIN:
-		OCR1A = TIMER_ONE_HZ_NUM;
-		sensorRate = RATE_TEN_MIN;
-		break;
+			OCR1A = TIMER_ONE_HZ_NUM;
+			sensorRate = RATE_TEN_MIN;
+			break;
 		
 		case RATE_THIRTY_MIN:
-		OCR1A = TIMER_ONE_HZ_NUM;
-		sensorRate = RATE_THIRTY_MIN;
-		break;
+			OCR1A = TIMER_ONE_HZ_NUM;
+			sensorRate = RATE_THIRTY_MIN;
+			break;
 		
 		case RATE_ONE_HOUR:
-		OCR1A = TIMER_ONE_HZ_NUM;
-		sensorRate = RATE_ONE_HOUR;
-		break;
+			OCR1A = TIMER_ONE_HZ_NUM;
+			sensorRate = RATE_ONE_HOUR;
+			break;
 		
 	}
 	secondCounter = 0;
@@ -162,7 +173,7 @@ int main(void) {
 	
 	cmdInit();
 	cmdAdd("SF",setSensorFreq);
-
+	
 	// enable global interrupts
 	sei();
 	

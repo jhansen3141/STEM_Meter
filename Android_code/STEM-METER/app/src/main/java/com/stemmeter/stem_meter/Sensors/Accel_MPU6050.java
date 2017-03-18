@@ -148,4 +148,9 @@ public class Accel_MPU6050 extends Sensor {
         shouldZero = false;
     }
 
+    @Override
+    public String getSensorOffString() {
+        return "Accelerometer - OFF";
+    }
+
 }

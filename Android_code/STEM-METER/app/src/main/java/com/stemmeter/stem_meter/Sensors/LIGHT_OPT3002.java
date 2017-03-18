@@ -121,4 +121,9 @@ public class LIGHT_OPT3002 extends Sensor {
         opticalPowerZero = 0;
         shouldZero = false;
     }
+
+    @Override
+    public String getSensorOffString() {
+        return "Light Sensor - OFF";
+    }
 }

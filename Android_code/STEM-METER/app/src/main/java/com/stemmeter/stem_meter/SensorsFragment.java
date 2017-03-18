@@ -52,6 +52,7 @@ public class SensorsFragment extends ListFragment {
         boolean sensorConfigAllOff();
         boolean sensorConfigSDAllOn();
         boolean sensorConfigSDAllOff();
+        void querySensorTypes();
     }
 
     @Override
@@ -170,13 +171,11 @@ public class SensorsFragment extends ListFragment {
     @Override
     public void onResume() {
         super.onResume();
-        // Only read the config settings from the base unit once
-
+        sensorFragInterface.querySensorTypes();
         // Update the base unit time
         sensorFragInterface.updateBaseUnitTime();
         // Read the current sensor config settings from base unit
         sensorFragInterface.readSensorConfigData();
-
     }
 
     private class SensorListAdapter extends BaseAdapter {
@@ -289,8 +288,16 @@ public class SensorsFragment extends ListFragment {
                 });
 
                 if(sensorText != null) {
-                    if(sensorFragInterface.getSensorConfig(finalPosition+1).getFreq() == SensorConst.RATE_OFF) {
-                        sensorText.setText("Sensor " + (finalPosition+1) + " - No Data");
+                    if(sensorFragInterface.getSensorConfig(finalPosition+1).getFreq() == SensorConst.RATE_OFF ||
+                            sensorFragInterface.getSensorConfig(finalPosition+1).getFreq() == SensorConst.RATE_INFO )
+                    {
+                        Sensor s = sensorFragInterface.getSensor(finalPosition+1);
+                        if(s == null) {
+                            sensorText.setText("Sensor " + (finalPosition+1) + " -OFF");
+                        }
+                        else {
+                            sensorText.setText(sensorFragInterface.getSensor(finalPosition + 1).getSensorOffString());
+                        }
                     }
                     else {
                         // write the string to the text view

@@ -97,6 +97,11 @@ public class Temp_MCP9808 extends Sensor {
     }
 
     @Override
+    public String getSensorOffString() {
+        return "Temperature Sensor - OFF";
+    }
+
+    @Override
     public String toString() {
         String unitsString = unitList.get(units);
         return "Temperature: " + sensorStringArray[0] + unitsString;

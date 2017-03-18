@@ -385,7 +385,6 @@ public class MainActivity extends AppCompatActivity
 
                         serviceDiscovered = true;
                         printConnectionStat("Connected");
-
                         // change the connection status icon to connected
                         runOnUiThread(new Runnable() {
                             @Override
@@ -644,7 +643,19 @@ public class MainActivity extends AppCompatActivity
         return writeAllSensorConfigs();
     }
 
+    @Override
+    public void querySensorTypes() {
 
+        for(SensorConfig config : sensorConfigList) {
+            config.setFreq(SensorConst.RATE_INFO);
+        }
+        writeAllSensorConfigs();
+
+        for(SensorConfig config : sensorConfigList) {
+            config.setFreq(SensorConst.RATE_OFF);
+        }
+        writeAllSensorConfigs();
+    }
 
     @Override
     public boolean sensorConfigWrite(SensorConfig config) {
