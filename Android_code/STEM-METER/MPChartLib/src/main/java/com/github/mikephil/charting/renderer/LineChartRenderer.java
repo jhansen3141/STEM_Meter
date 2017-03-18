@@ -562,7 +562,13 @@ public class LineChartRenderer extends LineRadarRenderer {
                     if (!mViewPortHandler.isInBoundsLeft(x) || !mViewPortHandler.isInBoundsY(y))
                         continue;
 
-                    Entry entry = dataSet.getEntryForIndex(j / 2 + mXBounds.min);
+                    Entry entry = null;
+                    try {
+                        entry = dataSet.getEntryForIndex(j / 2 + mXBounds.min);
+                    }
+                    catch(IndexOutOfBoundsException EX) {
+                        break;
+                    }
 
                     if (dataSet.isDrawValuesEnabled()) {
                         drawValue(c, dataSet.getValueFormatter(), entry.getY(), entry, i, x,

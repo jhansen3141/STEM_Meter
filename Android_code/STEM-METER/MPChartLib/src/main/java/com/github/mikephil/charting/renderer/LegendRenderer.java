@@ -373,8 +373,15 @@ public class LegendRenderer extends Renderer {
 
                         drawLabel(c, posX, posY + labelLineHeight, e.label);
 
-                        if (direction == Legend.LegendDirection.LEFT_TO_RIGHT)
-                            posX += calculatedLabelSizes.get(i).width;
+                        try {
+
+                            if (direction == Legend.LegendDirection.LEFT_TO_RIGHT)
+                                posX += calculatedLabelSizes.get(i).width;
+                        }
+                        catch (IndexOutOfBoundsException EX)
+                        {
+                            break;
+                        }
 
                         posX += direction == Legend.LegendDirection.RIGHT_TO_LEFT ? -xEntrySpace : xEntrySpace;
                     } else
