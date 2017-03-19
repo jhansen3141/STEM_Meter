@@ -8,6 +8,7 @@ import com.stemmeter.stem_meter.SensorConst;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Locale;
 
 /**
  * Created by Josh on 2/19/2017.
@@ -76,7 +77,7 @@ public class LIGHT_OPT3002 extends Sensor {
                 break;
         }
 
-        dataStr[0] = String.format("%.2f",opticalPower);
+        dataStr[0] = String.format(Locale.US,"%.2f",opticalPower);
         sensorStringArray = dataStr;
 
         return dataStr;

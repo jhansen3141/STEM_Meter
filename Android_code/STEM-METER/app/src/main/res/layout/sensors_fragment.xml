@@ -64,7 +64,7 @@
                         android:focusable="false"
                         android:layout_gravity="center"
                         android:focusableInTouchMode="false"
-                        android:text="All Sensors On"
+                        android:text="All On"
                         android:textSize="16sp"/>
 
                     <Button
@@ -76,7 +76,7 @@
                         android:focusable="false"
                         android:layout_gravity="center"
                         android:focusableInTouchMode="false"
-                        android:text="All Sensors Off"
+                        android:text="All Off"
                         android:textSize="16sp"/>
 
                 </LinearLayout>

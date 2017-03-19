@@ -30,6 +30,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
+import android.widget.BaseAdapter;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.data.LineData;
@@ -471,6 +472,15 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mBluetoothGatt.disconnect();
+        boardDevice = null;
+        mBluetoothManager = null;
+        mBluetoothAdapter = null;
+    }
+
+    @Override
     public boolean updateBaseUnitTime() {
         Calendar calendar = new GregorianCalendar();
         byte month = (byte)calendar.get(Calendar.MONTH);
@@ -644,15 +654,21 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void querySensorTypes() {
+    public void querySensorTypes()  {
+        ArrayList<SensorConfig> configTemp = new ArrayList<>();
 
         for(SensorConfig config : sensorConfigList) {
+            try {
+                configTemp.add(config.clone());
+            } catch (CloneNotSupportedException e) {
+                return;
+            }
             config.setFreq(SensorConst.RATE_INFO);
         }
         writeAllSensorConfigs();
 
-        for(SensorConfig config : sensorConfigList) {
-            config.setFreq(SensorConst.RATE_OFF);
+        for(int i=0; i<4; i++) {
+            sensorConfigList.get(i).setFreq(configTemp.get(i).getFreq());
         }
         writeAllSensorConfigs();
     }
@@ -684,7 +700,7 @@ public class MainActivity extends AppCompatActivity
 
         return writeCharacteristic(BoardSensorConfigChar, configData);
     }
-
+    @Override
     public boolean writeAllSensorConfigs() {
 
         // Byte 0 = S1 Freq | Byte 1 = S1 SD Log

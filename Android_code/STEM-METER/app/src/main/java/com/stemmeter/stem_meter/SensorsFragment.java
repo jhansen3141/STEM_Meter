@@ -53,6 +53,7 @@ public class SensorsFragment extends ListFragment {
         boolean sensorConfigSDAllOn();
         boolean sensorConfigSDAllOff();
         void querySensorTypes();
+        boolean writeAllSensorConfigs();
     }
 
     @Override
@@ -159,13 +160,23 @@ public class SensorsFragment extends ListFragment {
     }
 
     public void printSensorData(final int sensorNum, final String dataStr) {
-        // update the item in the list view
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                sensorListAdapter.updateItem(dataStr, sensorNum - 1);
-            }
-        });
+        if(sensorFragInterface.getSensorConfig(sensorNum).getFreq() != SensorConst.RATE_OFF) {
+            // update the item in the list view
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    sensorListAdapter.updateItem(dataStr, sensorNum - 1);
+                }
+            });
+        }
+        else {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    sensorListAdapter.updateItemAll(dataStr,sensorNum-1);
+                }
+            });
+        }
     }
 
     @Override
@@ -184,7 +195,6 @@ public class SensorsFragment extends ListFragment {
         private LayoutInflater mInflater;
         private final ArrayList<SetBoolean> setBooleanList = new ArrayList<SetBoolean>();
         private String TAG = " SensorListAdapter";
-        //private int currentSelectedPosition;
 
         public SensorListAdapter() {
             setBooleanList.add(new SetBoolean());
@@ -200,6 +210,11 @@ public class SensorsFragment extends ListFragment {
             notifyDataSetChanged();
         }
 
+        public void updateItemAll(final String item, int position) {
+            sensorData.set(position,item);
+            notifyDataSetChanged();
+        }
+
         public void updateItem(final String item, int position) {
             // Only update the sensor data if sensor text box is showing
             if(setBooleanList.get(position).isSet()) {
@@ -211,7 +226,7 @@ public class SensorsFragment extends ListFragment {
                 }
                 catch (Exception e)
                 {
-
+                    Log.i(TAG,"Did not update view. Exception");
                 }
 
                 if(v == null) {
