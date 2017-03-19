@@ -30,6 +30,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
+import android.widget.BaseAdapter;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.data.LineData;
@@ -385,7 +386,6 @@ public class MainActivity extends AppCompatActivity
 
                         serviceDiscovered = true;
                         printConnectionStat("Connected");
-
                         // change the connection status icon to connected
                         runOnUiThread(new Runnable() {
                             @Override
@@ -469,6 +469,15 @@ public class MainActivity extends AppCompatActivity
 
         sensorConfigList.get(3).setFreq((int) configData[6]);
         sensorConfigList.get(3).setSDLogging(configData[7] == 1);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mBluetoothGatt.disconnect();
+        boardDevice = null;
+        mBluetoothManager = null;
+        mBluetoothAdapter = null;
     }
 
     @Override
@@ -644,7 +653,25 @@ public class MainActivity extends AppCompatActivity
         return writeAllSensorConfigs();
     }
 
+    @Override
+    public void querySensorTypes()  {
+        ArrayList<SensorConfig> configTemp = new ArrayList<>();
 
+        for(SensorConfig config : sensorConfigList) {
+            try {
+                configTemp.add(config.clone());
+            } catch (CloneNotSupportedException e) {
+                return;
+            }
+            config.setFreq(SensorConst.RATE_INFO);
+        }
+        writeAllSensorConfigs();
+
+        for(int i=0; i<4; i++) {
+            sensorConfigList.get(i).setFreq(configTemp.get(i).getFreq());
+        }
+        writeAllSensorConfigs();
+    }
 
     @Override
     public boolean sensorConfigWrite(SensorConfig config) {
@@ -673,7 +700,7 @@ public class MainActivity extends AppCompatActivity
 
         return writeCharacteristic(BoardSensorConfigChar, configData);
     }
-
+    @Override
     public boolean writeAllSensorConfigs() {
 
         // Byte 0 = S1 Freq | Byte 1 = S1 SD Log

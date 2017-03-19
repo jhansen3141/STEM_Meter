@@ -16,6 +16,7 @@ sensorRate_t sensorRate = RATE_OFF;
 static sensorData_t data;
 
 void setSensorFreq(int arg_cnt, char **args);
+void sendSensorType();
 
 ISR(USART_RX_vect) {
 	cmd_handler(UDR0);	
@@ -90,57 +91,63 @@ void setSensorFreq(int arg_cnt, char **args) {
 	
 	switch (freqCommand) {
 		case RATE_OFF:
-		return;
-		break;
+			return;
+			break;
+		
+		case RATE_INFO:
+			sendSensorType();
+			return;
+			break;
+		
 		case RATE_TEN_HZ:
-		OCR1A = TIMER_TEN_HZ_NUM;
-		sensorRate = RATE_TEN_HZ;
-		break;
+			OCR1A = TIMER_TEN_HZ_NUM;
+			sensorRate = RATE_TEN_HZ;
+			break;
 		
 		case RATE_FIVE_HZ:
-		OCR1A = TIMER_FIVE_HZ_NUM;
-		sensorRate = RATE_FIVE_HZ;
-		break;
+			OCR1A = TIMER_FIVE_HZ_NUM;
+			sensorRate = RATE_FIVE_HZ;
+			break;
 		
 		case RATE_ONE_SEC:
-		OCR1A = TIMER_ONE_HZ_NUM;
-		sensorRate = RATE_ONE_SEC;
-		break;
+			OCR1A = TIMER_ONE_HZ_NUM;
+			sensorRate = RATE_ONE_SEC;
+			break;
 		
 		case RATE_FIVE_SEC:
-		OCR1A = TIMER_ONE_HZ_NUM;
-		sensorRate = RATE_FIVE_SEC;
-		break;
+			OCR1A = TIMER_ONE_HZ_NUM;
+			sensorRate = RATE_FIVE_SEC;
+			break;
 		
 		case RATE_TEN_SEC:
-		OCR1A = TIMER_ONE_HZ_NUM;
-		sensorRate = RATE_TEN_SEC;
-		break;
+			OCR1A = TIMER_ONE_HZ_NUM;
+			sensorRate = RATE_TEN_SEC;
+			break;
 		
 		case RATE_THIRTY_SEC:
-		OCR1A = TIMER_ONE_HZ_NUM;
-		sensorRate = RATE_THIRTY_SEC;
-		break;
+			OCR1A = TIMER_ONE_HZ_NUM;
+			sensorRate = RATE_THIRTY_SEC;
+			break;
 		
 		case RATE_ONE_MIN:
-		OCR1A = TIMER_ONE_HZ_NUM;
-		sensorRate = RATE_ONE_MIN;
-		break;
+			OCR1A = TIMER_ONE_HZ_NUM;
+			sensorRate = RATE_ONE_MIN;
+			break;
 		
 		case RATE_TEN_MIN:
-		OCR1A = TIMER_ONE_HZ_NUM;
-		sensorRate = RATE_TEN_MIN;
-		break;
+			OCR1A = TIMER_ONE_HZ_NUM;
+			sensorRate = RATE_TEN_MIN;
+			break;
 		
 		case RATE_THIRTY_MIN:
-		OCR1A = TIMER_ONE_HZ_NUM;
-		sensorRate = RATE_THIRTY_MIN;
-		break;
+			OCR1A = TIMER_ONE_HZ_NUM;
+			sensorRate = RATE_THIRTY_MIN;
+			break;
 		
 		case RATE_ONE_HOUR:
-		OCR1A = TIMER_ONE_HZ_NUM;
-		sensorRate = RATE_ONE_HOUR;
-		break;
+			OCR1A = TIMER_ONE_HZ_NUM;
+			sensorRate = RATE_ONE_HOUR;
+			break;
 		
 	}
 	secondCounter = 0;
@@ -152,6 +159,15 @@ void setSensorFreq(int arg_cnt, char **args) {
 	TCCR1B|=(1<<CS10) | (1<<CS12); // Enable Timer1 with prescaler of F_CPU/1024 (128uS / tick)
 }
 
+void sendSensorType() {
+	sensorRate_t tempRate = sensorRate;
+	memset(data.sensorDataRaw,0,RAW_DATA_SIZE);
+	memset(data.sensorDataStr,0,STR_DATA_SIZE);
+	sensorRate = RATE_INFO;
+	writeBaseUnitData(&data);
+	sensorRate = tempRate;
+}
+
 int main(void) {
 	_delay_ms(100);
 	initBoard();
@@ -161,6 +177,10 @@ int main(void) {
 	
 	cmdInit();
 	cmdAdd("SF",setSensorFreq);
+	
+	_delay_ms(1000);
+	
+	sendSensorType();
 		
 	// enable global interrupts
 	sei();

@@ -32,6 +32,7 @@ public final class SensorConst {
     public static final int RATE_TEN_MIN = 8;
     public static final int RATE_THIRTY_MIN = 9;
     public static final int RATE_ONE_HOUR = 10;
+    public static final int RATE_INFO = 11;
 
     public static final int ACCEL_UNIT_G = 0;
     public static final int ACCEL_UNIT_MS = 1;

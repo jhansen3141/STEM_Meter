@@ -123,4 +123,9 @@ public class MAG_MAG3110 extends Sensor {
 
         shouldZero = false;
     }
+
+    @Override
+    public String getSensorOffString() {
+        return "Magnetometer - OFF";
+    }
 }

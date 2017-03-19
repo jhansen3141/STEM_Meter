@@ -6,7 +6,7 @@
     <ListView
         android:id="@android:id/list"
         android:layout_width="match_parent"
-        android:layout_height="251dp" />
+        android:layout_height="275dp" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -26,9 +26,9 @@
 
                     <Button
                         android:id="@+id/ZeroButton"
-                        android:layout_width="130dp"
-                        android:layout_height="70dp"
-                        android:layout_marginTop="5dp"
+                        android:layout_width="125dp"
+                        android:layout_height="60dp"
+                        android:layout_marginTop="2dp"
                         android:layout_gravity="center"
                         android:focusable="false"
                         android:text="Zero Sensor"
@@ -37,9 +37,9 @@
 
                     <Button
                         android:id="@+id/ResetZeroButton"
-                        android:layout_width="130dp"
-                        android:layout_height="70dp"
-                        android:layout_marginTop="5dp"
+                        android:layout_width="125dp"
+                        android:layout_height="60dp"
+                        android:layout_marginTop="2dp"
                         android:layout_marginStart="20dp"
                         android:layout_gravity="center"
                         android:focusable="false"
@@ -58,25 +58,25 @@
 
                     <Button
                         android:id="@+id/AllOnButton"
-                        android:layout_width="130dp"
-                        android:layout_height="70dp"
-                        android:layout_marginTop="15dp"
+                        android:layout_width="125dp"
+                        android:layout_height="60dp"
+                        android:layout_marginTop="10dp"
                         android:focusable="false"
                         android:layout_gravity="center"
                         android:focusableInTouchMode="false"
-                        android:text="All Sensors On"
+                        android:text="All On"
                         android:textSize="16sp"/>
 
                     <Button
                         android:id="@+id/AllOffButton"
-                        android:layout_width="130dp"
-                        android:layout_height="70dp"
+                        android:layout_width="125dp"
+                        android:layout_height="60dp"
                         android:layout_marginStart="20dp"
-                        android:layout_marginTop="15dp"
+                        android:layout_marginTop="10dp"
                         android:focusable="false"
                         android:layout_gravity="center"
                         android:focusableInTouchMode="false"
-                        android:text="All Sensors Off"
+                        android:text="All Off"
                         android:textSize="16sp"/>
 
                 </LinearLayout>
@@ -89,9 +89,9 @@
 
                     <Button
                         android:id="@+id/AllSDLogButton"
-                        android:layout_width="130dp"
-                        android:layout_height="70dp"
-                        android:layout_marginTop="15dp"
+                        android:layout_width="125dp"
+                        android:layout_height="60dp"
+                        android:layout_marginTop="10dp"
                         android:focusable="false"
                         android:layout_gravity="center"
                         android:focusableInTouchMode="false"
@@ -100,9 +100,9 @@
 
                     <Button
                         android:id="@+id/AllStopSDButton"
-                        android:layout_width="130dp"
-                        android:layout_height="70dp"
-                        android:layout_marginTop="15dp"
+                        android:layout_width="125dp"
+                        android:layout_height="60dp"
+                        android:layout_marginTop="10dp"
                         android:layout_marginStart="20dp"
                         android:focusable="false"
                         android:layout_gravity="center"

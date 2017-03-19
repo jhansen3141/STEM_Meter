@@ -138,6 +138,9 @@ public class Gyro_MPU6050 extends Sensor {
         }
     }
 
-
+    @Override
+    public String getSensorOffString() {
+        return "Gyroscope - OFF";
+    }
 
 }

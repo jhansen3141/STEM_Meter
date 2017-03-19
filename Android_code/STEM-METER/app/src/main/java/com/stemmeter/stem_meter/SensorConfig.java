@@ -53,4 +53,8 @@ public class SensorConfig {
         this.selected = selected;
     }
 
+    @Override
+    protected SensorConfig clone() throws CloneNotSupportedException {
+        return new SensorConfig(this.sensorNumber,this.freq,this.isSDLogging);
+    }
 }

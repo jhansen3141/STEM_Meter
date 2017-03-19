@@ -59,7 +59,7 @@ public class BaseUnit {
                     break;
                 case SensorConst.GYRO_MPU6050:
                     if( !(sensorList.get(sNum-1) instanceof Gyro_MPU6050) || (sensorList.get(sNum-1) == null)) {
-                        sensorList.set( (sNum-1), new Gyro_MPU6050(sensorData, sNum));
+                        sensorList.set( (sNum-1), new Gyro_MPU6050(sensorData, sNum) );
                     }
                     break;
                 case SensorConst.LIGHT_OPT3002:

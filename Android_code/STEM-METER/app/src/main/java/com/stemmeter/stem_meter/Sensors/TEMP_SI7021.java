@@ -109,8 +109,12 @@ public class TEMP_SI7021 extends Sensor {
     }
 
     @Override
+    public String getSensorOffString() {
+        return "Temperature Sensor - OFF";
+    }
+
+    @Override
     public String toString() {
-        // TODO add units for humidity
         String unitsString = unitList.get(units);
         return "Temperature: " + sensorStringArray[0] + unitsString + "\n" +
                 "Humidity: " + sensorStringArray[1] + "% RH";

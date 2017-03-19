@@ -39,6 +39,7 @@ public abstract class Sensor {
         // the sync number (24 bits) is held in bytes 2-4
         syncNumber = (((data[2] & 0xFF)<<16) | ((data[3] & 0xFF)<<8) | (data[4] & 0xFF));
     }
+
     public int getSyncNumber() {
         return syncNumber - syncNumberOffset;
     }
@@ -116,6 +117,8 @@ public abstract class Sensor {
     public abstract void zeroSensor();
 
     public abstract void resetZero();
+
+    public abstract String getSensorOffString();
 
     public int getNumberDataPoints() {
         return numberDataPoints;

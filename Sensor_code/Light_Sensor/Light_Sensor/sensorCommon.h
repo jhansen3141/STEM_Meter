@@ -45,7 +45,8 @@ typedef volatile enum {
 	RATE_ONE_MIN,
 	RATE_TEN_MIN,
 	RATE_THIRTY_MIN,
-	RATE_ONE_HOUR
+	RATE_ONE_HOUR,
+	RATE_INFO
 }sensorRate_t;
 
 extern sensorRate_t sensorRate;
