@@ -662,8 +662,14 @@ public class LineChartRenderer extends LineRadarRenderer {
 
             for (int j = mXBounds.min; j <= boundsRangeCount; j++) {
 
-                Entry e = dataSet.getEntryForIndex(j);
-
+                Entry e;
+                try {
+                    e = dataSet.getEntryForIndex(j);
+                }
+                catch(IndexOutOfBoundsException EX)
+                {
+                    break;
+                }
                 if (e == null) break;
 
                 mCirclesBuffer[0] = e.getX();

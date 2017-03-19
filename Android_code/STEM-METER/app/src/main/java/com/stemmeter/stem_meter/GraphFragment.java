@@ -228,7 +228,7 @@ public class GraphFragment extends Fragment {
             @Override
             public void onClick(View arg0) {
                 if (playPauseBtn.isChecked()) {
-                    playPauseBtn.setBackgroundResource(R.drawable.ic_pause_black_24dp);
+                    playPauseBtn.setBackgroundResource(R.drawable.pausenormalred);
                     playPauseBtn.setChecked(true);
                     Log.i(TAG,"Play Button Clicked");
                     if (graphFragInterface.getGraphConfig().getState() != GRAPH_STATE_PLAY) {
@@ -243,7 +243,7 @@ public class GraphFragment extends Fragment {
                 }
                 else
                 {
-                    playPauseBtn.setBackgroundResource(R.drawable.ic_fiber_manual_record_black_24dp);
+                    playPauseBtn.setBackgroundResource(R.drawable.recordingicon2);
                     playPauseBtn.setChecked(false);
                     Log.i(TAG,"Pause Button Clicked");
                     if (graphFragInterface.getGraphConfig().getState() != GRAPH_STATE_PAUSE) {
@@ -263,7 +263,7 @@ public class GraphFragment extends Fragment {
                 if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP)
                     return;
 
-                playPauseBtn.setBackgroundResource(R.drawable.ic_fiber_manual_record_black_24dp);
+                playPauseBtn.setBackgroundResource(R.drawable.recordingicon2);
                 playPauseBtn.setChecked(false);
                 graphFragInterface.getGraphConfig().setState(GRAPH_STATE_STOP);
                 mChart.clearValues();
@@ -360,12 +360,13 @@ public class GraphFragment extends Fragment {
                 mChart.fitScreen();
 
             // limit the number of visible entries
-            mChart.setVisibleXRangeMaximum((graphFragInterface.getGraphConfig().getVisibleDataNum() - 1) * selectedSensor.getRateMult());
+            if (graphFragInterface.getGraphConfig().getState() != GRAPH_STATE_STOP)
+                mChart.setVisibleXRangeMaximum((graphFragInterface.getGraphConfig().getVisibleDataNum() - 1) * selectedSensor.getRateMult());
             //Log.i(TAG, String.valueOf(graphFragInterface.getGraphConfig().getVisibleDataNum()));
             // mChart.setVisibleYRange(30, AxisDependency.LEFT);
 
             // move to the latest entry
-            mChart.moveViewToX(xValue);
+                mChart.moveViewToX(xValue);
 
         }
     }
@@ -445,11 +446,12 @@ public class GraphFragment extends Fragment {
                 mChart.fitScreen();
 
             // limit the number of visible entries
-            mChart.setVisibleXRangeMaximum((graphFragInterface.getGraphConfig().getVisibleDataNum() - 1) * selectedSensor.getRateMult());
+            if (graphFragInterface.getGraphConfig().getState() != GRAPH_STATE_STOP)
+                mChart.setVisibleXRangeMaximum((graphFragInterface.getGraphConfig().getVisibleDataNum() - 1) * selectedSensor.getRateMult());
             // mChart.setVisibleYRange(30, AxisDependency.LEFT);
 
             // move to the latest entry
-            mChart.moveViewToX(xValue);
+                mChart.moveViewToX(xValue);
 
             // this automatically refreshes the chart (calls invalidate())
             // mChart.moveViewTo(data.getXValCount()-7, 55f,
