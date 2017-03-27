@@ -278,15 +278,15 @@ public class SensorsFragment extends ListFragment {
 
                     @Override
                     public void onClick(View arg0) {
-                        if (sensorFragInterface.getGraphConfig().getSelectedSensor() != position) {
+                        if (sensorFragInterface.getGraphConfig().getSelectedSensor() != position && sensorFragInterface.getSensor(position + 1) != null) {
                             sensorFragInterface.getGraphConfig().setSelectedSensor(position);
                             listItemSelected = position;
+                            notifyDataSetChanged();
                         }
-                        notifyDataSetChanged();
                     }
                 });
 
-                if (position == sensorFragInterface.getGraphConfig().getSelectedSensor())
+                if (position == sensorFragInterface.getGraphConfig().getSelectedSensor() && sensorFragInterface.getSensor(sensorFragInterface.getGraphConfig().getSelectedSensor() + 1) != null)
                     convertView.setBackgroundColor(SensorConst.SELECTION_COLOR);
 
                 // get the text view in the layout
@@ -302,13 +302,22 @@ public class SensorsFragment extends ListFragment {
                     }
                 });
 
+                if (sensorFragInterface.getSensor(position + 1) == null)
+                {
+                    settingsButton.setVisibility(View.INVISIBLE);
+                }
+                else
+                {
+                    settingsButton.setVisibility(View.VISIBLE);
+                }
+
                 if(sensorText != null) {
                     if(sensorFragInterface.getSensorConfig(finalPosition+1).getFreq() == SensorConst.RATE_OFF ||
                             sensorFragInterface.getSensorConfig(finalPosition+1).getFreq() == SensorConst.RATE_INFO )
                     {
                         Sensor s = sensorFragInterface.getSensor(finalPosition+1);
                         if(s == null) {
-                            sensorText.setText("Sensor " + (finalPosition+1) + " -OFF");
+                            sensorText.setText("Sensor " + (finalPosition+1) + " - Disconnected");
                         }
                         else {
                             sensorText.setText(sensorFragInterface.getSensor(finalPosition + 1).getSensorOffString());
@@ -331,8 +340,8 @@ public class SensorsFragment extends ListFragment {
                         if (sensorFragInterface.getGraphConfig().getSelectedSensor() != position) {
                             sensorFragInterface.getGraphConfig().setSelectedSensor(position);
                             listItemSelected = position;
+                            notifyDataSetChanged();
                         }
-                        notifyDataSetChanged();
                     }
                     });
 
