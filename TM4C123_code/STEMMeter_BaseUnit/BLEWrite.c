@@ -33,7 +33,7 @@
 #include "FatSD.h"
 #include "Sensor.h"
 
-#define TASKSTACKSIZE       	4000
+#define TASKSTACKSIZE       	5000
 #define TASK_PRIORITY 			1
 #define SPI_BIT_RATE 			5000000
 #define SPI_CONFIG_DATA_MARKER	0xA5
