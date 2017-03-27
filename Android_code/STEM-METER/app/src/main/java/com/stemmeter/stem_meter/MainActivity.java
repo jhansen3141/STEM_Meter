@@ -534,7 +534,6 @@ public class MainActivity extends AppCompatActivity
         }
         // Determines whether to add sensor data to graph
         else if(sensor.getSensorNumber() == (graphConfig.getSelectedSensor() + 1)) {
-           // Log.i(TAG,"Check if graph Fragment is up");
             GraphFragment graphFragment = (GraphFragment)
                     getSupportFragmentManager().findFragmentByTag(GRAPH_FRAG_TAG);
             if (graphFragment != null && graphFragment.isVisible()) {
@@ -543,7 +542,7 @@ public class MainActivity extends AppCompatActivity
             }
         }
         else {
-            // Log.i(TAG,"Graph and Sensors are not up. Selected Sensor: " + graphConfig.getSelectedSensor() );
+            Log.i(TAG,"Graph and Sensors are not up. Selected Sensor: " + graphConfig.getSelectedSensor() );
         }
     }
 

@@ -28,7 +28,7 @@ public class MAG_MAG3110 extends Sensor {
     private ArrayList<String> dataPointList;
 
     public MAG_MAG3110(byte[] data, int sensorPosition) {
-        super(data, sensorPosition,4);
+        super(data, sensorPosition,3);
 
         unitList = new ArrayList<>();
         dataPointList = new ArrayList<>();
