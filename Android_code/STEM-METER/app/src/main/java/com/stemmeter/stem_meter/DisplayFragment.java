@@ -39,6 +39,7 @@ import java.util.List;
 
 import static com.stemmeter.stem_meter.R.id.ListBtn;
 import static com.stemmeter.stem_meter.R.id.chart;
+import static com.stemmeter.stem_meter.R.id.visible;
 
 /**
  * Created by monro on 2/19/2017.
@@ -260,10 +261,14 @@ public class DisplayFragment extends Fragment {
                 }
             });
 
-            if (position == selectedPosition)
+            if (position == selectedPosition) {
                 convertView.setBackgroundColor(SensorConst.SELECTION_COLOR);
-            else
+                cameraBtn.setVisibility(View.VISIBLE);
+            }
+            else {
                 convertView.setBackgroundColor(Color.WHITE);
+                cameraBtn.setVisibility(View.INVISIBLE);
+            }
 
             if (dataNameText != null)
                 dataNameText.setText(graphName.get(position));

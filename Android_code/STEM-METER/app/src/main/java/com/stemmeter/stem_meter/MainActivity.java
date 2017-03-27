@@ -599,11 +599,23 @@ public class MainActivity extends AppCompatActivity
             //transaction.addToBackStack(null);
             transaction.commit();
         } else if (id == R.id.nav_sensors) {
+            if (mConnectionState != STATE_CONNECTED)
+            {
+                Toast.makeText(this, "No STEM-Meter is connected!", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+
             SensorsFragment sensorsFragment = new SensorsFragment();
             transaction.replace(R.id.fragment_container, sensorsFragment, SENSOR_FRAG_TAG);
             //transaction.addToBackStack(null);
             transaction.commit();
         } else if (id == R.id.nav_graph) {
+            if (mConnectionState != STATE_CONNECTED)
+            {
+                Toast.makeText(this, "No STEM-Meter is connected!", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+
             GraphFragment graphFragment = new GraphFragment();
             transaction.replace(R.id.fragment_container, graphFragment, GRAPH_FRAG_TAG);
             //transaction.addToBackStack(null);

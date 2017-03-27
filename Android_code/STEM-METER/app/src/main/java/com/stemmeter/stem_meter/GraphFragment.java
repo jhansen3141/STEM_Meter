@@ -39,6 +39,7 @@ import java.text.Format;
 import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -78,6 +79,9 @@ public class GraphFragment extends Fragment {
     private String dataSetName2;
     private String dataSetName3;
     private Sensor selectedSensor;
+    private boolean noSensorConnected = true;
+    private boolean selectedSensorIsOff = true;
+    private boolean graphIsOff = true;
 
     private GraphFileStorage graphFileStorage;
 
@@ -91,7 +95,6 @@ public class GraphFragment extends Fragment {
 
         //plot = (XYPlot) view.findViewById(plot);
         mChart = (LineChart) view.findViewById(chart);
-        mChart.setNoDataText("No data for the moment");
 
         //mChart.setOnChartValueSelectedListener(this);
 
@@ -109,42 +112,62 @@ public class GraphFragment extends Fragment {
         // set an alternative background color
         mChart.setBackgroundColor(Color.WHITE);
 
-        LineData data = new LineData();
-        data.setValueTextColor(Color.BLUE);
+        selectedSensor = graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1);
+        if (selectedSensor != null) {
+            noSensorConnected = false;
+            Log.i(TAG, "Selected Sensor is not null");
+            if (selectedSensor.getSensorRate() == SensorConst.RATE_OFF || selectedSensor.getSensorRate() == SensorConst.RATE_INFO)
+                selectedSensorIsOff = true;
+            else {
+                selectedSensorIsOff = false;
+            }
+        }
 
-        // add empty data
-        mChart.setData(data);
+        graphIsOff = selectedSensorIsOff || noSensorConnected;
 
-        // get the legend (only possible after setting data)
-        Legend l = mChart.getLegend();
+        if (noSensorConnected)
+            mChart.setNoDataText("No Sensor Selected");
+        else if (selectedSensorIsOff)
+            mChart.setNoDataText("Selected Sensor is turned off");
 
-      //  mChart.getLegend().setTextSize(11f);
+        if (!graphIsOff) {
+            LineData data = new LineData();
+            data.setValueTextColor(Color.BLUE);
 
-        // modify the legend ...
-        l.setForm(Legend.LegendForm.LINE);
-        l.setTypeface(Typeface.DEFAULT);
-        l.setTextColor(Color.BLACK);
-        //l.setTextSize(12f);
+            // add empty data
+            mChart.setData(data);
 
-        XAxis xl = mChart.getXAxis();
-        xl.setTypeface(Typeface.DEFAULT);
-        xl.setTextColor(Color.BLACK);
-        xl.setDrawGridLines(false);
-        xl.setAvoidFirstLastClipping(true);
-        xl.setEnabled(true);
-        xl.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xl.setTitle("Seconds");
+            // get the legend (only possible after setting data)
+            Legend l = mChart.getLegend();
 
-        YAxis leftAxis = mChart.getAxisLeft();
-        leftAxis.setTypeface(Typeface.DEFAULT);
-        leftAxis.setTextColor(Color.BLACK);
-        //leftAxis.setAxisMaximum(0);
-        //leftAxis.setAxisMinimum(0);
-        leftAxis.setDrawGridLines(true);
-        leftAxis.setTitle(graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1).getGraphSettings().getUnits().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition()));
+            //  mChart.getLegend().setTextSize(11f);
 
-        YAxis rightAxis = mChart.getAxisRight();
-        rightAxis.setEnabled(false);
+            // modify the legend ...
+            l.setForm(Legend.LegendForm.LINE);
+            l.setTypeface(Typeface.DEFAULT);
+            l.setTextColor(Color.BLACK);
+            //l.setTextSize(12f);
+
+            XAxis xl = mChart.getXAxis();
+            xl.setTypeface(Typeface.DEFAULT);
+            xl.setTextColor(Color.BLACK);
+            xl.setDrawGridLines(false);
+            xl.setAvoidFirstLastClipping(true);
+            xl.setEnabled(true);
+            xl.setPosition(XAxis.XAxisPosition.BOTTOM);
+            xl.setTitle("Seconds");
+
+            YAxis leftAxis = mChart.getAxisLeft();
+            leftAxis.setTypeface(Typeface.DEFAULT);
+            leftAxis.setTextColor(Color.BLACK);
+            //leftAxis.setAxisMaximum(0);
+            //leftAxis.setAxisMinimum(0);
+            leftAxis.setDrawGridLines(true);
+            leftAxis.setTitle(graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1).getGraphSettings().getUnits().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition()));
+
+            YAxis rightAxis = mChart.getAxisRight();
+            rightAxis.setEnabled(false);
+        }
 
         zeroBtn = (ImageButton) view.findViewById(R.id.ZeroBtn);
         zeroBtn.setOnClickListener(new View.OnClickListener() {
@@ -196,7 +219,7 @@ public class GraphFragment extends Fragment {
                         .setCancelable(false)
                         .setPositiveButton("OK",new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog,int id) {
-                                SavedGraphData savedGraphData = new SavedGraphData(input.getText().toString(), mChart.getData(), 1, graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1).getGraphSettings().getUnits().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition()));
+                                SavedGraphData savedGraphData = new SavedGraphData(input.getText().toString() + "-" + Calendar.getInstance().getTime().toString(), mChart.getData(), 1, graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1).getGraphSettings().getUnits().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition()));
 
                                 graphFragInterface.getSavedGraphDataList().add(savedGraphData);
                                 graphFileStorage.saveGraphFile(getActivity(),graphFragInterface.getSavedGraphDataList());
@@ -228,7 +251,7 @@ public class GraphFragment extends Fragment {
             @Override
             public void onClick(View arg0) {
                 if (playPauseBtn.isChecked()) {
-                    playPauseBtn.setBackgroundResource(R.drawable.ic_pause_black_24dp);
+                    playPauseBtn.setBackgroundResource(R.drawable.pausenormalred);
                     playPauseBtn.setChecked(true);
                     Log.i(TAG,"Play Button Clicked");
                     if (graphFragInterface.getGraphConfig().getState() != GRAPH_STATE_PLAY) {
@@ -243,7 +266,7 @@ public class GraphFragment extends Fragment {
                 }
                 else
                 {
-                    playPauseBtn.setBackgroundResource(R.drawable.ic_fiber_manual_record_black_24dp);
+                    playPauseBtn.setBackgroundResource(R.drawable.recordingicon2);
                     playPauseBtn.setChecked(false);
                     Log.i(TAG,"Pause Button Clicked");
                     if (graphFragInterface.getGraphConfig().getState() != GRAPH_STATE_PAUSE) {
@@ -263,7 +286,7 @@ public class GraphFragment extends Fragment {
                 if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP)
                     return;
 
-                playPauseBtn.setBackgroundResource(R.drawable.ic_fiber_manual_record_black_24dp);
+                playPauseBtn.setBackgroundResource(R.drawable.recordingicon2);
                 playPauseBtn.setChecked(false);
                 graphFragInterface.getGraphConfig().setState(GRAPH_STATE_STOP);
                 mChart.clearValues();
@@ -271,10 +294,11 @@ public class GraphFragment extends Fragment {
             }
         });
 
-        ArrayList<Boolean> visibleDataSets = graphFragInterface.getGraphConfig().getDataPoints();
-        Sensor sensor = graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1);
+        if (!graphIsOff)
+        {
+            ArrayList<Boolean> visibleDataSets = graphFragInterface.getGraphConfig().getDataPoints();
+            Sensor sensor = graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1);
 
-        if (sensor != null) {
             ArrayList<String> dataSetNames = sensor.getGraphSettings().getDataPoints();
 
             if (visibleDataSets.get(0) && dataSetNames.size() > 0)
@@ -292,8 +316,15 @@ public class GraphFragment extends Fragment {
             if (dataSetNames.size() > 2)
             dataSetName3 = dataSetNames.get(2);
         }
+        else
+        {
+            saveBtn.setVisibility(View.INVISIBLE);
+            settingsBtn.setVisibility(View.INVISIBLE);
+            zeroBtn.setVisibility(View.INVISIBLE);
+            stopBtn.setVisibility(View.INVISIBLE);
+            playPauseBtn.setVisibility(View.INVISIBLE);
+        }
 
-        selectedSensor = graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1);
         graphFragInterface.getGraphConfig().setState(GRAPH_STATE_STOP);
         return view;
     }
@@ -302,7 +333,8 @@ public class GraphFragment extends Fragment {
     public void onResume() {
         super.onResume();
         // Zero out the x axis every time graph screen is shown
-        selectedSensor.zeroX();
+        if (!graphIsOff)
+            selectedSensor.zeroX();
     }
 
     private void addEntry(float yValue, float xValue) {
@@ -360,12 +392,13 @@ public class GraphFragment extends Fragment {
                 mChart.fitScreen();
 
             // limit the number of visible entries
-            mChart.setVisibleXRangeMaximum((graphFragInterface.getGraphConfig().getVisibleDataNum() - 1) * selectedSensor.getRateMult());
+            if (graphFragInterface.getGraphConfig().getState() != GRAPH_STATE_STOP)
+                mChart.setVisibleXRangeMaximum((graphFragInterface.getGraphConfig().getVisibleDataNum() - 1) * selectedSensor.getRateMult());
             //Log.i(TAG, String.valueOf(graphFragInterface.getGraphConfig().getVisibleDataNum()));
             // mChart.setVisibleYRange(30, AxisDependency.LEFT);
 
             // move to the latest entry
-            mChart.moveViewToX(xValue);
+                mChart.moveViewToX(xValue);
 
         }
     }
@@ -445,11 +478,12 @@ public class GraphFragment extends Fragment {
                 mChart.fitScreen();
 
             // limit the number of visible entries
-            mChart.setVisibleXRangeMaximum((graphFragInterface.getGraphConfig().getVisibleDataNum() - 1) * selectedSensor.getRateMult());
+            if (graphFragInterface.getGraphConfig().getState() != GRAPH_STATE_STOP)
+                mChart.setVisibleXRangeMaximum((graphFragInterface.getGraphConfig().getVisibleDataNum() - 1) * selectedSensor.getRateMult());
             // mChart.setVisibleYRange(30, AxisDependency.LEFT);
 
             // move to the latest entry
-            mChart.moveViewToX(xValue);
+                mChart.moveViewToX(xValue);
 
             // this automatically refreshes the chart (calls invalidate())
             // mChart.moveViewTo(data.getXValCount()-7, 55f,
