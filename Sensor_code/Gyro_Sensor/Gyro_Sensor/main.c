@@ -48,6 +48,12 @@ ISR(TIMER1_COMPA_vect) {
 			}
 			break;
 			
+		case RATE_THIRTY_SEC:
+		if( ((secondCounter % 30) == 0) || (secondCounter == 0) ) {
+			shouldRead = TRUE;
+		}
+		break;
+			
 		case RATE_ONE_MIN:
 			if(secondCounter == 0) {
 				shouldRead = TRUE;
