@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ListView
+        android:id="@android:id/list"
+        android:layout_width="match_parent"
+        android:layout_height="500dp" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/ZeroButton"
+                        android:layout_width="200dp"
+                        android:layout_height="75dp"
+                        android:layout_marginTop="2dp"
+                        android:layout_gravity="center"
+                        android:focusable="false"
+                        android:text="Zero Sensor"
+                        android:textSize="16sp"
+                        android:focusableInTouchMode="false" />
+
+                    <Button
+                        android:id="@+id/ResetZeroButton"
+                        android:layout_width="200dp"
+                        android:layout_height="75dp"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginStart="40dp"
+                        android:layout_gravity="center"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:text="Negate Zero"
+                        android:textSize="16sp"/>
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/AllOnButton"
+                        android:layout_width="200dp"
+                        android:layout_height="75dp"
+                        android:layout_marginTop="10dp"
+                        android:focusable="false"
+                        android:layout_gravity="center"
+                        android:focusableInTouchMode="false"
+                        android:text="All On"
+                        android:textSize="16sp"/>
+
+                    <Button
+                        android:id="@+id/AllOffButton"
+                        android:layout_width="200dp"
+                        android:layout_height="75dp"
+                        android:layout_marginStart="40dp"
+                        android:layout_marginTop="10dp"
+                        android:focusable="false"
+                        android:layout_gravity="center"
+                        android:focusableInTouchMode="false"
+                        android:text="All Off"
+                        android:textSize="16sp"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/AllSDLogButton"
+                        android:layout_width="200dp"
+                        android:layout_height="75dp"
+                        android:layout_marginTop="10dp"
+                        android:focusable="false"
+                        android:layout_gravity="center"
+                        android:focusableInTouchMode="false"
+                        android:text="SD Log All"
+                        android:textSize="16sp"/>
+
+                    <Button
+                        android:id="@+id/AllStopSDButton"
+                        android:layout_width="200dp"
+                        android:layout_height="75dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginStart="40dp"
+                        android:focusable="false"
+                        android:layout_gravity="center"
+                        android:focusableInTouchMode="false"
+                        android:text="SD Log None"
+                        android:textSize="16sp"/>
+
+                </LinearLayout>
+            </LinearLayout>
+    </ScrollView>
+
+
+
+</LinearLayout>

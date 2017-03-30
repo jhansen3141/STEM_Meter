@@ -3,6 +3,7 @@ package com.stemmeter.stem_meter;
 import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
@@ -54,6 +55,7 @@ public class ConnectFragment extends ListFragment {
         setListAdapter(scanListAdapter);
         graphFileStorage = new GraphFileStorage();
         connectFragInterface.setSavedGraphDataList(graphFileStorage.readGraphFiles(getActivity()));
+        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
     }
 
     @Override

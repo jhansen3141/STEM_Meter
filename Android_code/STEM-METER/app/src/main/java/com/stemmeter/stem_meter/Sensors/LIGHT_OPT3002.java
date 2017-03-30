@@ -59,8 +59,12 @@ public class LIGHT_OPT3002 extends Sensor {
         } catch (UnsupportedEncodingException e) {
             Log.i("LightSensor", "String format incorrect");
         }
-
-        opticalPower = Double.parseDouble(dataStr[0]);
+        try {
+            opticalPower = Double.parseDouble(dataStr[0]);
+        }
+        catch (NumberFormatException nfe) {
+            opticalPower = 0;
+        }
 
         if(shouldZero) {
             opticalPowerZero = -(opticalPower);

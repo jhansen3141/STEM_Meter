@@ -2,6 +2,7 @@ package com.stemmeter.stem_meter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ListFragment;
@@ -68,7 +69,7 @@ public class SensorsFragment extends ListFragment {
         sensorListAdapter.addItem("Sensor 4 - No Data");
         setListAdapter(sensorListAdapter);
 
-        //getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
     }
 
     @Override

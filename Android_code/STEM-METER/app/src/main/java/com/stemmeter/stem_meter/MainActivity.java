@@ -474,7 +474,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mBluetoothGatt.disconnect();
+        if(mBluetoothGatt != null) {
+            mBluetoothGatt.disconnect();
+        }
         boardDevice = null;
         mBluetoothManager = null;
         mBluetoothAdapter = null;
@@ -666,6 +668,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void querySensorTypes()  {
+        Log.i(TAG,"Getting Sensor Types");
         ArrayList<SensorConfig> configTemp = new ArrayList<>();
 
         for(SensorConfig config : sensorConfigList) {
@@ -677,9 +680,11 @@ public class MainActivity extends AppCompatActivity
             config.setFreq(SensorConst.RATE_INFO);
         }
         writeAllSensorConfigs();
-
+        Log.i(TAG,"Reverting sensor configs after info update");
         for(int i=0; i<4; i++) {
             sensorConfigList.get(i).setFreq(configTemp.get(i).getFreq());
+            Log.i(TAG,"S" + (i+1) + " " +  sensorConfigList.get(i));
+
         }
         writeAllSensorConfigs();
     }
