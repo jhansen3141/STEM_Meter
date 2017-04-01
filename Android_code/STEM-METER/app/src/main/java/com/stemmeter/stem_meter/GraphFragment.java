@@ -115,7 +115,7 @@ public class GraphFragment extends Fragment {
         selectedSensor = graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1);
         if (selectedSensor != null) {
             noSensorConnected = false;
-            Log.i(TAG, "Selected Sensor is not null");
+           // Log.i(TAG, "Selected Sensor is not null");
             if (selectedSensor.getSensorRate() == SensorConst.RATE_OFF || selectedSensor.getSensorRate() == SensorConst.RATE_INFO)
                 selectedSensorIsOff = true;
             else {
@@ -253,7 +253,7 @@ public class GraphFragment extends Fragment {
                 if (playPauseBtn.isChecked()) {
                     playPauseBtn.setBackgroundResource(R.drawable.pausenormalred);
                     playPauseBtn.setChecked(true);
-                    Log.i(TAG,"Play Button Clicked");
+                  //  Log.i(TAG,"Play Button Clicked");
                     if (graphFragInterface.getGraphConfig().getState() != GRAPH_STATE_PLAY) {
                         graphFragInterface.getGraphConfig().setState(GRAPH_STATE_PLAY);
                         mChart.clearValues();
@@ -268,7 +268,7 @@ public class GraphFragment extends Fragment {
                 {
                     playPauseBtn.setBackgroundResource(R.drawable.recordingicon2);
                     playPauseBtn.setChecked(false);
-                    Log.i(TAG,"Pause Button Clicked");
+               //     Log.i(TAG,"Pause Button Clicked");
                     if (graphFragInterface.getGraphConfig().getState() != GRAPH_STATE_PAUSE) {
                         graphFragInterface.getGraphConfig().setState(GRAPH_STATE_PAUSE);
                         saveBtn.setEnabled(true);
@@ -540,7 +540,7 @@ public class GraphFragment extends Fragment {
                         float before = entry.getX();
                         entry.setX(entry.getX() - selectedSensor.getRateMult());
                         float after = entry.getX();
-                        Log.i(TAG, "Before: " + String.valueOf(before) + " After: " + String.valueOf(after));
+                       // Log.i(TAG, "Before: " + String.valueOf(before) + " After: " + String.valueOf(after));
                     }
                 }
 

@@ -190,7 +190,7 @@ public class ConnectFragment extends ListFragment {
                 rssiProgressBar.setProgress(140+bleDeviceList.get(position).getRssi());
             }
             catch (NullPointerException npe) {
-                Log.i(TAG,"View Item Null");
+              //  Log.i(TAG,"View Item Null");
             }
 
             connectButton.setOnClickListener(new View.OnClickListener() {

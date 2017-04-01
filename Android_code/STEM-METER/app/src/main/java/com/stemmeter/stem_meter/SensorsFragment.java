@@ -194,7 +194,7 @@ public class SensorsFragment extends ListFragment {
             sensorFragInterface.readSensorConfigData();
         }
         else {
-            Log.i("MainActivity","All Ready Updated");
+           // Log.i("MainActivity","All Ready Updated");
         }
     }
 
@@ -235,7 +235,7 @@ public class SensorsFragment extends ListFragment {
                 }
                 catch (Exception e)
                 {
-                    Log.i(TAG,"Did not update view. Exception");
+                   // Log.i(TAG,"Did not update view. Exception");
                 }
 
                 if(v == null) {
@@ -385,7 +385,7 @@ public class SensorsFragment extends ListFragment {
                         // Write the new config to the base unit over BLE
                         sensorFragInterface.sensorConfigWrite(config);
 
-                        Log.i(TAG,"FS:" + freqSelected);
+                      //  Log.i(TAG,"FS:" + freqSelected);
                     }
 
                     @Override

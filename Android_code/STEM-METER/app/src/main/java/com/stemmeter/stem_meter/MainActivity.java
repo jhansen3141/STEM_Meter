@@ -211,7 +211,7 @@ public class MainActivity extends AppCompatActivity
         switch (requestCode) {
             case PERMISSION_REQUEST_COARSE_LOCATION: {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.d(TAG, "coarse location permission granted");
+                   // Log.d(TAG, "coarse location permission granted");
                     ConnectFragment connectFragment = new ConnectFragment();
                     getSupportFragmentManager().beginTransaction()
                             .add(R.id.fragment_container, connectFragment, CONNECT_FRAG_TAG).commit();
@@ -259,7 +259,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void scanLeDevice(final boolean enable) {
-        Log.i(TAG, "Scanning...");
+        //Log.i(TAG, "Scanning...");
         mHandler = new Handler();
         if (enable) {
             // Stops scanning after a pre-defined scan period.
@@ -271,13 +271,13 @@ public class MainActivity extends AppCompatActivity
                     if(mConnectionState == BluetoothProfile.STATE_DISCONNECTED) {
                         printConnectionStat("Disconnected");
                     }
-                    Log.i(TAG, "Stopped Scanning");
+                    //Log.i(TAG, "Stopped Scanning");
                 }
             }, SensorConst.SCAN_TIME_MS);
 
             mScanning = true;
             mBluetoothAdapter.startLeScan(mLeScanCallback);
-            Log.i(TAG, "Scanning...");
+           // Log.i(TAG, "Scanning...");
 
         } else {
             mScanning = false;
@@ -309,7 +309,7 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
                     super.onDescriptorWrite(gatt, descriptor, status);
-                    Log.i(TAG, "Des Written " + descriptor + " " + status);
+                   // Log.i(TAG, "Des Written " + descriptor + " " + status);
                     if (!gattDescriptors.isEmpty()) {
                         gatt.writeDescriptor(gattDescriptors.remove());
                     }
@@ -320,14 +320,14 @@ public class MainActivity extends AppCompatActivity
                     if (newState == BluetoothProfile.STATE_CONNECTED) {
                         mConnectionState = STATE_CONNECTED;
 
-                        Log.i(TAG, "Connected to GATT server.");
-                        Log.i(TAG, "Attempting to start service discovery:" + mBluetoothGatt.discoverServices());
+                       // Log.i(TAG, "Connected to GATT server.");
+                       // Log.i(TAG, "Attempting to start service discovery:" + mBluetoothGatt.discoverServices());
                         printConnectionStat("Connected to GATT server. Starting service discovery");
 
 
                     } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                         mConnectionState = STATE_DISCONNECTED;
-                        Log.i(TAG, "Disconnected from GATT server.");
+                     //   Log.i(TAG, "Disconnected from GATT server.");
                         printConnectionStat("Disconnected from GATT server");
 
                         // change the connection status icon to disconnected
@@ -344,7 +344,7 @@ public class MainActivity extends AppCompatActivity
                 // Services discovered
                 public void onServicesDiscovered(BluetoothGatt gatt, int status) {
                     if (status == BluetoothGatt.GATT_SUCCESS) {
-                        Log.i(TAG, "Services Discovered");
+                       // Log.i(TAG, "Services Discovered");
                         printConnectionStat("Services Discovered");
                         BoardService = mBluetoothGatt.getService(SM_SERVICE_UUID);
                         try {
@@ -395,7 +395,7 @@ public class MainActivity extends AppCompatActivity
                         });
 
                     } else {
-                        Log.w(TAG, "onServicesDiscovered received: " + status);
+                       // Log.w(TAG, "onServicesDiscovered received: " + status);
                     }
                 }
 
@@ -409,7 +409,7 @@ public class MainActivity extends AppCompatActivity
                         }
                         else if (characteristic == BoardBatteryInfoChar) {
                             String charString = characteristic.getStringValue(0);
-                            Log.i(TAG, "Bat Char: " + charString);
+                           // Log.i(TAG, "Bat Char: " + charString);
                             baseUnit.getBaseUnitBattery().updateBatteryValues(charString);
                             new Handler(Looper.getMainLooper()).post(new Runnable() {
                                 @Override
@@ -425,7 +425,7 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
                     writeFinished = true;
-                    Log.i(TAG, "CHAR WRITE FINISHED");
+                 //  Log.i(TAG, "CHAR WRITE FINISHED");
                 }
 
                 @Override
@@ -456,7 +456,7 @@ public class MainActivity extends AppCompatActivity
         // Byte 2 = S2 Freq | Byte 3 = S2 SD Log
         // Byte 4 = S3 Freq | Byte 5 = S3 SD Log
         // Byte 6 = S4 Freq | Byte 7 = S4 SD Log
-        Log.i(TAG,"Updating sensor config objects");
+      //  Log.i(TAG,"Updating sensor config objects");
 
         sensorConfigList.get(0).setFreq((int) configData[0]);
         sensorConfigList.get(0).setSDLogging(configData[1] == 1);
@@ -510,7 +510,7 @@ public class MainActivity extends AppCompatActivity
         timeData[5] = minutes;
         timeData[6] = seconds;
 
-        Log.i(TAG,"Setting Base Unit Time...");
+        //Log.i(TAG,"Setting Base Unit Time...");
         return writeCharacteristic(BoardTimeConfigChar, timeData);
     }
 
@@ -544,7 +544,7 @@ public class MainActivity extends AppCompatActivity
             }
         }
         else {
-            Log.i(TAG,"Graph and Sensors are not up. Selected Sensor: " + graphConfig.getSelectedSensor() );
+           // Log.i(TAG,"Graph and Sensors are not up. Selected Sensor: " + graphConfig.getSelectedSensor() );
         }
     }
 
@@ -685,7 +685,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void querySensorTypes()  {
-        Log.i(TAG,"Getting Sensor Types");
+      //  Log.i(TAG,"Getting Sensor Types");
         ArrayList<SensorConfig> configTemp = new ArrayList<>();
 
         for(SensorConfig config : sensorConfigList) {
@@ -697,10 +697,10 @@ public class MainActivity extends AppCompatActivity
             config.setFreq(SensorConst.RATE_INFO);
         }
         writeAllSensorConfigs();
-        Log.i(TAG,"Reverting sensor configs after info update");
+      //  Log.i(TAG,"Reverting sensor configs after info update");
         for(int i=0; i<4; i++) {
             sensorConfigList.set(i,configTemp.get(i));
-            Log.i(TAG,"S" + (i+1) + " " +  sensorConfigList.get(i));
+     //       Log.i(TAG,"S" + (i+1) + " " +  sensorConfigList.get(i));
 
         }
         writeAllSensorConfigs();
@@ -799,7 +799,7 @@ public class MainActivity extends AppCompatActivity
         byte[] dataToSend = new byte[20];
 
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
-            Log.w(TAG, "BluetoothAdapter not initialized");
+          //  Log.w(TAG, "BluetoothAdapter not initialized");
             return false;
         }
 
@@ -812,7 +812,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         try {
-            Log.i(TAG, "Sending: " + dataToSend[0] + " " + dataToSend[1] + " " + dataToSend[2]);
+          //  Log.i(TAG, "Sending: " + dataToSend[0] + " " + dataToSend[1] + " " + dataToSend[2]);
             characteristic.setValue(dataToSend);
             mBluetoothGatt.writeCharacteristic(characteristic);
         } catch (NullPointerException npe) {
@@ -825,7 +825,7 @@ public class MainActivity extends AppCompatActivity
     // Overloaded method to write char data in string (ASCII) form
     public boolean writeCharacteristic(BluetoothGattCharacteristic characteristic, String data) {
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
-            Log.w(TAG, "BluetoothAdapter not initialized");
+         //   Log.w(TAG, "BluetoothAdapter not initialized");
             return false;
         }
 
@@ -834,7 +834,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         try {
-            Log.i(TAG, "Sending: " + data);
+        //    Log.i(TAG, "Sending: " + data);
             characteristic.setValue(data);
             mBluetoothGatt.writeCharacteristic(characteristic);
         } catch (NullPointerException npe) {
@@ -850,10 +850,10 @@ public class MainActivity extends AppCompatActivity
 
     boolean waitForWrite() {
         long end = System.currentTimeMillis() + 5 * 1000; // 2 second timeout
-        Log.i(TAG, "Waiting for write to complete");
+      //  Log.i(TAG, "Waiting for write to complete");
         while (!writeFinished) {
             if (System.currentTimeMillis() > end) {
-                Log.e(TAG, "Write Timeout");
+               // Log.e(TAG, "Write Timeout");
                 return false;
             }
             try {
@@ -863,7 +863,7 @@ public class MainActivity extends AppCompatActivity
             }
         }
         writeFinished = false;
-        Log.i(TAG, "Write complete");
+        //Log.i(TAG, "Write complete");
 
         return true;
     }
