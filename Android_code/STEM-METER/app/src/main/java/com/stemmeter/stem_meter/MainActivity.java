@@ -521,7 +521,9 @@ public class MainActivity extends AppCompatActivity
             Log.i(TAG, "Reading Sensor Config");
             // Read the current config values from base unit
             // Once read callback will update config objects
-            mBluetoothGatt.readCharacteristic(BoardSensorConfigChar);
+            if(mBluetoothGatt != null) {
+                mBluetoothGatt.readCharacteristic(BoardSensorConfigChar);
+            }
         }
     }
 
