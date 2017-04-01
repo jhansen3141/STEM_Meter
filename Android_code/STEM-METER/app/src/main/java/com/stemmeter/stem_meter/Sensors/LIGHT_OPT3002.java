@@ -24,6 +24,7 @@ public class LIGHT_OPT3002 extends Sensor {
     private int units = SensorConst.LIGHT_UNIT_UW;
     private ArrayList<String> unitList;
     private ArrayList<String> dataPointList;
+    private double opticalPowerLast = 0;
 
     public LIGHT_OPT3002(byte[] data, int sensorPosition) {
         super(data, sensorPosition,1);
@@ -63,8 +64,10 @@ public class LIGHT_OPT3002 extends Sensor {
             opticalPower = Double.parseDouble(dataStr[0]);
         }
         catch (NumberFormatException nfe) {
-            opticalPower = 0;
+            opticalPower = opticalPowerLast;
         }
+
+        opticalPowerLast = opticalPower;
 
         if(shouldZero) {
             opticalPowerZero = -(opticalPower);

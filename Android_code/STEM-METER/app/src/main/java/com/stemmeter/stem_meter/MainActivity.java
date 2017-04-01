@@ -620,18 +620,35 @@ public class MainActivity extends AppCompatActivity
 
             GraphFragment graphFragment = new GraphFragment();
             transaction.replace(R.id.fragment_container, graphFragment, GRAPH_FRAG_TAG);
-            //transaction.addToBackStack(null);
             transaction.commit();
         } else if (id == R.id.nav_display) {
             DisplayFragment displayFragment = new DisplayFragment();
             transaction.replace(R.id.fragment_container, displayFragment, DISPLAY_FRAG_TAG);
-            //transaction.addToBackStack(null);
             transaction.commit();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void switchFragments(int fragNum) {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        switch(fragNum) {
+            case 0:
+                GraphFragment graphFragment = new GraphFragment();
+                transaction.replace(R.id.fragment_container, graphFragment, GRAPH_FRAG_TAG);
+                transaction.commit();
+                break;
+            case 1:
+                ConnectFragment connectFragment = new ConnectFragment();
+                transaction.replace(R.id.fragment_container, connectFragment, CONNECT_FRAG_TAG);
+                transaction.commit();
+                break;
+        }
+
+
     }
 
     @Override
@@ -682,7 +699,7 @@ public class MainActivity extends AppCompatActivity
         writeAllSensorConfigs();
         Log.i(TAG,"Reverting sensor configs after info update");
         for(int i=0; i<4; i++) {
-            sensorConfigList.get(i).setFreq(configTemp.get(i).getFreq());
+            sensorConfigList.set(i,configTemp.get(i));
             Log.i(TAG,"S" + (i+1) + " " +  sensorConfigList.get(i));
 
         }

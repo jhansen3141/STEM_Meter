@@ -38,6 +38,7 @@ public class SensorsFragment extends ListFragment {
     private Button sdLogAllButton;
     private Button sdLogNoneButton;
 
+    private boolean hasReadConfig = false;
     private int listItemSelected = 0;
 
 
@@ -55,6 +56,7 @@ public class SensorsFragment extends ListFragment {
         boolean sensorConfigSDAllOff();
         void querySensorTypes();
         boolean writeAllSensorConfigs();
+        void switchFragments(int fragNum);
     }
 
     @Override
@@ -170,7 +172,7 @@ public class SensorsFragment extends ListFragment {
                 }
             });
         }
-        else {
+        else if(sensorFragInterface.getSensorConfig(sensorNum).getFreq() == SensorConst.RATE_INFO) {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -183,11 +185,17 @@ public class SensorsFragment extends ListFragment {
     @Override
     public void onResume() {
         super.onResume();
-        sensorFragInterface.querySensorTypes();
-        // Update the base unit time
-        sensorFragInterface.updateBaseUnitTime();
-        // Read the current sensor config settings from base unit
-        sensorFragInterface.readSensorConfigData();
+        if (!hasReadConfig) {
+            hasReadConfig = true;
+            sensorFragInterface.querySensorTypes();
+            // Update the base unit time
+            sensorFragInterface.updateBaseUnitTime();
+            // Read the current sensor config settings from base unit
+            sensorFragInterface.readSensorConfigData();
+        }
+        else {
+            Log.i("MainActivity","All Ready Updated");
+        }
     }
 
     private class SensorListAdapter extends BaseAdapter {
@@ -287,8 +295,9 @@ public class SensorsFragment extends ListFragment {
                     }
                 });
 
-                if (position == sensorFragInterface.getGraphConfig().getSelectedSensor() && sensorFragInterface.getSensor(sensorFragInterface.getGraphConfig().getSelectedSensor() + 1) != null)
+                if (position == sensorFragInterface.getGraphConfig().getSelectedSensor() && sensorFragInterface.getSensor(sensorFragInterface.getGraphConfig().getSelectedSensor() + 1) != null) {
                     convertView.setBackgroundColor(SensorConst.SELECTION_COLOR);
+                }
 
                 // get the text view in the layout
                 sensorText = (TextView) convertView.findViewById(R.id.sensorDataTextView);
@@ -335,7 +344,6 @@ public class SensorsFragment extends ListFragment {
                 sdCheck = (CheckedTextView) altView.findViewById(R.id.checkedTextViewSD);
                 frequencySpinner = (Spinner) altView.findViewById(R.id.FrequencySpinner);
                 altView.setOnClickListener(new View.OnClickListener() {
-
                     @Override
                     public void onClick(View arg0) {
                         if (sensorFragInterface.getGraphConfig().getSelectedSensor() != position) {
@@ -344,7 +352,7 @@ public class SensorsFragment extends ListFragment {
                             notifyDataSetChanged();
                         }
                     }
-                    });
+                });
 
                 if (position == sensorFragInterface.getGraphConfig().getSelectedSensor()) {
                     altView.setBackgroundColor(SensorConst.SELECTION_COLOR);
