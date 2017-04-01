@@ -320,10 +320,8 @@ public class MainActivity extends AppCompatActivity
                     if (newState == BluetoothProfile.STATE_CONNECTED) {
                         mConnectionState = STATE_CONNECTED;
 
-                       // Log.i(TAG, "Connected to GATT server.");
-                       // Log.i(TAG, "Attempting to start service discovery:" + mBluetoothGatt.discoverServices());
                         printConnectionStat("Connected to GATT server. Starting service discovery");
-
+                        mBluetoothGatt.discoverServices();
 
                     } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                         mConnectionState = STATE_DISCONNECTED;
