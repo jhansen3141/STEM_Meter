@@ -142,4 +142,7 @@ public class PRESSURE_MPL3115A2 extends Sensor {
     public String getSensorOffString() {
         return "Air Pressure Sensor - OFF";
     }
+
+    @Override
+    public int getSensorType() {return SensorConst.PRESSURE_MPL3115A2; }
 }

@@ -153,4 +153,7 @@ public class Accel_MPU6050 extends Sensor {
         return "Accelerometer - OFF";
     }
 
+    @Override
+    public int getSensorType() {return SensorConst.ACCEL_MPU6050; }
+
 }

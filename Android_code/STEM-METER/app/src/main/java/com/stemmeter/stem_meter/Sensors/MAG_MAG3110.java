@@ -128,4 +128,7 @@ public class MAG_MAG3110 extends Sensor {
     public String getSensorOffString() {
         return "Magnetometer - OFF";
     }
+
+    @Override
+    public int getSensorType() {return SensorConst.MAG_MAG3110; }
 }

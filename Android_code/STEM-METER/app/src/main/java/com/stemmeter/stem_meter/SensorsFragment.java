@@ -269,6 +269,7 @@ public class SensorsFragment extends ListFragment {
         public View getView(final int position, View convertView, ViewGroup parent) {
             final TextView sensorText;
             final ImageButton settingsButton;
+            final ImageButton sensorImage;
             final ImageButton ListButton;
             final CheckedTextView sdCheck;
             final Spinner frequencySpinner;
@@ -311,6 +312,39 @@ public class SensorsFragment extends ListFragment {
                         notifyDataSetChanged();
                     }
                 });
+
+
+                sensorImage = (ImageButton) convertView.findViewById(R.id.SensorImage);
+
+                if (sensorFragInterface.getSensor(position + 1) != null) {
+                    switch (sensorFragInterface.getSensor(position + 1).getSensorType()) {
+                        case SensorConst.ACCEL_MPU6050:
+                            sensorImage.setBackgroundResource(R.drawable.acceleration);
+                            break;
+                        case SensorConst.GYRO_MPU6050:
+                            sensorImage.setBackgroundResource(R.drawable.gyroscope);
+                            break;
+                        case SensorConst.LIGHT_OPT3002:
+                            sensorImage.setBackgroundResource(R.drawable.light);
+                            break;
+                        case SensorConst.MAG_MAG3110:
+                            sensorImage.setBackgroundResource(R.drawable.magnetometer);
+                            break;
+                        case SensorConst.PRESSURE_MPL3115A2:
+                            sensorImage.setBackgroundResource(R.drawable.air_pressure);
+                            break;
+                        case SensorConst.TEMP_MCP9808:
+                            sensorImage.setBackgroundResource(R.drawable.temperature);
+                            break;
+                        case SensorConst.TEMP_SI7021:
+                            sensorImage.setBackgroundResource(R.drawable.temperature);
+                            break;
+                    }
+                    sensorImage.setVisibility(View.VISIBLE);
+                }
+                else {
+                    sensorImage.setVisibility(View.INVISIBLE);
+                }
 
                 if (sensorFragInterface.getSensor(position + 1) == null)
                 {

@@ -143,4 +143,7 @@ public class Gyro_MPU6050 extends Sensor {
         return "Gyroscope - OFF";
     }
 
+    @Override
+    public int getSensorType() {return SensorConst.GYRO_MPU6050; }
+
 }

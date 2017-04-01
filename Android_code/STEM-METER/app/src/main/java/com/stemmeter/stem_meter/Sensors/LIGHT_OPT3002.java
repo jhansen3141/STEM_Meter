@@ -134,4 +134,7 @@ public class LIGHT_OPT3002 extends Sensor {
     public String getSensorOffString() {
         return "Light Sensor - OFF";
     }
+
+    @Override
+    public int getSensorType() {return SensorConst.LIGHT_OPT3002; }
 }
