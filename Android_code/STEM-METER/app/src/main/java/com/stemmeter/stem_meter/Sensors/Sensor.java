@@ -120,6 +120,8 @@ public abstract class Sensor {
 
     public abstract String getSensorOffString();
 
+    public abstract int getSensorType();
+
     public int getNumberDataPoints() {
         return numberDataPoints;
     }

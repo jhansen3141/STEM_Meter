@@ -119,4 +119,7 @@ public class TEMP_SI7021 extends Sensor {
         return "Temperature: " + sensorStringArray[0] + unitsString + "\n" +
                 "Humidity: " + sensorStringArray[1] + "% RH";
     }
+
+    @Override
+    public int getSensorType() {return SensorConst.TEMP_SI7021; }
 }
