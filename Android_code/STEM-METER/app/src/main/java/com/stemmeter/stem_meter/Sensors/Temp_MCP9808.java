@@ -107,8 +107,6 @@ public class Temp_MCP9808 extends Sensor {
         return "Temperature: " + sensorStringArray[0] + unitsString;
     }
 
-    @Override
-    public int getSensorType() {return SensorConst.TEMP_MCP9808; }
 
 
 }
