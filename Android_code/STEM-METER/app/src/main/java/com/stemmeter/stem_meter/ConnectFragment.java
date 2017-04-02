@@ -25,7 +25,7 @@ import java.util.ArrayList;
 
 
 /**
- * Created by Josh on 11/28/2016.
+ * Created by Josh on 1/28/2017.
  */
 
 public class ConnectFragment extends ListFragment {
@@ -192,6 +192,13 @@ public class ConnectFragment extends ListFragment {
             catch (NullPointerException npe) {
               //  Log.i(TAG,"View Item Null");
             }
+
+            convertView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    connectFragInterface.BoardConnect(scanListAdapter.getItem(position).getBluetoothDevice());
+                }
+            });
 
             connectButton.setOnClickListener(new View.OnClickListener() {
 

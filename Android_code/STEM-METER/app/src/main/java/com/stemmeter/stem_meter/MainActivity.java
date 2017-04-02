@@ -30,20 +30,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
-import android.widget.BaseAdapter;
 import android.widget.Toast;
 
-import com.github.mikephil.charting.data.LineData;
-import com.stemmeter.stem_meter.Sensors.Accel_MPU6050;
-import com.stemmeter.stem_meter.Sensors.Gyro_MPU6050;
-import com.stemmeter.stem_meter.Sensors.LIGHT_OPT3002;
-import com.stemmeter.stem_meter.Sensors.MAG_MAG3110;
-import com.stemmeter.stem_meter.Sensors.PRESSURE_MPL3115A2;
 import com.stemmeter.stem_meter.Sensors.Sensor;
-import com.stemmeter.stem_meter.Sensors.TEMP_SI7021;
-import com.stemmeter.stem_meter.Sensors.Temp_MCP9808;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -124,6 +114,9 @@ public class MainActivity extends AppCompatActivity
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
     private static final int PERMISSION_REQUEST_WRITE_EXTERNAL = 2;
 
+    private boolean oneTimeRun = false;
+    private NavigationView navigationView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -151,7 +144,7 @@ public class MainActivity extends AppCompatActivity
         graphConfig = new GraphConfig();
 
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
         //noinspection RestrictedApi
         navigationView.setNavigationItemSelectedListener(this);
 
@@ -211,10 +204,14 @@ public class MainActivity extends AppCompatActivity
         switch (requestCode) {
             case PERMISSION_REQUEST_COARSE_LOCATION: {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                   // Log.d(TAG, "coarse location permission granted");
-                    ConnectFragment connectFragment = new ConnectFragment();
-                    getSupportFragmentManager().beginTransaction()
-                            .add(R.id.fragment_container, connectFragment, CONNECT_FRAG_TAG).commit();
+                   try {
+                       ConnectFragment connectFragment = new ConnectFragment();
+                       getSupportFragmentManager().beginTransaction()
+                               .add(R.id.fragment_container, connectFragment, CONNECT_FRAG_TAG).commit();
+                   }
+                   catch (Exception e) {
+
+                   }
                 } else {
                     final AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setTitle("Functionality limited");
@@ -333,6 +330,7 @@ public class MainActivity extends AppCompatActivity
                             @Override
                             public void run() {
                                 mainMenu.findItem(R.id.connection_icon).setIcon(R.drawable.disconnected_icon);
+                                switchFragments(SensorConst.CONNECT_FRAG_ID);
                             }
                         });
                     }
@@ -391,9 +389,6 @@ public class MainActivity extends AppCompatActivity
                                 mainMenu.findItem(R.id.connection_icon).setIcon(R.drawable.ble_connected);
                             }
                         });
-
-                    } else {
-                       // Log.w(TAG, "onServicesDiscovered received: " + status);
                     }
                 }
 
@@ -529,7 +524,6 @@ public class MainActivity extends AppCompatActivity
     public void postSensorData(Sensor sensor) {
         SensorsFragment sensorsFragment = (SensorsFragment)
                 getSupportFragmentManager().findFragmentByTag(SENSOR_FRAG_TAG);
-       // Log.i(TAG,"Check if Sensors are up");
         // if the sensor fragment is showing print the data there
         if (sensorsFragment != null && sensorsFragment.isVisible()) {
             sensorsFragment.printSensorData(sensor.getSensorNumber(), sensor.toString());
@@ -542,9 +536,6 @@ public class MainActivity extends AppCompatActivity
                 // get ArrayList of graph floats
                 graphFragment.addGraphEntry(sensor.getGraphData(), sensor.getNumberDataPoints());
             }
-        }
-        else {
-           // Log.i(TAG,"Graph and Sensors are not up. Selected Sensor: " + graphConfig.getSelectedSensor() );
         }
     }
 
@@ -574,7 +565,6 @@ public class MainActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             if (mBluetoothAdapter == null || mBluetoothGatt == null ||  mConnectionState == STATE_DISCONNECTED) {
                 Toast.makeText(this,"Not Connected", Toast.LENGTH_SHORT).show();
@@ -601,19 +591,15 @@ public class MainActivity extends AppCompatActivity
             //transaction.addToBackStack(null);
             transaction.commit();
         } else if (id == R.id.nav_sensors) {
-            if (mConnectionState != STATE_CONNECTED)
-            {
+            if (mConnectionState != STATE_CONNECTED) {
                 Toast.makeText(this, "No STEM-Meter is connected!", Toast.LENGTH_SHORT).show();
                 return false;
             }
-
             SensorsFragment sensorsFragment = new SensorsFragment();
             transaction.replace(R.id.fragment_container, sensorsFragment, SENSOR_FRAG_TAG);
-            //transaction.addToBackStack(null);
             transaction.commit();
         } else if (id == R.id.nav_graph) {
-            if (mConnectionState != STATE_CONNECTED)
-            {
+            if (mConnectionState != STATE_CONNECTED) {
                 Toast.makeText(this, "No STEM-Meter is connected!", Toast.LENGTH_SHORT).show();
                 return false;
             }
@@ -636,19 +622,31 @@ public class MainActivity extends AppCompatActivity
     public void switchFragments(int fragNum) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         switch(fragNum) {
-            case 0:
+            case SensorConst.GRAPH_FRAG_ID:
+                navigationView.getMenu().getItem(2).setChecked(true);
                 GraphFragment graphFragment = new GraphFragment();
                 transaction.replace(R.id.fragment_container, graphFragment, GRAPH_FRAG_TAG);
                 transaction.commit();
                 break;
-            case 1:
+            case SensorConst.CONNECT_FRAG_ID:
+                navigationView.getMenu().getItem(0).setChecked(true);
                 ConnectFragment connectFragment = new ConnectFragment();
                 transaction.replace(R.id.fragment_container, connectFragment, CONNECT_FRAG_TAG);
                 transaction.commit();
                 break;
+            case SensorConst.SENSORS_FRAG_ID:
+                navigationView.getMenu().getItem(1).setChecked(true);
+                SensorsFragment sensorsFragment = new SensorsFragment();
+                transaction.replace(R.id.fragment_container, sensorsFragment, CONNECT_FRAG_TAG);
+                transaction.commit();
+                break;
+            case SensorConst.DISPLAY_FRAG_ID:
+                navigationView.getMenu().getItem(3).setChecked(true);
+                DisplayFragment displayFragment = new DisplayFragment();
+                transaction.replace(R.id.fragment_container, displayFragment, CONNECT_FRAG_TAG);
+                transaction.commit();
+                break;
         }
-
-
     }
 
     @Override
@@ -763,17 +761,16 @@ public class MainActivity extends AppCompatActivity
         return sensorConfigList.get(sensorNumber-1);
     }
 
-//    @Override
-//    public ArrayList<LineData> getSavedList(){
-//
-//        return savedDataList;
-//    }
-//
-//    @Override
-//    public ArrayList<String> getSavedNameList(){
-//
-//        return savedNameList;
-//    }
+    @Override
+    public boolean OneTimeRun() {
+        if(!oneTimeRun) {
+            oneTimeRun = true;
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 
     @Override
     public ArrayList<SavedGraphData> getSavedGraphDataList(){

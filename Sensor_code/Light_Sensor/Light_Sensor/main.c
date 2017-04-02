@@ -167,12 +167,14 @@ void setSensorFreq(int arg_cnt, char **args) {
 }
 
 void sendSensorType() {
+	cli();
 	sensorRate_t tempRate = sensorRate;
 	memset(data.sensorDataRaw,0,RAW_DATA_SIZE);
 	memset(data.sensorDataStr,0,STR_DATA_SIZE);
 	sensorRate = RATE_INFO;
 	writeBaseUnitData(&data);
 	sensorRate = tempRate;
+	sei();
 }
 
 int main(void) {

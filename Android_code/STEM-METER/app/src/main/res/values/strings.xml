@@ -8,7 +8,12 @@
 
 
     <string name="action_settings">Battery Info</string>
-
+    <string name="AllSensorsOn">All On</string>
+    <string name="AllSensorsOff">All Off</string>
+    <string name="ZeroSensor">Zero Sensor</string>
+    <string name="NegateZero">Negate Zero</string>
+    <string name="SDLogAll">SD Log All</string>
+    <string name="SDLogNone">SD Log None</string>
     <string-array name="Sensors">
         <item>Sensor 1 - No Data</item>
         <item>Sensor 2 - No Data</item>
