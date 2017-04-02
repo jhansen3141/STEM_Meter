@@ -76,6 +76,9 @@ public class DisplayFragment extends Fragment {
         mChart.setScaleEnabled(true);
         mChart.setDrawGridBackground(false);
 
+        // disable description text
+        mChart.getDescription().setEnabled(false);
+
         // set an alternative background color
         mChart.setBackgroundColor(Color.WHITE);
 
