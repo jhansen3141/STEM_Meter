@@ -150,7 +150,13 @@ public class YAxisRenderer extends AxisRenderer {
 
             String text = mYAxis.getFormattedLabel(i);
 
-            c.drawText(text, fixedPosition, positions[i * 2 + 1] + offset, mAxisLabelPaint);
+            try {
+                c.drawText(text, fixedPosition, positions[i * 2 + 1] + offset, mAxisLabelPaint);
+            }
+            catch (ArrayIndexOutOfBoundsException EX)
+            {
+                break;
+            }
         }
     }
 

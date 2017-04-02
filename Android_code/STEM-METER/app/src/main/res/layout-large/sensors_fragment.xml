@@ -31,7 +31,7 @@
                         android:layout_marginTop="2dp"
                         android:layout_gravity="center"
                         android:focusable="false"
-                        android:text="Zero Sensor"
+                        android:text="@string/ZeroSensor"
                         android:textSize="16sp"
                         android:focusableInTouchMode="false" />
 
@@ -44,7 +44,7 @@
                         android:layout_gravity="center"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
-                        android:text="Negate Zero"
+                        android:text="@string/NegateZero"
                         android:textSize="16sp"/>
 
 
@@ -64,7 +64,7 @@
                         android:focusable="false"
                         android:layout_gravity="center"
                         android:focusableInTouchMode="false"
-                        android:text="All On"
+                        android:text="@string/AllSensorsOn"
                         android:textSize="16sp"/>
 
                     <Button
@@ -76,7 +76,7 @@
                         android:focusable="false"
                         android:layout_gravity="center"
                         android:focusableInTouchMode="false"
-                        android:text="All Off"
+                        android:text="@string/AllSensorsOff"
                         android:textSize="16sp"/>
 
                 </LinearLayout>
@@ -95,7 +95,7 @@
                         android:focusable="false"
                         android:layout_gravity="center"
                         android:focusableInTouchMode="false"
-                        android:text="SD Log All"
+                        android:text="@string/SDLogAll"
                         android:textSize="16sp"/>
 
                     <Button
@@ -107,7 +107,7 @@
                         android:focusable="false"
                         android:layout_gravity="center"
                         android:focusableInTouchMode="false"
-                        android:text="SD Log None"
+                        android:text="@string/SDLogNone"
                         android:textSize="16sp"/>
 
                 </LinearLayout>

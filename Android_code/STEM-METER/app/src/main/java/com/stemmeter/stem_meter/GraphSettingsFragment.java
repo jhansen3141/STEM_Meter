@@ -168,11 +168,11 @@ public class GraphSettingsFragment extends Fragment {
 
                 // commit changes to data points boolean list in graph config
                 graphSettingsFragInterface.getGraphConfig().getDataPoints().set(0, dataPoints.get(0));
-                Log.i(TAG, "First:" + String.valueOf(dataPoints.get(0)));
+               // Log.i(TAG, "First:" + String.valueOf(dataPoints.get(0)));
                 graphSettingsFragInterface.getGraphConfig().getDataPoints().set(1, dataPoints.get(1));
-                Log.i(TAG, "Second:" + String.valueOf(dataPoints.get(1)));
+               // Log.i(TAG, "Second:" + String.valueOf(dataPoints.get(1)));
                 graphSettingsFragInterface.getGraphConfig().getDataPoints().set(2, dataPoints.get(2));
-                Log.i(TAG, "Third:" + String.valueOf(dataPoints.get(2)));
+              //  Log.i(TAG, "Third:" + String.valueOf(dataPoints.get(2)));
 
                 FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
                 GraphFragment graphFragment = new GraphFragment();

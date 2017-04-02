@@ -49,16 +49,16 @@ public class GraphFileStorage implements Serializable {
         try {
             fos = context.openFileOutput(fileName, Context.MODE_PRIVATE);
             ObjectOutputStream os = new ObjectOutputStream(fos);
-            Log.i(TAG,"Writing graph files to internal storage: " + graphFilesList.size());
+            //Log.i(TAG,"Writing graph files to internal storage: " + graphFilesList.size());
             os.writeObject(graphFilesList);
             os.close();
             fos.close();
-            Log.i(TAG,"File Write Complete");
+           // Log.i(TAG,"File Write Complete");
         } catch (FileNotFoundException e) {
-            Log.i(TAG, "File not found while writing: " + e);
+           // Log.i(TAG, "File not found while writing: " + e);
             return false;
         } catch (IOException e) {
-            Log.i(TAG, "IO exception while writing: " + e);
+          //  Log.i(TAG, "IO exception while writing: " + e);
             return false;
         }
         return true;
@@ -69,23 +69,23 @@ public class GraphFileStorage implements Serializable {
         try {
             FileInputStream fis = context.openFileInput(fileName);
             ObjectInputStream is = new ObjectInputStream(fis);
-            Log.i(TAG,"Reading graph files from internal storage");
+          //  Log.i(TAG,"Reading graph files from internal storage");
             graphFilesList = (ArrayList<ArrayList<GraphPlot>>) is.readObject();
             is.close();
             fis.close();
-            Log.i(TAG,"File Read Complete: " + graphFilesList.size());
+         //   Log.i(TAG,"File Read Complete: " + graphFilesList.size());
 
         } catch (ClassNotFoundException e) {
-            Log.i(TAG, "Class not found while reading: " + e);
+          //  Log.i(TAG, "Class not found while reading: " + e);
             return null;
         } catch (FileNotFoundException e) {
-            Log.i(TAG, "File not found while reading: " + e);
+         //   Log.i(TAG, "File not found while reading: " + e);
             return null;
         } catch (IOException e) {
-            Log.i(TAG, "IO Exception while reading: " + e);
+         //   Log.i(TAG, "IO Exception while reading: " + e);
             return null;
         } catch (IllegalArgumentException e) {
-            Log.i(TAG,"IllegalArgument:" + e);
+          //  Log.i(TAG,"IllegalArgument:" + e);
             return null;
         }
 
@@ -135,7 +135,7 @@ public class GraphFileStorage implements Serializable {
         set.setFillAlpha(65);
         set.setFillColor(color);
         set.setHighLightColor(Color.rgb(244, 117, 117));
-        set.setValueTextColor(color);
+        set.setValueTextColor(circleColor);
         set.setValueTextSize(9f);
         set.setDrawValues(true);
         return set;

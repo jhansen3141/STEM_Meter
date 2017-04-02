@@ -76,6 +76,9 @@ public class DisplayFragment extends Fragment {
         mChart.setScaleEnabled(true);
         mChart.setDrawGridBackground(false);
 
+        // disable description text
+        mChart.getDescription().setEnabled(false);
+
         // set an alternative background color
         mChart.setBackgroundColor(Color.WHITE);
 
@@ -278,7 +281,7 @@ public class DisplayFragment extends Fragment {
                 @Override
                 public void onClick(View arg0) {
                     addEntry(displayFragInterface.getSavedGraphDataList().get(position).getData(), position);
-                    Log.i(TAG, "Graph List Item clicked");
+                  //  Log.i(TAG, "Graph List Item clicked");
                     selectedPosition = position;
                     notifyDataSetChanged();
                 }

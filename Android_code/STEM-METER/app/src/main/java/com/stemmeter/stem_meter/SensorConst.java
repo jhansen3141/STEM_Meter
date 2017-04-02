@@ -3,7 +3,7 @@ package com.stemmeter.stem_meter;
 import android.graphics.Color;
 
 /**
- * Created by Josh on 11/28/2016.
+ * Created by Josh on 1/28/2017.
  */
 
 public final class SensorConst {
@@ -74,4 +74,9 @@ public final class SensorConst {
     public static final int SELECTION_COLOR = Color.rgb(66, 215, 244); // Light blue
 
     public static final int SCAN_TIME_MS = 30000; // 30 second scan time
+
+    public static final int CONNECT_FRAG_ID = 0;
+    public static final int SENSORS_FRAG_ID = 1;
+    public static final int GRAPH_FRAG_ID = 3;
+    public static final int DISPLAY_FRAG_ID = 4;
 }

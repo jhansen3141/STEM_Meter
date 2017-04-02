@@ -58,7 +58,7 @@ public class LIGHT_OPT3002 extends Sensor {
             // convert byte array into string
             dataStr[0] =  new String(byteString, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            Log.i("LightSensor", "String format incorrect");
+           // Log.i("LightSensor", "String format incorrect");
         }
         try {
             opticalPower = Double.parseDouble(dataStr[0]);

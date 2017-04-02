@@ -1,14 +1,12 @@
 package com.stemmeter.stem_meter.Sensors;
 
-import android.util.Log;
-
 import com.stemmeter.stem_meter.GraphSettings;
 import com.stemmeter.stem_meter.SensorConst;
 
 import java.util.ArrayList;
 
 /**
- * Created by Josh on 11/28/2016.
+ * Created by Josh on 01/28/2017.
  */
 
 public abstract class Sensor {
@@ -29,7 +27,6 @@ public abstract class Sensor {
         sensorRate = (int)data[1];
         // the sync number (24 bits) is held in bytes 2-4
         syncNumber = (((data[2] & 0xFF)<<16) | ((data[3] & 0xFF)<<8) | (data[4] & 0xFF));
-
     }
 
     public void updateData(byte data[]) {

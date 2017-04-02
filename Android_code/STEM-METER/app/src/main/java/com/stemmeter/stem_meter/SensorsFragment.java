@@ -24,7 +24,7 @@ import com.stemmeter.stem_meter.Sensors.Sensor;
 import java.util.ArrayList;
 
 /**
- * Created by Josh on 11/28/2016.
+ * Created by Josh on 1/28/2017.
  */
 
 public class SensorsFragment extends ListFragment {
@@ -37,8 +37,6 @@ public class SensorsFragment extends ListFragment {
     private Button allSensorsOffButton;
     private Button sdLogAllButton;
     private Button sdLogNoneButton;
-
-    private boolean hasReadConfig = false;
     private int listItemSelected = 0;
 
 
@@ -57,6 +55,7 @@ public class SensorsFragment extends ListFragment {
         void querySensorTypes();
         boolean writeAllSensorConfigs();
         void switchFragments(int fragNum);
+        boolean OneTimeRun();
     }
 
     @Override
@@ -95,7 +94,7 @@ public class SensorsFragment extends ListFragment {
                     sensorFragInterface.getSensor(listItemSelected + 1).zeroSensor();
                 }
                 catch (NullPointerException npe) {
-                    Log.i(TAG,"Sensor Null - Cannot Zero");
+                   // Log.i(TAG,"Sensor Null - Cannot Zero");
                 }
 
             }
@@ -108,7 +107,7 @@ public class SensorsFragment extends ListFragment {
                 try {
                     sensorFragInterface.getSensor(listItemSelected + 1).resetZero();
                 } catch (NullPointerException npe) {
-                    Log.i(TAG, "Sensor Null - Cannot Reset Zero");
+                   // Log.i(TAG, "Sensor Null - Cannot Reset Zero");
                 }
             }
         });
@@ -185,17 +184,15 @@ public class SensorsFragment extends ListFragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (!hasReadConfig) {
-            hasReadConfig = true;
+        if (sensorFragInterface.OneTimeRun()) {
+            Log.i(TAG,"Querying Sensor Types");
             sensorFragInterface.querySensorTypes();
             // Update the base unit time
             sensorFragInterface.updateBaseUnitTime();
-            // Read the current sensor config settings from base unit
-            sensorFragInterface.readSensorConfigData();
         }
-        else {
-            Log.i("MainActivity","All Ready Updated");
-        }
+        // Read the current sensor config settings from base unit
+        sensorFragInterface.readSensorConfigData();
+        sensorListAdapter.updateAll();
     }
 
     private class SensorListAdapter extends BaseAdapter {
@@ -224,6 +221,10 @@ public class SensorsFragment extends ListFragment {
             notifyDataSetChanged();
         }
 
+        public void updateAll() {
+            notifyDataSetChanged();
+        }
+
         public void updateItem(final String item, int position) {
             // Only update the sensor data if sensor text box is showing
             if(setBooleanList.get(position).isSet()) {
@@ -235,7 +236,7 @@ public class SensorsFragment extends ListFragment {
                 }
                 catch (Exception e)
                 {
-                    Log.i(TAG,"Did not update view. Exception");
+                   // Log.i(TAG,"Did not update view. Exception");
                 }
 
                 if(v == null) {
@@ -341,6 +342,15 @@ public class SensorsFragment extends ListFragment {
                             break;
                     }
                     sensorImage.setVisibility(View.VISIBLE);
+
+                    sensorImage.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            sensorFragInterface.getGraphConfig().setSelectedSensor(position);
+                            listItemSelected = position;
+                            sensorFragInterface.switchFragments(SensorConst.GRAPH_FRAG_ID);
+                        }
+                    });
                 }
                 else {
                     sensorImage.setVisibility(View.INVISIBLE);
@@ -419,7 +429,7 @@ public class SensorsFragment extends ListFragment {
                         // Write the new config to the base unit over BLE
                         sensorFragInterface.sensorConfigWrite(config);
 
-                        Log.i(TAG,"FS:" + freqSelected);
+                      //  Log.i(TAG,"FS:" + freqSelected);
                     }
 
                     @Override
@@ -427,7 +437,6 @@ public class SensorsFragment extends ListFragment {
 
                     }
                 });
-
 
                 // Set listener to listen for when check mark is clicked for check mark in list item settings SD card
                 sdCheck.setOnClickListener(new View.OnClickListener() {
@@ -472,24 +481,22 @@ public class SensorsFragment extends ListFragment {
             }
 
             if(setBooleanList.get(finalPosition).isSet()) {
-               // Log.i(TAG,"Returning Normal View");
                 return convertView;
             }
             else {
-              //  Log.i(TAG,"Returning Alt View");
                 return altView;
             }
 
         }
 
-        public class SetBoolean {
+        private class SetBoolean {
             private boolean isSet = true;
 
-            public boolean isSet() {
+            private boolean isSet() {
                 return isSet;
             }
 
-            public void setSet(boolean set) {
+            private void setSet(boolean set) {
                 isSet = set;
             }
         }

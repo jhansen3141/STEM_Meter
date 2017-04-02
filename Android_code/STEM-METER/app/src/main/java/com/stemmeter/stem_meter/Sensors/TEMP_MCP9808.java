@@ -6,7 +6,7 @@ import com.stemmeter.stem_meter.SensorConst;
 import java.util.ArrayList;
 
 /**
- * Created by Josh on 11/28/2016.
+ * Created by Josh on 1/28/2017.
  */
 
 public class Temp_MCP9808 extends Sensor {
@@ -107,6 +107,8 @@ public class Temp_MCP9808 extends Sensor {
         return "Temperature: " + sensorStringArray[0] + unitsString;
     }
 
+    @Override
+    public int getSensorType() {return SensorConst.TEMP_MCP9808; }
 
 
 }

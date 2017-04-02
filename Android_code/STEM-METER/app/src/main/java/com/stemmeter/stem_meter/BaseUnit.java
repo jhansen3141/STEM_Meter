@@ -130,7 +130,7 @@ public class BaseUnit {
 
         public String getBatStr() {
             return "Voltage: " + voltageStr + "V \n" +
-                    "Current: " + currentStr + "mA \n" +
+                   // "Current: " + currentStr + "mA \n" +
                     "Percentage: " + percentageStr + "%";
         }
 
