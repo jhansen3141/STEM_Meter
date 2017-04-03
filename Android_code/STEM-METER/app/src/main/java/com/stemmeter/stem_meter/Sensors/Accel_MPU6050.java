@@ -43,7 +43,7 @@ public class Accel_MPU6050 extends Sensor {
         dataPointList.add("Accel Y");
         dataPointList.add("Accel Z");
 
-        graphSettings = new GraphSettings(unitList,dataPointList);
+        graphSettings = new GraphSettings(unitList,null,dataPointList);
 
         this.setColor(ACCEL_SENSE_COLOR);
     }
@@ -115,10 +115,14 @@ public class Accel_MPU6050 extends Sensor {
     }
 
     @Override
-    public void setGraphUnits(int units) {
+    public void setGraphUnits1(int units) {
         this.units = units;
     }
 
+    @Override
+    public void setGraphUnits2(int units) {
+        this.units = units;
+    }
 
     @Override
     public String toString() {
@@ -155,5 +159,8 @@ public class Accel_MPU6050 extends Sensor {
 
     @Override
     public int getSensorType() {return SensorConst.ACCEL_MPU6050; }
+
+    @Override
+    public String getSensorName() { return "Acceleration"; }
 
 }

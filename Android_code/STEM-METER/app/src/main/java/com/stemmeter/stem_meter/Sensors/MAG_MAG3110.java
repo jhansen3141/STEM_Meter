@@ -24,23 +24,23 @@ public class MAG_MAG3110 extends Sensor {
 
     private GraphSettings graphSettings;
     private int units = SensorConst.MAG_UNIT_T;
-    private ArrayList<String> unitList;
+    private ArrayList<String> unitList1;
     private ArrayList<String> dataPointList;
 
     public MAG_MAG3110(byte[] data, int sensorPosition) {
         super(data, sensorPosition,3);
 
-        unitList = new ArrayList<>();
+        unitList1 = new ArrayList<>();
         dataPointList = new ArrayList<>();
 
         // micro tesla
-        unitList.add("uT");
+        unitList1.add("uT");
 
         dataPointList.add("Mag X");
         dataPointList.add("Mag Y");
         dataPointList.add("Mag Z");
 
-        graphSettings = new GraphSettings(unitList,dataPointList);
+        graphSettings = new GraphSettings(unitList1, null, dataPointList);
     }
 
     @Override
@@ -80,7 +80,7 @@ public class MAG_MAG3110 extends Sensor {
     @Override
     public String toString() {
         if(sensorStringArray != null) {
-            String unitString = unitList.get(units);
+            String unitString = unitList1.get(units);
             return "Magnetometer\n" +
                     " X:  " + sensorStringArray[0] + unitString + "\n" +
                     " Y:  " + sensorStringArray[1] + unitString + "\n" +
@@ -106,9 +106,12 @@ public class MAG_MAG3110 extends Sensor {
     }
 
     @Override
-    public void setGraphUnits(int units) {
+    public void setGraphUnits1(int units) {
         this.units = units;
     }
+
+    @Override
+    public void setGraphUnits2(int units) { }
 
     @Override
     public void zeroSensor() {
@@ -131,4 +134,7 @@ public class MAG_MAG3110 extends Sensor {
 
     @Override
     public int getSensorType() {return SensorConst.MAG_MAG3110; }
+
+    @Override
+    public String getSensorName() { return "Magnetometer"; }
 }

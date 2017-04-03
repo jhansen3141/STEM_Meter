@@ -143,7 +143,7 @@ public class GraphFragment extends Fragment {
             leftAxis.setTypeface(Typeface.DEFAULT);
             leftAxis.setTextColor(Color.BLACK);
             leftAxis.setDrawGridLines(true);
-            leftAxis.setTitle(graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1).getGraphSettings().getUnits().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition()));
+            //leftAxis.setTitle(graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1).getGraphSettings().getUnits().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition()));
 
             YAxis rightAxis = mChart.getAxisRight();
             rightAxis.setEnabled(false);
@@ -198,7 +198,7 @@ public class GraphFragment extends Fragment {
                         .setCancelable(false)
                         .setPositiveButton("OK",new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog,int id) {
-                                SavedGraphData savedGraphData = new SavedGraphData(input.getText().toString() + "-" + Calendar.getInstance().getTime().toString(), mChart.getData(), 1, graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1).getGraphSettings().getUnits().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition()));
+                                SavedGraphData savedGraphData = new SavedGraphData(input.getText().toString() + "-" + Calendar.getInstance().getTime().toString(), mChart.getData(), 1, graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1).getGraphSettings().getDataSet1Units().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition1()));
 
                                 graphFragInterface.getSavedGraphDataList().add(savedGraphData);
                                 graphFileStorage.saveGraphFile(getActivity(),graphFragInterface.getSavedGraphDataList());
@@ -281,20 +281,39 @@ public class GraphFragment extends Fragment {
 
             ArrayList<String> dataSetNames = sensor.getGraphSettings().getDataPoints();
 
-            if (visibleDataSets.get(0) && dataSetNames.size() > 0)
-                dataSetName1 = dataSetNames.get(0);
-            else if (visibleDataSets.get(1) && dataSetNames.size() > 1)
-                dataSetName1 = dataSetNames.get(1);
+            String dataSet1Units = selectedSensor.getGraphSettings().getDataSet1Units().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition1());
+            String dataSet2Units = null;
+
+            if (selectedSensor.getGraphSettings().sensorHasUniqueDataSetUnits())
+                dataSet2Units = selectedSensor.getGraphSettings().getDataSet2Units().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition2());
+
+            if (visibleDataSets.get(0) && dataSetNames.size() > 0) {
+                dataSetName1 = dataSetNames.get(0) + "-" + dataSet1Units;
+            }
+            else if (visibleDataSets.get(1) && dataSetNames.size() > 1) {
+                if (selectedSensor.getGraphSettings().sensorHasUniqueDataSetUnits()) {
+                    dataSetName1 = dataSetNames.get(1) + "-" + dataSet2Units;
+                }
+                else {
+                    dataSetName1 = dataSetNames.get(1) + "-" + dataSet1Units;
+                }
+            }
             else if (dataSetNames.size() > 2)
-                dataSetName1 = dataSetNames.get(2);
+                dataSetName1 = dataSetNames.get(2) + "-" + dataSet1Units;
 
             if (visibleDataSets.get(1) && dataSetNames.size() > 1)
-                dataSetName2 = dataSetNames.get(1);
+                if (selectedSensor.getGraphSettings().sensorHasUniqueDataSetUnits()) {
+                    dataSetName2 = dataSetNames.get(1) + "-" + dataSet2Units;
+                }
+                else
+                {
+                    dataSetName2 = dataSetNames.get(1) + "-" + dataSet1Units;
+                }
             else if (dataSetNames.size() > 2)
-                dataSetName2 = dataSetNames.get(2);
+                dataSetName2 = dataSetNames.get(2) + "-" + dataSet1Units;
 
             if (dataSetNames.size() > 2)
-            dataSetName3 = dataSetNames.get(2);
+            dataSetName3 = dataSetNames.get(2) + "-" + dataSet1Units;
         }
         else
         {

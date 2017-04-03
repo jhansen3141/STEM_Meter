@@ -109,7 +109,9 @@ public abstract class Sensor {
 
     public abstract GraphSettings getGraphSettings();
 
-    public abstract void setGraphUnits(int units);
+    public abstract void setGraphUnits1(int units);
+
+    public abstract void setGraphUnits2(int units);
 
     public abstract void zeroSensor();
 
@@ -118,6 +120,8 @@ public abstract class Sensor {
     public abstract String getSensorOffString();
 
     public abstract int getSensorType();
+
+    public abstract String getSensorName();
 
     public int getNumberDataPoints() {
         return numberDataPoints;

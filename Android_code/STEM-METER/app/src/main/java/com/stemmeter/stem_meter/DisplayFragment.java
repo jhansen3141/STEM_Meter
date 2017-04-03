@@ -146,7 +146,7 @@ public class DisplayFragment extends Fragment {
 
             mChart.getAxisLeft().resetAxisMinimum();
             mChart.getAxisLeft().resetAxisMaximum();
-            mChart.getAxisLeft().setTitle(displayFragInterface.getSavedGraphDataList().get(position).getUnits());
+            //mChart.getAxisLeft().setTitle(displayFragInterface.getSavedGraphDataList().get(position).getUnits());
 
             mChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
 
