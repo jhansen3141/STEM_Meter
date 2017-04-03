@@ -64,7 +64,7 @@ const char S2Outputfile[] = "fat:"STR(DRIVE_NUM)":S2_Data.csv";
 const char S3Outputfile[] = "fat:"STR(DRIVE_NUM)":S3_Data.csv";
 const char S4Outputfile[] = "fat:"STR(DRIVE_NUM)":S4_Data.csv";
 
-bool SDMasterWriteEnabled = false;
+bool SDMasterWriteEnabled = true;
 static FILE *dataFile;
 static SDSPI_Handle sdspiHandle;
 static SDSPI_Params sdspiParams;
@@ -195,9 +195,11 @@ static void writeSensorDataToSD(uint8_t sNum, SD_msg_t *sData) {
 			break;
 		}
 
-
 		// check to see if file opened
 		if (dataFile) {
+			GPIO_write(Board_SD_CARD_LED, Board_LED_OFF);
+			GPIO_write(Board_SD_CARD_LED, Board_LED_ON);
+
 			// if new sensor was attached
 			if(sensorAttached[sNum-1] == false) {
 				sensorAttached[sNum-1] = true;
@@ -224,6 +226,10 @@ static void writeSensorDataToSD(uint8_t sNum, SD_msg_t *sData) {
 
 			// close the data file
 			fclose(dataFile);
+		}
+		else {
+			SDMasterWriteEnabled = false;
+			GPIO_write(Board_SD_CARD_LED, Board_LED_OFF);
 		}
 	}
 }

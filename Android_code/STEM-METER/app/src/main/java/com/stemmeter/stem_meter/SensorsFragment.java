@@ -177,9 +177,10 @@ public class SensorsFragment extends ListFragment {
                 @Override
                 public void run() {
                     sensorListAdapter.updateItemAll(dataStr,sensorNum-1);
+                    sensorListAdapter.updateAll();
                 }
             });
-            sensorListAdapter.updateAll();
+
         }
     }
 
