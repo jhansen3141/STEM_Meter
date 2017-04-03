@@ -171,19 +171,22 @@ public class SensorsFragment extends ListFragment {
                 }
             });
         }
-        else if(sensorFragInterface.getSensorConfig(sensorNum).getFreq() == SensorConst.RATE_INFO) {
+        else if(sensorFragInterface.getSensorConfig(sensorNum).getFreq() == SensorConst.RATE_INFO ||
+                sensorFragInterface.getSensorConfig(sensorNum).getFreq() == SensorConst.RATE_OFF) {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     sensorListAdapter.updateItemAll(dataStr,sensorNum-1);
                 }
             });
+            sensorListAdapter.updateAll();
         }
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        Log.i(TAG,"RESUME");
         if (sensorFragInterface.OneTimeRun()) {
             Log.i(TAG,"Querying Sensor Types");
             sensorFragInterface.querySensorTypes();

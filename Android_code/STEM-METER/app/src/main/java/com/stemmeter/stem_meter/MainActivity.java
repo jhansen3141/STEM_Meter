@@ -330,7 +330,7 @@ public class MainActivity extends AppCompatActivity
                             @Override
                             public void run() {
                                 mainMenu.findItem(R.id.connection_icon).setIcon(R.drawable.disconnected_icon);
-                                switchFragments(SensorConst.CONNECT_FRAG_ID);
+                                Toast.makeText(getApplicationContext(), "Disconnected", Toast.LENGTH_LONG).show();
                             }
                         });
                     }
