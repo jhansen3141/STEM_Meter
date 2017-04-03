@@ -22,25 +22,30 @@ public class PRESSURE_MPL3115A2 extends Sensor {
     private boolean shouldZero = false;
 
     private GraphSettings graphSettings;
-    private int units = SensorConst.PRESSURE_UNIT_PA;
-    private ArrayList<String> unitList;
+    private int units1 = SensorConst.PRESSURE_UNIT_PA;
+    private int units2 = 0;
+    private ArrayList<String> unitList1;
+    private ArrayList<String> unitList2;
     private ArrayList<String> dataPointList;
 
     public PRESSURE_MPL3115A2(byte[] data, int sensorPosition) {
         super(data, sensorPosition,2);
 
-        unitList = new ArrayList<>();
+        unitList1 = new ArrayList<>();
+        unitList2 = new ArrayList<>();
         dataPointList = new ArrayList<>();
 
         // Pascals
-        unitList.add("Pa");
+        unitList1.add("Pa");
         // 100 Pascals
-        unitList.add("hPa");
+        unitList1.add("hPa");
+
+        unitList2.add("ft");
 
         dataPointList.add("Pressure");
         dataPointList.add("Altitude");
 
-        graphSettings = new GraphSettings(unitList,dataPointList);
+        graphSettings = new GraphSettings(unitList1, unitList2, dataPointList);
     }
 
     @Override
@@ -81,7 +86,7 @@ public class PRESSURE_MPL3115A2 extends Sensor {
         altitude += altitudeZero;
         airPressure += pressureZero;
 
-        switch(units) {
+        switch(units1) {
             case SensorConst.PRESSURE_UNIT_HPA:
                 airPressure /= 100;
                 break;
@@ -97,10 +102,11 @@ public class PRESSURE_MPL3115A2 extends Sensor {
     @Override
     public String toString() {
         if(sensorStringArray != null) {
-            String unitsString = unitList.get(units);
+            String units1String = unitList1.get(units1);
+            String units2String = unitList2.get(units2);
             return "Air Pressure\n" +
-                    sensorStringArray[0] + unitsString + "\n" +
-                    sensorStringArray[1] + " Ft";
+                    sensorStringArray[0] + units1String + "\n" +
+                    sensorStringArray[1] + units2String;
         }
         else {
             return "NULL";
@@ -121,8 +127,13 @@ public class PRESSURE_MPL3115A2 extends Sensor {
     }
 
     @Override
-    public void setGraphUnits(int units) {
-        this.units = units;
+    public void setGraphUnits1(int units) {
+        this.units1 = units;
+    }
+
+    @Override
+    public void setGraphUnits2(int units){
+        this.units2 = units;
     }
 
     @Override
@@ -145,4 +156,7 @@ public class PRESSURE_MPL3115A2 extends Sensor {
 
     @Override
     public int getSensorType() {return SensorConst.PRESSURE_MPL3115A2; }
+
+    @Override
+    public String getSensorName() { return "Air Pressure"; }
 }

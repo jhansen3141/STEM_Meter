@@ -135,7 +135,7 @@ public class GraphFileStorage implements Serializable {
         set.setFillAlpha(65);
         set.setFillColor(color);
         set.setHighLightColor(Color.rgb(244, 117, 117));
-        set.setValueTextColor(color);
+        set.setValueTextColor(circleColor);
         set.setValueTextSize(9f);
         set.setDrawValues(true);
         return set;

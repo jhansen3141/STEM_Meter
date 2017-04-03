@@ -30,6 +30,8 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.stemmeter.stem_meter.Sensors.Sensor;
 
+import org.w3c.dom.Text;
+
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,16 +49,19 @@ public class GraphSettingsFragment extends Fragment {
     private String TAG = "GraphSettingsFragTag";
     private Spinner selectedSensorSpinner;
     private ArrayList<String> dataPointNames;
-    private ArrayList<String> unitNames;
+    private ArrayList<String> unitNames1;
+    private ArrayList<String> unitNames2;
     private DataListAdapter dataListAdapter;
-    private UnitListAdapter unitListAdapter;
+    private UnitList1Adapter unitList1Adapter;
+    private UnitList2Adapter unitList2Adapter;
     private ImageButton doneBtn;
     private ImageButton cancelBtn;
     private SeekBar dataSeekBar;
     private final String GRAPH_FRAG_TAG = "GraphFragTag";
     private TextView seekBarText;
     private ArrayList<Boolean> dataPoints;
-    private int selectedUnitPosition;
+    private int selectedUnitPosition1;
+    private int selectedUnitPosition2;
     // Container Activity must implement this interface
 
     // Container Activity must implement this interface
@@ -79,21 +84,31 @@ public class GraphSettingsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.graph_settings_fragment, container, false);
+        final View view = inflater.inflate(R.layout.graph_settings_fragment, container, false);
+
+        ArrayList<String> connectedSensors = new ArrayList<String>();
+        if (graphSettingsFragInterface.getSensor(1) != null)
+            connectedSensors.add(graphSettingsFragInterface.getSensor(1).getSensorName() + " Sensor");
+        if (graphSettingsFragInterface.getSensor(2) != null)
+            connectedSensors.add(graphSettingsFragInterface.getSensor(2).getSensorName() + " Sensor");
+        if (graphSettingsFragInterface.getSensor(3) != null)
+            connectedSensors.add(graphSettingsFragInterface.getSensor(3).getSensorName() + " Sensor");
+        if (graphSettingsFragInterface.getSensor(4) != null)
+            connectedSensors.add(graphSettingsFragInterface.getSensor(4).getSensorName() + " Sensor");
+
+        ArrayAdapter<String> connectedSensorNames = new ArrayAdapter<String>(this.getContext(), android.R.layout.simple_spinner_item, connectedSensors);
 
         selectedSensorSpinner = (Spinner) view.findViewById(R.id.SelectedSensorSpinner);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
-                R.array.sensor_array, android.R.layout.simple_spinner_item);
         // Specify the layout to use when the list of choices appears
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        connectedSensorNames.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
-        selectedSensorSpinner.setAdapter(adapter);
+        selectedSensorSpinner.setAdapter(connectedSensorNames);
         selectedSensorSpinner.setSelection(graphSettingsFragInterface.getGraphConfig().getSelectedSensor());
 
         // Set the spinner based on its SensorConfig object
         //selectedSensorSpinner.setSelection(sensorFragInterface.getSensorConfig(position+1).getFreq());
         selectedSensorSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            public void onItemSelected(AdapterView<?> parent, View view,
+            public void onItemSelected(AdapterView<?> parent, View viewd,
                                        int sensorSelected, long id) {
                 if (graphSettingsFragInterface.getSensor(sensorSelected + 1) == null) {
                     selectedSensorSpinner.setSelection(graphSettingsFragInterface.getGraphConfig().getSelectedSensor());
@@ -102,7 +117,27 @@ public class GraphSettingsFragment extends Fragment {
 
                 graphSettingsFragInterface.getGraphConfig().setSelectedSensor(sensorSelected);
                 reinitializeDataListView();
-                reinitializeUnitListView();
+                reinitializeUnit1ListView();
+
+                ListView unitNameListView2 = (ListView) view.findViewById(R.id.Unitlist2);
+                TextView unitNameTextView2 = (TextView) view.findViewById(R.id.SelectedUnitText2);
+                TextView unitNameTextView1 = (TextView) view.findViewById(R.id.SelectedUnitText1);
+                String dataName1Text = graphSettingsFragInterface.getSensor(graphSettingsFragInterface.getGraphConfig().getSelectedSensor() + 1).getSensorName() + " Units";
+                unitNameTextView1.setText(dataName1Text);
+
+                GraphSettings graphSettings = graphSettingsFragInterface.getSensor(graphSettingsFragInterface.getGraphConfig().getSelectedSensor() + 1).getGraphSettings();
+                if (graphSettings.sensorHasUniqueDataSetUnits()) {
+                    reinitializeUnit2ListView();
+                    unitNameListView2.setVisibility(View.VISIBLE);
+                    unitNameTextView2.setVisibility(View.VISIBLE);
+                    String dataName2Text = dataPointNames.get(1) + " Units";
+                    unitNameTextView2.setText(dataName2Text);
+                }
+                else
+                {
+                    unitNameListView2.setVisibility(View.GONE);
+                    unitNameTextView2.setVisibility(View.GONE);
+                }
             }
 
             @Override
@@ -123,16 +158,45 @@ public class GraphSettingsFragment extends Fragment {
         ListView dataNameListView = (ListView) view.findViewById(R.id.SelectedSensorDatalist);
         dataNameListView.setAdapter(dataListAdapter);
 
-        unitListAdapter = new UnitListAdapter();
-        unitNames = graphSettings.getUnits();
-        if (unitNames.size() > 0)
+        unitList1Adapter = new UnitList1Adapter();
+        unitNames1 = graphSettings.getDataSet1Units();
+        if (unitNames1.size() > 0)
         {
-            for (int i = 0; i < unitNames.size(); i++)
-                unitListAdapter.addItem(unitNames.get(i));
+            for (int i = 0; i < unitNames1.size(); i++)
+                unitList1Adapter.addItem(unitNames1.get(i));
         }
 
-        ListView unitNameListView = (ListView) view.findViewById(R.id.Unitlist);
-        unitNameListView.setAdapter(unitListAdapter);
+        ListView unitNameListView1 = (ListView) view.findViewById(R.id.Unitlist1);
+        unitNameListView1.setAdapter(unitList1Adapter);
+
+        ListView unitNameListView2 = (ListView) view.findViewById(R.id.Unitlist2);
+        TextView unitNameTextView2 = (TextView) view.findViewById(R.id.SelectedUnitText2);
+        TextView unitNameTextView1 = (TextView) view.findViewById(R.id.SelectedUnitText1);
+
+        String dataName1Text = graphSettingsFragInterface.getSensor(graphSettingsFragInterface.getGraphConfig().getSelectedSensor() + 1).getSensorName() + " Units";
+        unitNameTextView1.setText(dataName1Text);
+
+        if (graphSettings.sensorHasUniqueDataSetUnits())
+        {
+            unitList2Adapter = new UnitList2Adapter();
+            unitNames2 = graphSettings.getDataSet2Units();
+            if (unitNames2.size() > 0)
+            {
+                for (int i = 0; i < unitNames2.size(); i++)
+                    unitList2Adapter.addItem(unitNames2.get(i));
+            }
+
+            String dataName2Text = dataPointNames.get(1) + " Units";
+            unitNameTextView2.setVisibility(View.VISIBLE);
+            unitNameTextView2.setText(dataName2Text);
+            unitNameListView2.setVisibility(View.VISIBLE);
+            unitNameListView2.setAdapter(unitList2Adapter);
+        }
+        else {
+            unitNameTextView2.setVisibility(View.GONE);
+            unitNameListView2.setVisibility(View.GONE);
+        }
+
 
         seekBarText = (TextView) view.findViewById(R.id.SeekBarTextView);
         dataSeekBar = (SeekBar) view.findViewById(R.id.seekBar);
@@ -163,8 +227,10 @@ public class GraphSettingsFragment extends Fragment {
                 // Commit changes to visible data number in graph config
                 graphSettingsFragInterface.getGraphConfig().setVisibleDataNum(dataSeekBar.getProgress());
 
-                graphSettingsFragInterface.getGraphConfig().setSelectedUnitsPosition(selectedUnitPosition);
-                graphSettingsFragInterface.getSensor(graphSettingsFragInterface.getGraphConfig().getSelectedSensor() + 1).setGraphUnits(selectedUnitPosition);
+                graphSettingsFragInterface.getGraphConfig().setSelectedUnitsPosition1(selectedUnitPosition1);
+                graphSettingsFragInterface.getGraphConfig().setSelectedUnitsPosition2(selectedUnitPosition2);
+                graphSettingsFragInterface.getSensor(graphSettingsFragInterface.getGraphConfig().getSelectedSensor() + 1).setGraphUnits1(selectedUnitPosition1);
+                graphSettingsFragInterface.getSensor(graphSettingsFragInterface.getGraphConfig().getSelectedSensor() + 1).setGraphUnits2(selectedUnitPosition2);
 
                 // commit changes to data points boolean list in graph config
                 graphSettingsFragInterface.getGraphConfig().getDataPoints().set(0, dataPoints.get(0));
@@ -202,7 +268,8 @@ public class GraphSettingsFragment extends Fragment {
         dataPoints.add(graphSettingsFragInterface.getGraphConfig().getDataPoints().get(1));
         dataPoints.add(graphSettingsFragInterface.getGraphConfig().getDataPoints().get(2));
 
-        selectedUnitPosition = graphSettingsFragInterface.getGraphConfig().getSelectedUnitsPosition();
+        selectedUnitPosition1 = graphSettingsFragInterface.getGraphConfig().getSelectedUnitsPosition1();
+        selectedUnitPosition2 = graphSettingsFragInterface.getGraphConfig().getSelectedUnitsPosition2();
 
         return view;
     }
@@ -219,15 +286,26 @@ public class GraphSettingsFragment extends Fragment {
         }
     }
 
-    private void reinitializeUnitListView()
+    private void reinitializeUnit1ListView()
     {
-        unitListAdapter.removeAllItems();
+        unitList1Adapter.removeAllItems();
         GraphSettings graphSettings = graphSettingsFragInterface.getSensor(graphSettingsFragInterface.getGraphConfig().getSelectedSensor() + 1).getGraphSettings();
-        unitNames = graphSettings.getUnits();
-        if (unitNames.size() > 0)
+        unitNames1 = graphSettings.getDataSet1Units();
+        if (unitNames1.size() > 0)
         {
-            for (int i = 0; i < unitNames.size(); i++)
-                unitListAdapter.addItem(unitNames.get(i));
+            for (int i = 0; i < unitNames1.size(); i++)
+                unitList1Adapter.addItem(unitNames1.get(i));
+        }
+    }
+
+    private void reinitializeUnit2ListView()
+    {
+        GraphSettings graphSettings = graphSettingsFragInterface.getSensor(graphSettingsFragInterface.getGraphConfig().getSelectedSensor() + 1).getGraphSettings();
+        unitList2Adapter.removeAllItems();
+        unitNames2 = graphSettings.getDataSet2Units();
+        if (unitNames2.size() > 0) {
+            for (int i = 0; i < unitNames2.size(); i++)
+                unitList2Adapter.addItem(unitNames2.get(i));
         }
     }
 
@@ -326,13 +404,13 @@ public class GraphSettingsFragment extends Fragment {
         }
     }
 
-    private class UnitListAdapter extends BaseAdapter {
+    private class UnitList1Adapter extends BaseAdapter {
         private ArrayList<String> unitName = new ArrayList<String>();
         private LayoutInflater mInflater;
-        private String TAG = "UnitListAdapter";
+        private String TAG = "UnitListAdapter1";
         private int currentSelectedPosition;
 
-        public UnitListAdapter() {
+        public UnitList1Adapter() {
 
             mInflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
@@ -386,14 +464,91 @@ public class GraphSettingsFragment extends Fragment {
 
                 @Override
                 public void onClick(View arg0) {
-                    if (position != selectedUnitPosition) {
-                        selectedUnitPosition = position;
+                    if (position != selectedUnitPosition1) {
+                        selectedUnitPosition1 = position;
                         notifyDataSetChanged();
                     }
                 }
             });
 
-            if (position == selectedUnitPosition)
+            if (position == selectedUnitPosition1)
+                convertView.setBackgroundColor(SensorConst.SELECTION_COLOR);
+            else
+                convertView.setBackgroundColor(Color.WHITE);
+
+            return convertView;
+
+        }
+    }
+
+    private class UnitList2Adapter extends BaseAdapter {
+        private ArrayList<String> unitName = new ArrayList<String>();
+        private LayoutInflater mInflater;
+        private String TAG = "UnitListAdapter2";
+        private int currentSelectedPosition;
+
+        public UnitList2Adapter() {
+
+            mInflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        }
+
+        public void addItem(final String item) {
+            unitName.add(item);
+            notifyDataSetChanged();
+        }
+
+        public void removeAllItems()
+        {
+            unitName.clear();
+        }
+
+        public void updateItem(final String item, int position) {
+            unitName.set(position, item);
+
+        }
+
+        @Override
+        public int getCount() {
+            return unitName.size();
+        }
+
+        @Override
+        public String getItem(int position) {
+            return unitName.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(final int position, View convertView, ViewGroup parent) {
+            final TextView unitNameText;
+            final ImageButton deleteBtn;
+
+            if (convertView == null) {
+                // if the view is null then inflate the custom item layout
+                convertView = mInflater.inflate(R.layout.unit_name_list_item, null);
+            }
+
+            unitNameText = (TextView) convertView.findViewById(R.id.unitNameItemTextView);
+
+            if (unitNameText != null)
+                unitNameText.setText(unitName.get(position));
+
+            convertView.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View arg0) {
+                    if (position != selectedUnitPosition2) {
+                        selectedUnitPosition2 = position;
+                        notifyDataSetChanged();
+                    }
+                }
+            });
+
+            if (position == selectedUnitPosition2)
                 convertView.setBackgroundColor(SensorConst.SELECTION_COLOR);
             else
                 convertView.setBackgroundColor(Color.WHITE);

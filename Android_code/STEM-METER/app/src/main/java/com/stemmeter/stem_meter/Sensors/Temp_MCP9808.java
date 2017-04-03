@@ -33,7 +33,7 @@ public class Temp_MCP9808 extends Sensor {
 
         dataPointList.add("Temp");
 
-        graphSettings = new GraphSettings(unitList,dataPointList);
+        graphSettings = new GraphSettings(unitList, null, dataPointList);
     }
 
     @Override
@@ -81,9 +81,12 @@ public class Temp_MCP9808 extends Sensor {
     }
 
     @Override
-    public void setGraphUnits(int units) {
+    public void setGraphUnits1(int units) {
         this.units = units;
     }
+
+    @Override
+    public void setGraphUnits2(int units) {}
 
     @Override
     public void zeroSensor() {
@@ -110,5 +113,6 @@ public class Temp_MCP9808 extends Sensor {
     @Override
     public int getSensorType() {return SensorConst.TEMP_MCP9808; }
 
-
+    @Override
+    public String getSensorName() { return "Temperature"; }
 }

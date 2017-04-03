@@ -18,23 +18,28 @@ public class TEMP_SI7021 extends Sensor {
     private boolean shouldZero = false;
 
     private GraphSettings graphSettings;
-    private int units = SensorConst.TEMP_UNIT_C;
-    private ArrayList<String> unitList;
+    private int units1 = SensorConst.TEMP_UNIT_C;
+    private int units2 = 0;
+    private ArrayList<String> unitList1;
+    private ArrayList<String> unitList2;
     private ArrayList<String> dataPointList;
 
     public TEMP_SI7021(byte[] data, int sensorPosition) {
         super(data, sensorPosition,2);
 
-        unitList = new ArrayList<>();
+        unitList1 = new ArrayList<>();
+        unitList2 = new ArrayList<>();
         dataPointList = new ArrayList<>();
 
-        unitList.add("°C");
-        unitList.add("°F");
+        unitList1.add("°C");
+        unitList1.add("°F");
+
+        unitList2.add("% RH");
 
         dataPointList.add("Temp");
         dataPointList.add("Humidity");
 
-        graphSettings = new GraphSettings(unitList,dataPointList);
+        graphSettings = new GraphSettings(unitList1, unitList2, dataPointList);
     }
 
     @Override
@@ -64,7 +69,7 @@ public class TEMP_SI7021 extends Sensor {
         temp += tempZero;
         humidity += humidityZero;
 
-        switch(units) {
+        switch(units1) {
             case SensorConst.TEMP_UNIT_F:
                 temp = ((temp * 1.8f) + 32.0f);
                 break;
@@ -91,8 +96,13 @@ public class TEMP_SI7021 extends Sensor {
     }
 
     @Override
-    public void setGraphUnits(int units) {
-        this.units = units;
+    public void setGraphUnits1(int units) {
+        this.units1 = units;
+    }
+
+    @Override
+    public void setGraphUnits2(int units) {
+        this.units2 = units;
     }
 
     @Override
@@ -115,11 +125,15 @@ public class TEMP_SI7021 extends Sensor {
 
     @Override
     public String toString() {
-        String unitsString = unitList.get(units);
-        return "Temperature: " + sensorStringArray[0] + unitsString + "\n" +
-                "Humidity: " + sensorStringArray[1] + "% RH";
+        String unitsString1 = unitList1.get(units1);
+        String unitsString2 = unitList2.get(units2);
+        return "Temperature: " + sensorStringArray[0] + unitsString1 + "\n" +
+                "Humidity: " + sensorStringArray[1] + unitsString2;
     }
 
     @Override
     public int getSensorType() {return SensorConst.TEMP_SI7021; }
+
+    @Override
+    public String getSensorName() { return "Temperature"; }
 }

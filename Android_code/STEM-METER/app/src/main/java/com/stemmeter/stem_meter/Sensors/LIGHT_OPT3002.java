@@ -37,7 +37,7 @@ public class LIGHT_OPT3002 extends Sensor {
 
         dataPointList.add("Optical Power");
 
-        graphSettings = new GraphSettings(unitList,dataPointList);
+        graphSettings = new GraphSettings(unitList,null,dataPointList);
     }
 
     @Override
@@ -115,9 +115,12 @@ public class LIGHT_OPT3002 extends Sensor {
     }
 
     @Override
-    public void setGraphUnits(int units) {
+    public void setGraphUnits1(int units) {
         this.units = units;
     }
+
+    @Override
+    public void setGraphUnits2(int units) {}
 
     @Override
     public void zeroSensor() {
@@ -137,4 +140,7 @@ public class LIGHT_OPT3002 extends Sensor {
 
     @Override
     public int getSensorType() {return SensorConst.LIGHT_OPT3002; }
+
+    @Override
+    public String getSensorName() { return "Optical Power"; }
 }

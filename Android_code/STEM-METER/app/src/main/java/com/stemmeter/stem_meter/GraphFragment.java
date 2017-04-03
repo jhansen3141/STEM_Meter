@@ -82,7 +82,7 @@ public class GraphFragment extends Fragment {
         //plot = (XYPlot) view.findViewById(plot);
         mChart = (LineChart) view.findViewById(chart);
 
-        // enable description text
+        // disable description text
         mChart.getDescription().setEnabled(false);
 
         // enable touch gestures
@@ -143,7 +143,7 @@ public class GraphFragment extends Fragment {
             leftAxis.setTypeface(Typeface.DEFAULT);
             leftAxis.setTextColor(Color.BLACK);
             leftAxis.setDrawGridLines(true);
-            leftAxis.setTitle(graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1).getGraphSettings().getUnits().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition()));
+            //leftAxis.setTitle(graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1).getGraphSettings().getUnits().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition()));
 
             YAxis rightAxis = mChart.getAxisRight();
             rightAxis.setEnabled(false);
@@ -198,7 +198,7 @@ public class GraphFragment extends Fragment {
                         .setCancelable(false)
                         .setPositiveButton("OK",new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog,int id) {
-                                SavedGraphData savedGraphData = new SavedGraphData(input.getText().toString() + "-" + Calendar.getInstance().getTime().toString(), mChart.getData(), 1, graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1).getGraphSettings().getUnits().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition()));
+                                SavedGraphData savedGraphData = new SavedGraphData(input.getText().toString() + "-" + Calendar.getInstance().getTime().toString(), mChart.getData(), 1, graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1).getGraphSettings().getDataSet1Units().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition1()));
 
                                 graphFragInterface.getSavedGraphDataList().add(savedGraphData);
                                 graphFileStorage.saveGraphFile(getActivity(),graphFragInterface.getSavedGraphDataList());
@@ -230,7 +230,7 @@ public class GraphFragment extends Fragment {
             @Override
             public void onClick(View arg0) {
                 if (playPauseBtn.isChecked()) {
-                    playPauseBtn.setBackgroundResource(R.drawable.pausenormalred);
+                    playPauseBtn.setBackgroundResource(R.drawable.ic_pause_circle_filled_black_24dp);
                     playPauseBtn.setChecked(true);
                   //  Log.i(TAG,"Play Button Clicked");
                     if (graphFragInterface.getGraphConfig().getState() != GRAPH_STATE_PLAY) {
@@ -240,12 +240,12 @@ public class GraphFragment extends Fragment {
                         saveBtn.setEnabled(false);
                         saveBtn.setColorFilter(Color.GRAY);
                         // Zero out the x axis
-                        graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor()+1).zeroX();
+                        selectedSensor.zeroX();
                     }
                 }
                 else
                 {
-                    playPauseBtn.setBackgroundResource(R.drawable.recordingicon2);
+                    playPauseBtn.setBackgroundResource(R.drawable.black_record);
                     playPauseBtn.setChecked(false);
                //     Log.i(TAG,"Pause Button Clicked");
                     if (graphFragInterface.getGraphConfig().getState() != GRAPH_STATE_PAUSE) {
@@ -265,11 +265,12 @@ public class GraphFragment extends Fragment {
                 if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP)
                     return;
 
-                playPauseBtn.setBackgroundResource(R.drawable.recordingicon2);
+                playPauseBtn.setBackgroundResource(R.drawable.black_record);
                 playPauseBtn.setChecked(false);
                 graphFragInterface.getGraphConfig().setState(GRAPH_STATE_STOP);
                 mChart.clearValues();
                 mChart.fitScreen();
+                selectedSensor.zeroX();
             }
         });
 
@@ -280,20 +281,39 @@ public class GraphFragment extends Fragment {
 
             ArrayList<String> dataSetNames = sensor.getGraphSettings().getDataPoints();
 
-            if (visibleDataSets.get(0) && dataSetNames.size() > 0)
-                dataSetName1 = dataSetNames.get(0);
-            else if (visibleDataSets.get(1) && dataSetNames.size() > 1)
-                dataSetName1 = dataSetNames.get(1);
+            String dataSet1Units = selectedSensor.getGraphSettings().getDataSet1Units().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition1());
+            String dataSet2Units = null;
+
+            if (selectedSensor.getGraphSettings().sensorHasUniqueDataSetUnits())
+                dataSet2Units = selectedSensor.getGraphSettings().getDataSet2Units().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition2());
+
+            if (visibleDataSets.get(0) && dataSetNames.size() > 0) {
+                dataSetName1 = dataSetNames.get(0) + "-" + dataSet1Units;
+            }
+            else if (visibleDataSets.get(1) && dataSetNames.size() > 1) {
+                if (selectedSensor.getGraphSettings().sensorHasUniqueDataSetUnits()) {
+                    dataSetName1 = dataSetNames.get(1) + "-" + dataSet2Units;
+                }
+                else {
+                    dataSetName1 = dataSetNames.get(1) + "-" + dataSet1Units;
+                }
+            }
             else if (dataSetNames.size() > 2)
-                dataSetName1 = dataSetNames.get(2);
+                dataSetName1 = dataSetNames.get(2) + "-" + dataSet1Units;
 
             if (visibleDataSets.get(1) && dataSetNames.size() > 1)
-                dataSetName2 = dataSetNames.get(1);
+                if (selectedSensor.getGraphSettings().sensorHasUniqueDataSetUnits()) {
+                    dataSetName2 = dataSetNames.get(1) + "-" + dataSet2Units;
+                }
+                else
+                {
+                    dataSetName2 = dataSetNames.get(1) + "-" + dataSet1Units;
+                }
             else if (dataSetNames.size() > 2)
-                dataSetName2 = dataSetNames.get(2);
+                dataSetName2 = dataSetNames.get(2) + "-" + dataSet1Units;
 
             if (dataSetNames.size() > 2)
-            dataSetName3 = dataSetNames.get(2);
+            dataSetName3 = dataSetNames.get(2) + "-" + dataSet1Units;
         }
         else
         {
@@ -396,7 +416,7 @@ public class GraphFragment extends Fragment {
 
             if (set2 == null)
             {
-                set2 = createSet(Color.RED, Color.RED, dataSetName2);
+                set2 = createSet(Color.rgb(140,0,0), Color.RED, dataSetName2);
                 data.addDataSet(set2);
             }
 
@@ -483,13 +503,13 @@ public class GraphFragment extends Fragment {
 
             if (set2 == null)
             {
-                set2 = createSet(Color.RED, Color.RED, dataSetName2);
+                set2 = createSet(Color.rgb(140,0,0), Color.RED, dataSetName2);
                 data.addDataSet(set2);
             }
 
             if (set3 == null)
             {
-                set3 = createSet(Color.GREEN, Color.DKGRAY, dataSetName3);
+                set3 = createSet(Color.rgb(0,140,0), Color.GREEN, dataSetName3);
                 data.addDataSet(set3);
             }
 
@@ -501,7 +521,7 @@ public class GraphFragment extends Fragment {
             data.addEntry(new Entry(xValue, yValue3), 2);
 
             if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_STOP) {
-                mChart.getXAxis().setEnabled(true);
+                mChart.getXAxis().setEnabled(false);
                 Entry entry;
                 //removing last element from the chart and finding max and min visible value
                 if ((set1.getEntryCount() - 1) > graphFragInterface.getGraphConfig().getVisibleDataNum()) {
@@ -585,7 +605,7 @@ public class GraphFragment extends Fragment {
         set.setFillAlpha(65);
         set.setFillColor(color);
         set.setHighLightColor(Color.rgb(244, 117, 117));
-        set.setValueTextColor(color);
+        set.setValueTextColor(circleColor);
         set.setValueTextSize(9f);
         set.setDrawValues(true);
         return set;

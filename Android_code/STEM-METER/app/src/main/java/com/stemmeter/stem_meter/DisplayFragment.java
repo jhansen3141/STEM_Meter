@@ -76,6 +76,9 @@ public class DisplayFragment extends Fragment {
         mChart.setScaleEnabled(true);
         mChart.setDrawGridBackground(false);
 
+        // disable description text
+        mChart.getDescription().setEnabled(false);
+
         // set an alternative background color
         mChart.setBackgroundColor(Color.WHITE);
 
@@ -143,7 +146,7 @@ public class DisplayFragment extends Fragment {
 
             mChart.getAxisLeft().resetAxisMinimum();
             mChart.getAxisLeft().resetAxisMaximum();
-            mChart.getAxisLeft().setTitle(displayFragInterface.getSavedGraphDataList().get(position).getUnits());
+            //mChart.getAxisLeft().setTitle(displayFragInterface.getSavedGraphDataList().get(position).getUnits());
 
             mChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
 
