@@ -7,7 +7,6 @@ import com.stemmeter.stem_meter.Sensors.MAG_MAG3110;
 import com.stemmeter.stem_meter.Sensors.PRESSURE_MPL3115A2;
 import com.stemmeter.stem_meter.Sensors.Sensor;
 import com.stemmeter.stem_meter.Sensors.TEMP_SI7021;
-import com.stemmeter.stem_meter.Sensors.Temp_MCP9808;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,11 +50,6 @@ public class BaseUnit {
                         case SensorConst.ACCEL_MPU6050:
                             if( !(sensorList.get(sNum-1) instanceof Accel_MPU6050 ) || (sensorList.get(sNum-1) == null)) {
                                 sensorList.set( (sNum-1), new Accel_MPU6050(sensorData, sNum));
-                            }
-                            break;
-                        case SensorConst.TEMP_MCP9808:
-                            if( !(sensorList.get(sNum-1) instanceof Temp_MCP9808) || (sensorList.get(sNum-1) == null)) {
-                                sensorList.set( (sNum-1), new Temp_MCP9808(sensorData, sNum));
                             }
                             break;
                         case SensorConst.GYRO_MPU6050:
@@ -136,7 +130,7 @@ public class BaseUnit {
 
         public String getBatStr() {
             return "Voltage: " + voltageStr + "V \n" +
-                    "Temp: " + fTemp + "C \n" +
+                    "Temp: " + fTemp + "F \n" +
                     "Percentage: " + percentageStr + "%";
         }
 
