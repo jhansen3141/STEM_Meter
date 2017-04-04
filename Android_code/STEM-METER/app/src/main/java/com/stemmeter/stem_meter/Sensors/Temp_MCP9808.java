@@ -8,7 +8,6 @@ import java.util.ArrayList;
 /**
  * Created by Josh on 1/28/2017.
  */
-
 public class Temp_MCP9808 extends Sensor {
 
     private String[] sensorStringArray;
