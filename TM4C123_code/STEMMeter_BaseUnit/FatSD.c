@@ -1,7 +1,10 @@
-// Josh Hansen
-// STEM-Meter
-// Team 3
-// Spring 2017
+/*
+* Author: Josh Hansen
+* Project: STEM-Meter Base Unit
+* Last Updated: April. 4, 2017
+* File: FatSD.c
+* Desc: Implements task responsible for reading and writing to SD card
+*/
 
 #include <stdio.h>
 #include <string.h>
@@ -43,9 +46,7 @@
 #define DRIVE_NUM           0
 
 #define TASKSTACKSIZE       5000
-
 #define TIME_STR_LEN		18
-
 #define TASK_PRIORITY 		1
 
 Task_Struct SDCardTaskStruct;
@@ -96,7 +97,6 @@ void SDCard_createTask(void) {
 		(Task_FuncPtr)SDCardFxn, &taskParams, NULL);
 }
 
-
 // function to return the current date for file writes
 uint32_t fatTimeHook() {
 	UTCTimeStruct time;
@@ -125,7 +125,7 @@ static void SDCard_Init() {
 	initTime.seconds = 0;
 	Time_clockSetTimeStruct(initTime); // set an intial time
 
-	/* Mount and register the SD Card */
+	// Mount and register the SD Card
 	SDSPI_Params_init(&sdspiParams);
 	sdspiHandle = SDSPI_open(Board_SDSPI0, DRIVE_NUM, &sdspiParams);
 	if (sdspiHandle == NULL) {

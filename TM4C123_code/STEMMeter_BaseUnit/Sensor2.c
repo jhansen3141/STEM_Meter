@@ -1,8 +1,11 @@
-// Josh Hansen
-// STEM-Meter
-// Team 3
-// Spring 2017
-
+/*
+* Author: Josh Hansen
+* Project: STEM-Meter Base Unit
+* Last Updated: April. 4, 2017
+* File: Sensor2.c
+* Desc: Implements task responsible for sending / receiving data from
+* sensor 2 over UART1
+*/
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -23,7 +26,6 @@
 #include <driverlib/gpio.h>
 #include <inc/hw_memmap.h>
 
-/* Example/Board Header files */
 #include "Board.h"
 #include "Sensor.h"
 #include "BLEWrite.h"
@@ -74,14 +76,9 @@ static void Sensor2TaskInit() {
 
 void Sensor2WriteConfig(uint8_t freq) {
 	char txBuffer[10];
+	memset(txBuffer,0,10);
 	sprintf(txBuffer,"SF %d\r",freq);
-	UART_writePolling(UART1Handle,txBuffer,5);
-}
-
-void Sensor2RequestStr() {
-	char txBuffer[5];
-	strcpy(txBuffer,"RS\n");
-	UART_writePolling(UART1Handle,txBuffer,3);
+	UART_writePolling(UART1Handle,txBuffer,strlen(txBuffer));
 }
 
 static void UART1WriteCallback(UART_Handle handle, void *buffer, size_t size) {
