@@ -1,4 +1,10 @@
-
+/*
+* Author: Josh Hansen
+* Project: STEM-Meter Base Unit
+* Last Updated: April. 4, 2017
+* File: FatSD.h
+* Desc: Header File
+*/
 #ifndef FATSD_H_
 #define FATSD_H_
 

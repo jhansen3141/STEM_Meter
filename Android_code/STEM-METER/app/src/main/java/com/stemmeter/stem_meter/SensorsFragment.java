@@ -171,13 +171,16 @@ public class SensorsFragment extends ListFragment {
                 }
             });
         }
-        else if(sensorFragInterface.getSensorConfig(sensorNum).getFreq() == SensorConst.RATE_INFO) {
+        else if(sensorFragInterface.getSensorConfig(sensorNum).getFreq() == SensorConst.RATE_INFO ||
+                sensorFragInterface.getSensorConfig(sensorNum).getFreq() == SensorConst.RATE_OFF) {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     sensorListAdapter.updateItemAll(dataStr,sensorNum-1);
+                    sensorListAdapter.updateAll();
                 }
             });
+
         }
     }
 
@@ -185,7 +188,6 @@ public class SensorsFragment extends ListFragment {
     public void onResume() {
         super.onResume();
         if (sensorFragInterface.OneTimeRun()) {
-            Log.i(TAG,"Querying Sensor Types");
             sensorFragInterface.querySensorTypes();
             // Update the base unit time
             sensorFragInterface.updateBaseUnitTime();
@@ -200,7 +202,6 @@ public class SensorsFragment extends ListFragment {
         private ArrayList<String> sensorData = new ArrayList<String>();
         private LayoutInflater mInflater;
         private final ArrayList<SetBoolean> setBooleanList = new ArrayList<SetBoolean>();
-        private String TAG = " SensorListAdapter";
 
         public SensorListAdapter() {
             setBooleanList.add(new SetBoolean());
@@ -208,7 +209,7 @@ public class SensorsFragment extends ListFragment {
             setBooleanList.add(new SetBoolean());
             setBooleanList.add(new SetBoolean());
 
-            mInflater = (LayoutInflater)getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            mInflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
 
         public void addItem(final String item) {
@@ -217,7 +218,7 @@ public class SensorsFragment extends ListFragment {
         }
 
         public void updateItemAll(final String item, int position) {
-            sensorData.set(position,item);
+            sensorData.set(position, item);
             notifyDataSetChanged();
         }
 
@@ -227,25 +228,23 @@ public class SensorsFragment extends ListFragment {
 
         public void updateItem(final String item, int position) {
             // Only update the sensor data if sensor text box is showing
-            if(setBooleanList.get(position).isSet()) {
+            if (setBooleanList.get(position).isSet()) {
                 sensorData.set(position, item);
                 View v = null;
                 try {
                     // Only update the row we need to. Not the entire list
                     v = getListView().getChildAt(position - getListView().getFirstVisiblePosition());
-                }
-                catch (Exception e)
-                {
-                   // Log.i(TAG,"Did not update view. Exception");
+                } catch (Exception e) {
+                    // Log.i(TAG,"Did not update view. Exception");
                 }
 
-                if(v == null) {
+                if (v == null) {
                     return;
                 }
 
                 TextView sensorText = (TextView) v.findViewById(R.id.sensorDataTextView);
 
-                if(sensorText != null) {
+                if (sensorText != null) {
                     sensorText.setText(item);
                 }
             }
@@ -276,13 +275,13 @@ public class SensorsFragment extends ListFragment {
             final Spinner frequencySpinner;
             final int finalPosition = position;
 
-            final  View altView  = mInflater.inflate(R.layout.sensor_list_config_item, null);
+            final View altView = mInflater.inflate(R.layout.sensor_list_config_item, null);
             if (convertView == null) {
                 // if the view is null then inflate the custom item layout
                 convertView = mInflater.inflate(R.layout.sensor_list_item, null);
             }
 
-            if(setBooleanList.get(finalPosition).isSet()) {
+            if (setBooleanList.get(finalPosition).isSet()) {
                 convertView = mInflater.inflate(R.layout.sensor_list_item, null);
 
                 convertView.setOnClickListener(new View.OnClickListener() {
@@ -303,7 +302,7 @@ public class SensorsFragment extends ListFragment {
 
                 // get the text view in the layout
                 sensorText = (TextView) convertView.findViewById(R.id.sensorDataTextView);
-                settingsButton = (ImageButton)convertView.findViewById(R.id.SettingsBtn);
+                settingsButton = (ImageButton) convertView.findViewById(R.id.SettingsBtn);
 
                 settingsButton.setOnClickListener(new View.OnClickListener() {
 
@@ -313,7 +312,6 @@ public class SensorsFragment extends ListFragment {
                         notifyDataSetChanged();
                     }
                 });
-
 
                 sensorImage = (ImageButton) convertView.findViewById(R.id.SensorImage);
 
@@ -351,39 +349,31 @@ public class SensorsFragment extends ListFragment {
                             sensorFragInterface.switchFragments(SensorConst.GRAPH_FRAG_ID);
                         }
                     });
-                }
-                else {
+                } else {
                     sensorImage.setVisibility(View.INVISIBLE);
                 }
 
-                if (sensorFragInterface.getSensor(position + 1) == null)
-                {
+                if (sensorFragInterface.getSensor(position + 1) == null) {
                     settingsButton.setVisibility(View.INVISIBLE);
-                }
-                else
-                {
+                } else {
                     settingsButton.setVisibility(View.VISIBLE);
                 }
 
-                if(sensorText != null) {
-                    if(sensorFragInterface.getSensorConfig(finalPosition+1).getFreq() == SensorConst.RATE_OFF ||
-                            sensorFragInterface.getSensorConfig(finalPosition+1).getFreq() == SensorConst.RATE_INFO )
-                    {
-                        Sensor s = sensorFragInterface.getSensor(finalPosition+1);
-                        if(s == null) {
-                            sensorText.setText("Sensor " + (finalPosition+1) + " - Disconnected");
-                        }
-                        else {
+                if (sensorText != null) {
+                    if (sensorFragInterface.getSensorConfig(finalPosition + 1).getFreq() == SensorConst.RATE_OFF ||
+                            sensorFragInterface.getSensorConfig(finalPosition + 1).getFreq() == SensorConst.RATE_INFO) {
+                        Sensor s = sensorFragInterface.getSensor(finalPosition + 1);
+                        if (s == null) {
+                            sensorText.setText("Sensor " + (finalPosition + 1) + " - Disconnected");
+                        } else {
                             sensorText.setText(sensorFragInterface.getSensor(finalPosition + 1).getSensorOffString());
                         }
-                    }
-                    else {
+                    } else {
                         // write the string to the text view
                         sensorText.setText(sensorData.get(position));
                     }
                 }
-            }
-            else {
+            } else {
                 ListButton = (ImageButton) altView.findViewById(R.id.ListBtn);
                 sdCheck = (CheckedTextView) altView.findViewById(R.id.checkedTextViewSD);
                 frequencySpinner = (Spinner) altView.findViewById(R.id.FrequencySpinner);
@@ -403,7 +393,7 @@ public class SensorsFragment extends ListFragment {
                 }
 
                 // set the SD card check box based on its SensorConfig object
-                sdCheck.setChecked(sensorFragInterface.getSensorConfig(position+1).isSDLogging());
+                sdCheck.setChecked(sensorFragInterface.getSensorConfig(position + 1).isSDLogging());
 
                 // Create an ArrayAdapter using the string array and a default spinner layout
                 ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
@@ -413,15 +403,14 @@ public class SensorsFragment extends ListFragment {
                 // Apply the adapter to the spinner
                 frequencySpinner.setAdapter(adapter);
                 // Set the spinner based on its SensorConfig object
-                frequencySpinner.setSelection(sensorFragInterface.getSensorConfig(position+1).getFreq());
+                frequencySpinner.setSelection(sensorFragInterface.getSensorConfig(position + 1).getFreq());
 
                 // Get the selected freq from spinner and send it to base unit
                 frequencySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     public void onItemSelected(AdapterView<?> parent, View view,
-                                               int freqSelected, long id)
-                    {
+                                               int freqSelected, long id) {
                         // Create a new config object
-                        SensorConfig config = new SensorConfig(finalPosition+1);
+                        SensorConfig config = new SensorConfig(finalPosition + 1);
                         // Set the freq to the one just selected
                         config.setFreq(freqSelected);
                         // Set the SD logging boolean to whatever it was before
@@ -429,7 +418,7 @@ public class SensorsFragment extends ListFragment {
                         // Write the new config to the base unit over BLE
                         sensorFragInterface.sensorConfigWrite(config);
 
-                      //  Log.i(TAG,"FS:" + freqSelected);
+                        //  Log.i(TAG,"FS:" + freqSelected);
                     }
 
                     @Override
@@ -445,9 +434,9 @@ public class SensorsFragment extends ListFragment {
                     public void onClick(View arg0) {
                         // Create a new config object
                         // Add one to offset zero based number
-                        SensorConfig config = new SensorConfig(finalPosition+1);
+                        SensorConfig config = new SensorConfig(finalPosition + 1);
                         // Set the freq to what it was before
-                        config.setFreq(sensorFragInterface.getSensorConfig(finalPosition+1).getFreq());
+                        config.setFreq(sensorFragInterface.getSensorConfig(finalPosition + 1).getFreq());
 
                         // if it was checked then now its not
                         if (sdCheck.isChecked()) {
@@ -466,7 +455,7 @@ public class SensorsFragment extends ListFragment {
                         // Write the new config to the base unit over BLE
                         sensorFragInterface.sensorConfigWrite(config);
                     }
-                    });
+                });
 
                 // Set listener to listen for when List button is clicked in list item settiings view
                 ListButton.setOnClickListener(new View.OnClickListener() {
@@ -480,14 +469,14 @@ public class SensorsFragment extends ListFragment {
 
             }
 
-            if(setBooleanList.get(finalPosition).isSet()) {
+            if (setBooleanList.get(finalPosition).isSet()) {
                 return convertView;
-            }
-            else {
+            } else {
                 return altView;
             }
 
         }
+
 
         private class SetBoolean {
             private boolean isSet = true;
@@ -500,7 +489,5 @@ public class SensorsFragment extends ListFragment {
                 isSet = set;
             }
         }
-
-
     }
 }

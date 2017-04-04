@@ -1,13 +1,13 @@
 /*
- * BLEWrite.h
- *
- *  Created on: Nov 12, 2016
- *      Author: Josh
- */
+* Author: Josh Hansen
+* Project: STEM-Meter Base Unit
+* Last Updated: April. 4, 2017
+* File: BLEWrite.h
+* Desc: Header File
+*/
 
 #ifndef BLEWRITE_H_
 #define BLEWRITE_H_
-
 
 typedef enum {
   SENSOR_1_UPDATE_DATA_MSG = 0,
