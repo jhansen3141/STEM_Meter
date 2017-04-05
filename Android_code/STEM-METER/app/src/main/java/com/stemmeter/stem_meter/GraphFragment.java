@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.github.mikephil.charting.charts.LineChart;
@@ -112,10 +113,12 @@ public class GraphFragment extends Fragment {
 
         graphIsOff = selectedSensorIsOff || noSensorConnected;
 
-        if (noSensorConnected)
+        if (noSensorConnected) {
             mChart.setNoDataText("No Sensor Selected");
-        else if (selectedSensorIsOff)
+        }
+        else if (selectedSensorIsOff) {
             mChart.setNoDataText("Selected Sensor is turned off");
+        }
 
         if (!graphIsOff) {
             LineData data = new LineData();
@@ -209,6 +212,13 @@ public class GraphFragment extends Fragment {
                         graphFragInterface.getSavedGraphDataList().add(savedGraphData);
                         graphFileStorage.saveGraphFile(getActivity(),graphFragInterface.getSavedGraphDataList());
                         dialog.cancel();
+
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getActivity(), input.getText().toString() +  " Graph Saved", Toast.LENGTH_SHORT).show();
+                            }
+                        });
                     }
                 })
                 .setNegativeButton("Cancel",new DialogInterface.OnClickListener() {
@@ -325,10 +335,9 @@ public class GraphFragment extends Fragment {
             };
             thread.start();
         }
-        else
-        {
+        else {
             saveBtn.setVisibility(View.INVISIBLE);
-            settingsBtn.setVisibility(View.INVISIBLE);
+//            settingsBtn.setVisibility(View.INVISIBLE);
             zeroBtn.setVisibility(View.INVISIBLE);
             stopBtn.setVisibility(View.INVISIBLE);
             playPauseBtn.setVisibility(View.INVISIBLE);
@@ -342,8 +351,9 @@ public class GraphFragment extends Fragment {
     public void onResume() {
         super.onResume();
         // Zero out the x axis every time graph screen is shown
-        if (!graphIsOff)
+        if (!graphIsOff) {
             selectedSensor.zeroX();
+        }
     }
 
     private void addEntry(float yValue, float xValue) {

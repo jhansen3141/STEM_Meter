@@ -301,11 +301,13 @@ public class GraphSettingsFragment extends Fragment {
     private void reinitializeUnit2ListView()
     {
         GraphSettings graphSettings = graphSettingsFragInterface.getSensor(graphSettingsFragInterface.getGraphConfig().getSelectedSensor() + 1).getGraphSettings();
-        unitList2Adapter.removeAllItems();
-        unitNames2 = graphSettings.getDataSet2Units();
-        if (unitNames2.size() > 0) {
-            for (int i = 0; i < unitNames2.size(); i++)
-                unitList2Adapter.addItem(unitNames2.get(i));
+        if(unitList2Adapter != null) {
+            unitList2Adapter.removeAllItems();
+            unitNames2 = graphSettings.getDataSet2Units();
+            if (unitNames2.size() > 0) {
+                for (int i = 0; i < unitNames2.size(); i++)
+                    unitList2Adapter.addItem(unitNames2.get(i));
+            }
         }
     }
 
