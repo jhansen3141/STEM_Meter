@@ -86,7 +86,6 @@ static void BatMonitor_init();
 static void user_processBatMonitorMessage(batMonitor_msg_t *pMsg);
 static bool I2CWrite(uint8_t address, uint8_t *data, uint8_t len);
 static bool I2CWriteRead(uint8_t address, uint8_t *wdata, uint8_t wlen, uint8_t *rdata, uint8_t rlen);
-static void BattGauge_Write_Reg(uint8_t reg, uint8_t data);
 static void BattGauge_On();
 static float Get_Batt_Voltage();
 static float Get_Tempature();
@@ -133,9 +132,6 @@ static void BatMonitor_init() {
 	i2cParams.transferMode = I2C_MODE_BLOCKING;
 	I2Chandle = I2C_open(Board_I2C, &i2cParams);
 
-	// Turn the battery gauge IC on to start monitoring battery
-	BattGauge_On();
-
 	Clock_Params clockParams;
 	Clock_Params buttonClockParams;
 	Clock_Params_init(&clockParams);
@@ -163,6 +159,10 @@ static void BatMonitor_init() {
 
 	// Setup callback for button interrupt
 	PIN_registerIntCb(btnPinHandle, &btnPinCallbackFxn);
+
+	BattGauge_On();
+	Task_sleep(1000);
+	BattGauge_On();
 
 	Clock_start(hBatteryUpdateClock);
 
@@ -302,23 +302,14 @@ static bool I2CWriteRead(uint8_t address, uint8_t *wdata, uint8_t wlen, uint8_t 
   return I2C_transfer(I2Chandle, &masterTransaction) == TRUE;
 }
 
-
-// Input - Register to write to battery gauge, data to write
-// Output - None
-// Description - Writes a value to batt gauge register
-static void BattGauge_Write_Reg(uint8_t reg, uint8_t data) {
-	uint8_t dataCombined[2];
-	dataCombined[0] = reg;
-	dataCombined[1] = data;
-	I2CWrite(BATT_GAUGE_ADDR, dataCombined, 2);
-}
-
 // Input -None
 // Output - None
 // Description - Takes battery gauge IC out of standby
 static void BattGauge_On() {
-	// take bat gauge out of standby
-	BattGauge_Write_Reg(BATT_GAUGE_REG_MODE,0x10);
+	uint8_t dataCombined[2];
+	dataCombined[0] = BATT_GAUGE_REG_MODE;
+	dataCombined[1] = 0x10;
+	I2CWrite(BATT_GAUGE_ADDR, dataCombined, 2);
 }
 
 // Input - None
@@ -326,11 +317,11 @@ static void BattGauge_On() {
 // Description - Reads current battery voltage from battery gauge IC
 static float Get_Batt_Voltage() {
 	uint8_t returnData[2];
-	uint8_t regAddress = BATT_GAUGE_REG_VOLTAGE_LOW;
+	uint8_t voltageRegAddress = BATT_GAUGE_REG_VOLTAGE_LOW;
 	uint16_t combinedData;
-	I2CWriteRead(BATT_GAUGE_ADDR,&regAddress,1,returnData,2);
-	combinedData = (uint16_t)(returnData[1] << 8) | returnData[0];
-	return ((float)combinedData * 2.44f)/1000;
+	I2CWriteRead(BATT_GAUGE_ADDR,&voltageRegAddress,1,returnData,2);
+	combinedData = ( ( (uint16_t)returnData[1] ) << 8 ) | returnData[0];
+	return ( (float)combinedData * 2.44f ) / 1000.0f;
 }
 
 // Input - None
@@ -338,11 +329,11 @@ static float Get_Batt_Voltage() {
 // Description - Reads current battery tempature from battery gauge
 static float Get_Tempature() {
 	uint8_t returnData[2];
-	uint8_t regAddress = BATT_GAUGE_REG_TEMP_LOW;
+	uint8_t tempRegAddress = BATT_GAUGE_REG_TEMP_LOW;
 	uint16_t combinedData;
-	I2CWriteRead(BATT_GAUGE_ADDR,&regAddress,1,returnData,2);
+	I2CWriteRead(BATT_GAUGE_ADDR,&tempRegAddress,1,returnData,2);
 	// Read the two bytes of data from IC then combine into 16-bit value
-	combinedData = (uint16_t)(returnData[1] << 8) | returnData[0];
+	combinedData = ( ( (int16_t)returnData[1] ) << 8 ) | returnData[0];
 	// multiply by temp per LSB then convert to F
 	return ((float)combinedData * 0.125f) * 1.8f + 32.0f;
 }
@@ -353,12 +344,12 @@ static float Get_Tempature() {
 static float Get_Batt_Current() {
 	float current;
 	uint8_t returnData[2];
-	uint8_t regAddress = BATT_GAUGE_REG_CURRENT_LOW;
+	uint8_t currentRegAddress = BATT_GAUGE_REG_CURRENT_LOW;
 	int16_t combinedData;
-	I2CWriteRead(BATT_GAUGE_ADDR,&regAddress,1,returnData,2);
-	combinedData = (int8_t)((uint16_t)(returnData[1] << 8) | returnData[0]);
-	current = (((float)combinedData * 11.77f)/0.03);
-	return current / 1000.0f;
+	I2CWriteRead(BATT_GAUGE_ADDR,&currentRegAddress,1,returnData,2);
+	combinedData = ( ( (int16_t)returnData[1] ) << 8 ) | returnData[0];
+	current = ( ( (float)combinedData * 11.77f ) / 0.03f );
+	return (current / 1000.0f);
 }
 
 // Called by clock every 5seconds
@@ -372,6 +363,7 @@ static void FiveSecUpdate() {
 // Description - Retrives current battery data from bat monitor IC
 // then sends that updated data to the BLE task to be read by the Android app
 static void updateBatteryValues() {
+	BattGauge_On();
 	uint8_t batteryString[20] = {0};
 	float temp = Get_Tempature();
 

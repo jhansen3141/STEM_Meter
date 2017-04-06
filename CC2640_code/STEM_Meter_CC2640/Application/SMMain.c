@@ -187,7 +187,7 @@ static void user_gapBondMgr_pairStateCB(uint16_t connHandle, uint8_t state,
 static void user_STEMMeter_ServiceValueChangeCB(uint8_t paramID); // Callback from the service.
 static void user_STEMMeter_Service_ValueChangeDispatchHandler(server_char_write_t *pWrite); // Local handler called from the Task context of this task.
 // Task handler for sending notifications.
-static void user_updateCharVal(char_data_t *pCharData);
+//static void user_updateCharVal(char_data_t *pCharData);
 
 // Utility functions
 static void user_enqueueRawAppMsg(app_msg_types_t appMsgType, uint8_t *pData, uint16_t len );
@@ -965,38 +965,38 @@ static void user_enqueueRawAppMsg(app_msg_types_t appMsgType, uint8_t *pData,
 }
 
 
-/*
- * @brief  Convenience function for updating characteristic data via char_data_t
- *         structured message.
- *
- * @note   Must run in Task context in case BLE Stack APIs are invoked.
- *
- * @param  *pCharData  Pointer to struct with value to update.
- */
-static void user_updateCharVal(char_data_t *pCharData) {
-  switch(pCharData->svcUUID) {
-    case STEMMETER_SERVICE_SENSOR1DATA_UUID:
-    	STEMMeter_Service_SetParameter(STEMMETER_SERVICE_SENSOR1DATA, STEMMETER_SERVICE_SENSOR1DATA_LEN, pCharData->data);
-    	break;
-
-    case STEMMETER_SERVICE_SENSOR2DATA_UUID:
-    	  STEMMeter_Service_SetParameter(STEMMETER_SERVICE_SENSOR2DATA, STEMMETER_SERVICE_SENSOR2DATA_LEN, pCharData->data);
-    	  break;
-
-    case STEMMETER_SERVICE_SENSOR3DATA_UUID:
-    	STEMMeter_Service_SetParameter(STEMMETER_SERVICE_SENSOR3DATA, STEMMETER_SERVICE_SENSOR3DATA_LEN, pCharData->data);
-    	break;
-
-    case STEMMETER_SERVICE_SENSOR4DATA_UUID:
-    	STEMMeter_Service_SetParameter(STEMMETER_SERVICE_SENSOR4DATA, STEMMETER_SERVICE_SENSOR4DATA_LEN, pCharData->data);
-    break;
-
-    case STEMMETER_SERVICE_BATTERYDATA_UUID:
-    	STEMMeter_Service_SetParameter(STEMMETER_SERVICE_BATTERYDATA, STEMMETER_SERVICE_BATTERYDATA_LEN, pCharData->data);
-    break;
-
-  }
-}
+///*
+// * @brief  Convenience function for updating characteristic data via char_data_t
+// *         structured message.
+// *
+// * @note   Must run in Task context in case BLE Stack APIs are invoked.
+// *
+// * @param  *pCharData  Pointer to struct with value to update.
+// */
+//static void user_updateCharVal(char_data_t *pCharData) {
+//  switch(pCharData->svcUUID) {
+//    case STEMMETER_SERVICE_SENSOR1DATA_UUID:
+//    	STEMMeter_Service_SetParameter(STEMMETER_SERVICE_SENSOR1DATA, STEMMETER_SERVICE_SENSOR1DATA_LEN, pCharData->data);
+//    	break;
+//
+//    case STEMMETER_SERVICE_SENSOR2DATA_UUID:
+//    	  STEMMeter_Service_SetParameter(STEMMETER_SERVICE_SENSOR2DATA, STEMMETER_SERVICE_SENSOR2DATA_LEN, pCharData->data);
+//    	  break;
+//
+//    case STEMMETER_SERVICE_SENSOR3DATA_UUID:
+//    	STEMMeter_Service_SetParameter(STEMMETER_SERVICE_SENSOR3DATA, STEMMETER_SERVICE_SENSOR3DATA_LEN, pCharData->data);
+//    	break;
+//
+//    case STEMMETER_SERVICE_SENSOR4DATA_UUID:
+//    	STEMMeter_Service_SetParameter(STEMMETER_SERVICE_SENSOR4DATA, STEMMETER_SERVICE_SENSOR4DATA_LEN, pCharData->data);
+//    break;
+//
+//    case STEMMETER_SERVICE_BATTERYDATA_UUID:
+//    	STEMMeter_Service_SetParameter(STEMMETER_SERVICE_BATTERYDATA, STEMMETER_SERVICE_BATTERYDATA_LEN, pCharData->data);
+//    break;
+//
+//  }
+//}
 
 
 void enqueueSensorCharUpdate(uint16_t charUUID, uint8_t *pValue) {
