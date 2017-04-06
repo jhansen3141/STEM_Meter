@@ -101,6 +101,11 @@ public class PRESSURE_MPL3115A2 extends Sensor {
 
     @Override
     public String toString() {
+        if(this.getSensorRate() == SensorConst.RATE_OFF ||
+                this.getSensorRate() == SensorConst.RATE_INFO ) {
+            return this.getSensorOffString();
+        }
+
         if(sensorStringArray != null) {
             String units1String = unitList1.get(units1);
             String units2String = unitList2.get(units2);

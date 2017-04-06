@@ -125,6 +125,11 @@ public class TEMP_SI7021 extends Sensor {
 
     @Override
     public String toString() {
+        if(this.getSensorRate() == SensorConst.RATE_OFF ||
+                this.getSensorRate() == SensorConst.RATE_INFO ) {
+            return this.getSensorOffString();
+        }
+
         String unitsString1 = unitList1.get(units1);
         String unitsString2 = unitList2.get(units2);
         return "Temperature: " + sensorStringArray[0] + unitsString1 + "\n" +
