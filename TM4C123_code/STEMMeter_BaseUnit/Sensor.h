@@ -1,9 +1,10 @@
 /*
- * Sensor1.h
- *
- *  Created on: Nov 15, 2016
- *      Author: Josh
- */
+* Author: Josh Hansen
+* Project: STEM-Meter Base Unit
+* Last Updated: April. 4, 2017
+* File: Sensor.h
+* Desc: Header File
+*/
 
 #ifndef SENSOR_H_
 #define SENSOR_H_
@@ -18,7 +19,6 @@
 #define SD_CARD_DATA_LEN	46
 #define STR_NAME_OFFSET		1
 #define STR_META_DATA_LEN	16
-
 
 #define FRAME_BYTE_0 0x55
 #define FRAME_BYTE_1 0xAA
@@ -41,8 +41,5 @@ extern void Sensor1RequestStr();
 extern void Sensor2RequestStr();
 extern void Sensor3RequestStr();
 extern void Sensor4RequestStr();
-
-
-
 
 #endif /* SENSOR_H_ */

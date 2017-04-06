@@ -120,12 +120,15 @@ public class Accel_MPU6050 extends Sensor {
     }
 
     @Override
-    public void setGraphUnits2(int units) {
-        this.units = units;
-    }
+    public void setGraphUnits2(int units) {}
 
     @Override
     public String toString() {
+        if(this.getSensorRate() == SensorConst.RATE_OFF ||
+            this.getSensorRate() == SensorConst.RATE_INFO ) {
+            return this.getSensorOffString();
+        }
+
         if(sensorStringArray != null) {
             String unitString = unitList.get(units);
 

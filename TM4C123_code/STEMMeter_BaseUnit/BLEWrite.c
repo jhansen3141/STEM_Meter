@@ -1,7 +1,11 @@
-// Josh Hansen
-// STEM-Meter
-// Team 3
-// Spring 2017
+/*
+* Author: Josh Hansen
+* Project: STEM-Meter Base Unit
+* Last Updated: April. 4, 2017
+* File: BLEWrite.c
+* Desc: Implements task responsible for reading and writing to BLE
+* transceiver over SPI
+*/
 
 #include <stdio.h>
 #include <string.h>
@@ -18,7 +22,6 @@
 #include <ti/sysbios/knl/Task.h>
 #include <ti/sysbios/knl/Semaphore.h>
 #include <ti/sysbios/knl/Queue.h>
-
 
 /* TI-RTOS Header files */
 #include <ti/drivers/GPIO.h>
@@ -52,7 +55,6 @@ typedef enum {
 	CHARGE_NOT_FULL_ID
 } spiMsgID_t;
 
-
 Task_Struct task0Struct;
 Char task0Stack[TASKSTACKSIZE];
 
@@ -65,9 +67,7 @@ static Queue_Handle hBleWritesMsgQ;
 
 static Semaphore_Struct semBLEWriteStruct;
 static Semaphore_Handle semBLEWriteHandle;
-
 static int32_t queueSize = 0;
-
 
 // Struct for task messages
 typedef struct {
@@ -86,7 +86,6 @@ static void updateSensorConfig();
 static void InputPowerGoodInterrupt(unsigned int index);
 static void ChargeCompleteInterrupt(unsigned int index);
 static void checkChargeStatus();
-
 
 void BLEWrite_createTask(void) {
     Task_Params taskParams;
@@ -213,9 +212,6 @@ static void BLEWriteFxn(UArg arg0, UArg arg1) {
 	}
 }
 
-// Input - Device Task Message Struct
-// Output - None
-// Description - Called from device task context when message dequeued
 static void user_processBLEWriteMessage(bleWrite_msg_t *pMsg) {
 	bool shouldSendUpdate = true;
 	bool oneByteMsg = false;
@@ -341,9 +337,6 @@ static void updateSensorConfig() {
 				break;
 		}
 	}
-
-	// Re-Enable interrupt
-//	GPIO_enableInt(Board_SPI_SLAVE_INT);
 }
 
 void enqueueBLEWritetTaskMsg(bleWrite_msg_types_t msgType, uint8_t *buffer, uint16_t len) {
@@ -375,6 +368,8 @@ static void sdCardLEDBlink(uint8_t numBlink) {
 		GPIO_write(Board_SD_CARD_LED, Board_LED_OFF);
 		Task_sleep(300);
 	}
+
+	GPIO_write(Board_SD_CARD_LED, Board_LED_ON);
 }
 
 static void checkChargeStatus() {

@@ -1,7 +1,10 @@
-// Josh Hansen
-// STEM-Meter
-// Team 3
-// Spring 2017
+/*
+* Author: Josh Hansen
+* Project: STEM-Meter Base Unit
+* Last Updated: April. 4, 2017
+* File: main.c
+* Desc: Main function. Creates all tasks then starts BIOS
+*/
 
 /* BIOS Header files */
 #include <ti/sysbios/BIOS.h>
@@ -11,14 +14,13 @@
 #include <ti/drivers/GPIO.h>
 #include <ti/drivers/SDSPI.h>
 
-/* Example/Board Header files */
 #include "Board.h"
 #include "main.h"
 
 
 int main(void) {
 
-    /* Call board init functions */
+   // Call board init functions
     Board_initGeneral();
     Board_initGPIO();
     Board_initSDSPI();
@@ -37,7 +39,6 @@ int main(void) {
 
     Sensor4_createTask();
 
-    /* Start BIOS */
     BIOS_start();
 
     return (0);

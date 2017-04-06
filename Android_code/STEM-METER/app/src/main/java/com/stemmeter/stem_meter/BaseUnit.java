@@ -7,7 +7,6 @@ import com.stemmeter.stem_meter.Sensors.MAG_MAG3110;
 import com.stemmeter.stem_meter.Sensors.PRESSURE_MPL3115A2;
 import com.stemmeter.stem_meter.Sensors.Sensor;
 import com.stemmeter.stem_meter.Sensors.TEMP_SI7021;
-import com.stemmeter.stem_meter.Sensors.Temp_MCP9808;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,52 +39,53 @@ public class BaseUnit {
     }
 
     public Sensor updateSensorData(final int sNum, final byte sensorData[]) {
-        if(sensorData[0] == SensorConst.INVALID_SENSOR) {
-            return null;
-        }
-        else {
-            // check to see which sensor is connected
-            // sensor data type is held in first byte of sensor data
-            switch(sensorData[0]) {
-                case SensorConst.ACCEL_MPU6050:
-                    if( !(sensorList.get(sNum-1) instanceof Accel_MPU6050 ) || (sensorList.get(sNum-1) == null)) {
-                        sensorList.set( (sNum-1), new Accel_MPU6050(sensorData, sNum));
+
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                if( !(sensorData[0] == SensorConst.INVALID_SENSOR) ) {
+                    // check to see which sensor is connected
+                    // sensor data type is held in first byte of sensor data
+                    switch(sensorData[0]) {
+                        case SensorConst.ACCEL_MPU6050:
+                            if( !(sensorList.get(sNum-1) instanceof Accel_MPU6050 ) || (sensorList.get(sNum-1) == null)) {
+                                sensorList.set( (sNum-1), new Accel_MPU6050(sensorData, sNum));
+                            }
+                            break;
+                        case SensorConst.GYRO_MPU6050:
+                            if( !(sensorList.get(sNum-1) instanceof Gyro_MPU6050) || (sensorList.get(sNum-1) == null)) {
+                                sensorList.set( (sNum-1), new Gyro_MPU6050(sensorData, sNum) );
+                            }
+                            break;
+                        case SensorConst.LIGHT_OPT3002:
+                            if( !(sensorList.get(sNum-1) instanceof LIGHT_OPT3002) || (sensorList.get(sNum-1) == null)) {
+                                sensorList.set( (sNum-1), new LIGHT_OPT3002(sensorData, sNum));
+                            }
+                            break;
+                        case SensorConst.MAG_MAG3110:
+                            if( !(sensorList.get(sNum-1) instanceof MAG_MAG3110) || (sensorList.get(sNum-1) == null)) {
+                                sensorList.set( (sNum-1), new MAG_MAG3110(sensorData, sNum));
+                            }
+                            break;
+                        case SensorConst.PRESSURE_MPL3115A2:
+                            if( !(sensorList.get(sNum-1) instanceof PRESSURE_MPL3115A2) || (sensorList.get(sNum-1) == null)) {
+                                sensorList.set( (sNum-1), new PRESSURE_MPL3115A2(sensorData, sNum));
+                            }
+                            break;
+                        case SensorConst.TEMP_SI7021:
+                            if( !(sensorList.get(sNum-1) instanceof TEMP_SI7021) || (sensorList.get(sNum-1) == null)) {
+                                sensorList.set( (sNum-1), new TEMP_SI7021(sensorData, sNum));
+                            }
+                            break;
                     }
-                    break;
-                case SensorConst.TEMP_MCP9808:
-                    if( !(sensorList.get(sNum-1) instanceof Temp_MCP9808) || (sensorList.get(sNum-1) == null)) {
-                        sensorList.set( (sNum-1), new Temp_MCP9808(sensorData, sNum));
-                    }
-                    break;
-                case SensorConst.GYRO_MPU6050:
-                    if( !(sensorList.get(sNum-1) instanceof Gyro_MPU6050) || (sensorList.get(sNum-1) == null)) {
-                        sensorList.set( (sNum-1), new Gyro_MPU6050(sensorData, sNum) );
-                    }
-                    break;
-                case SensorConst.LIGHT_OPT3002:
-                    if( !(sensorList.get(sNum-1) instanceof LIGHT_OPT3002) || (sensorList.get(sNum-1) == null)) {
-                        sensorList.set( (sNum-1), new LIGHT_OPT3002(sensorData, sNum));
-                    }
-                    break;
-                case SensorConst.MAG_MAG3110:
-                    if( !(sensorList.get(sNum-1) instanceof MAG_MAG3110) || (sensorList.get(sNum-1) == null)) {
-                        sensorList.set( (sNum-1), new MAG_MAG3110(sensorData, sNum));
-                    }
-                    break;
-                case SensorConst.PRESSURE_MPL3115A2:
-                    if( !(sensorList.get(sNum-1) instanceof PRESSURE_MPL3115A2) || (sensorList.get(sNum-1) == null)) {
-                        sensorList.set( (sNum-1), new PRESSURE_MPL3115A2(sensorData, sNum));
-                    }
-                    break;
-                case SensorConst.TEMP_SI7021:
-                    if( !(sensorList.get(sNum-1) instanceof TEMP_SI7021) || (sensorList.get(sNum-1) == null)) {
-                        sensorList.set( (sNum-1), new TEMP_SI7021(sensorData, sNum));
-                    }
-                    break;
+
+                    sensorList.get(sNum-1).updateData(sensorData);
+                    sensorList.get(sNum-1).calcSensorData();
+                }
             }
-        }
-        sensorList.get(sNum-1).updateData(sensorData);
-        sensorList.get(sNum-1).calcSensorData();
+        };
+
+        thread.start();
 
         return  sensorList.get(sNum-1);
     }
@@ -130,7 +130,7 @@ public class BaseUnit {
 
         public String getBatStr() {
             return "Voltage: " + voltageStr + "V \n" +
-                   // "Current: " + currentStr + "mA \n" +
+                    "Temp: " + fTemp + "F \n" +
                     "Percentage: " + percentageStr + "%";
         }
 

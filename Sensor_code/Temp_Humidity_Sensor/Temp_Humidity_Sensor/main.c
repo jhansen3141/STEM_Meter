@@ -10,8 +10,8 @@
 #include "uart.h"
 #include "cmd.h"
 
-static uint32_t secondCounter = 0;
-static uint32_t minuteCounter = 0;
+static volatile uint32_t secondCounter = 0;
+static volatile uint32_t minuteCounter = 0;
 sensorRate_t sensorRate = RATE_OFF;
 static sensorData_t data;
 

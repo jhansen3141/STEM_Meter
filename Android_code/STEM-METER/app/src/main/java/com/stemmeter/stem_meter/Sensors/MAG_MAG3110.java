@@ -79,6 +79,11 @@ public class MAG_MAG3110 extends Sensor {
 
     @Override
     public String toString() {
+        if(this.getSensorRate() == SensorConst.RATE_OFF ||
+                this.getSensorRate() == SensorConst.RATE_INFO ) {
+            return this.getSensorOffString();
+        }
+
         if(sensorStringArray != null) {
             String unitString = unitList1.get(units);
             return "Magnetometer\n" +

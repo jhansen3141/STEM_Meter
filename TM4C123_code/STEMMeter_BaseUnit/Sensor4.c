@@ -1,7 +1,11 @@
-// Josh Hansen
-// STEM-Meter
-// Team 3
-// Spring 2017
+/*
+* Author: Josh Hansen
+* Project: STEM-Meter Base Unit
+* Last Updated: April. 4, 2017
+* File: Sensor4.c
+* Desc: Implements task responsible for sending / receiving data from
+* sensor 4 over UART3
+*/
 
 #include <stdio.h>
 #include <string.h>
@@ -21,12 +25,10 @@
 #include <ti/drivers/GPIO.h>
 #include <ti/drivers/UART.h>
 
-/* Example/Board Header files */
 #include "Board.h"
 #include "Sensor.h"
 #include "BLEWrite.h"
 #include "FatSD.h"
-
 
 #define TASKSTACKSIZE       1500
 #define TASK_PRIORITY 		2
@@ -72,14 +74,9 @@ static void Sensor4TaskInit() {
 
 void Sensor4WriteConfig(uint8_t freq) {
 	char txBuffer[10];
+	memset(txBuffer,0,10);
 	sprintf(txBuffer,"SF %d\r",freq);
-	UART_writePolling(UART3Handle,txBuffer,5);
-}
-
-void Sensor4RequestStr() {
-	char txBuffer[5];
-	strcpy(txBuffer,"RS\n");
-	UART_writePolling(UART3Handle,txBuffer,3);
+	UART_writePolling(UART3Handle,txBuffer,strlen(txBuffer));
 }
 
 static void UART3WriteCallback(UART_Handle handle, void *buffer, size_t size) {

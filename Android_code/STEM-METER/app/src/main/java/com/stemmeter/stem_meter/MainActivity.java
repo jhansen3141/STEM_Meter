@@ -330,7 +330,7 @@ public class MainActivity extends AppCompatActivity
                             @Override
                             public void run() {
                                 mainMenu.findItem(R.id.connection_icon).setIcon(R.drawable.disconnected_icon);
-                                switchFragments(SensorConst.CONNECT_FRAG_ID);
+                                Toast.makeText(getApplicationContext(), "STEM-Meter Disconnected", Toast.LENGTH_LONG).show();
                             }
                         });
                     }
@@ -522,6 +522,10 @@ public class MainActivity extends AppCompatActivity
 
 
     public void postSensorData(Sensor sensor) {
+        if(sensor == null) {
+            return;
+        }
+
         SensorsFragment sensorsFragment = (SensorsFragment)
                 getSupportFragmentManager().findFragmentByTag(SENSOR_FRAG_TAG);
         // if the sensor fragment is showing print the data there

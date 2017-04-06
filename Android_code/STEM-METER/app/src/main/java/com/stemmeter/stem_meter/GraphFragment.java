@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.github.mikephil.charting.charts.LineChart;
@@ -71,16 +72,18 @@ public class GraphFragment extends Fragment {
 
     private GraphFileStorage graphFileStorage;
 
+    private View graphView;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        final View view = inflater.inflate(R.layout.graph_fragment, container, false);
+        graphView = inflater.inflate(R.layout.graph_fragment, container, false);
 
         graphFileStorage = new GraphFileStorage();
 
         //plot = (XYPlot) view.findViewById(plot);
-        mChart = (LineChart) view.findViewById(chart);
+        mChart = (LineChart) graphView.findViewById(chart);
 
         // disable description text
         mChart.getDescription().setEnabled(false);
@@ -110,10 +113,12 @@ public class GraphFragment extends Fragment {
 
         graphIsOff = selectedSensorIsOff || noSensorConnected;
 
-        if (noSensorConnected)
+        if (noSensorConnected) {
             mChart.setNoDataText("No Sensor Selected");
-        else if (selectedSensorIsOff)
+        }
+        else if (selectedSensorIsOff) {
             mChart.setNoDataText("Selected Sensor is turned off");
+        }
 
         if (!graphIsOff) {
             LineData data = new LineData();
@@ -149,7 +154,7 @@ public class GraphFragment extends Fragment {
             rightAxis.setEnabled(false);
         }
 
-        zeroBtn = (ImageButton) view.findViewById(R.id.ZeroBtn);
+        zeroBtn = (ImageButton) graphView.findViewById(R.id.ZeroBtn);
         zeroBtn.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -159,7 +164,7 @@ public class GraphFragment extends Fragment {
         });
 
         //mChart.setVisibleXRangeMaximum(10);
-        settingsBtn = (ImageButton) view.findViewById(R.id.GraphSettingsBtn);
+        settingsBtn = (ImageButton) graphView.findViewById(R.id.GraphSettingsBtn);
         settingsBtn.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -172,59 +177,68 @@ public class GraphFragment extends Fragment {
         });
 
 
-        saveBtn = (ImageButton) view.findViewById(R.id.SaveBtn);
+        saveBtn = (ImageButton) graphView.findViewById(R.id.SaveBtn);
         saveBtn.setEnabled(false);
         saveBtn.setColorFilter(Color.GRAY);
         saveBtn.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View arg0) {
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-                        getActivity());
 
-                // set title
-                alertDialogBuilder.setTitle("Graph Name");
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                    getActivity());
 
-                final EditText input = new EditText(getActivity());
-                        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            LinearLayout.LayoutParams.MATCH_PARENT);
-                input.setLayoutParams(lp);
-                alertDialogBuilder.setView(input);
+            // set title
+            alertDialogBuilder.setTitle("Graph Name");
 
-                // set dialog message
-                alertDialogBuilder
-                        .setMessage("Enter Graph Name")
-                        .setCancelable(false)
-                        .setPositiveButton("OK",new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,int id) {
-                                SavedGraphData savedGraphData = new SavedGraphData(input.getText().toString() + "-" + Calendar.getInstance().getTime().toString(), mChart.getData(), 1, graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1).getGraphSettings().getDataSet1Units().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition1()));
+            final EditText input = new EditText(getActivity());
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT);
+            input.setLayoutParams(lp);
+            alertDialogBuilder.setView(input);
 
-                                graphFragInterface.getSavedGraphDataList().add(savedGraphData);
-                                graphFileStorage.saveGraphFile(getActivity(),graphFragInterface.getSavedGraphDataList());
-                                dialog.cancel();
-                            }
-                        })
-                        .setNegativeButton("Cancel",new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,int id) {
-                                // if this button is clicked, just close
-                                // the dialog box and do nothing
-                                dialog.cancel();
+            // set dialog message
+            alertDialogBuilder
+                .setMessage("Enter Graph Name")
+                .setCancelable(false)
+                .setPositiveButton("OK",new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,int id) {
+                        SavedGraphData savedGraphData = new SavedGraphData(input.getText().toString() + "-" +
+                                Calendar.getInstance().getTime().toString(),
+                                mChart.getData(), 1, graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1).
+                                getGraphSettings().getDataSet1Units().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition1()));
+
+                        graphFragInterface.getSavedGraphDataList().add(savedGraphData);
+                        graphFileStorage.saveGraphFile(getActivity(),graphFragInterface.getSavedGraphDataList());
+                        dialog.cancel();
+
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getActivity(), input.getText().toString() +  " Graph Saved", Toast.LENGTH_SHORT).show();
                             }
                         });
+                    }
+                })
+                .setNegativeButton("Cancel",new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,int id) {
+                        // if this button is clicked, just close
+                        // the dialog box and do nothing
+                        dialog.cancel();
+                    }
+                });
 
-                // create alert dialog
-                AlertDialog alertDialog = alertDialogBuilder.create();
+            // create alert dialog
+            AlertDialog alertDialog = alertDialogBuilder.create();
 
-                // show it
-                alertDialog.show();
-                //LineData data = mChart.getData();
+            // show it
+            alertDialog.show();
             }
-
         });
 
 
-        playPauseBtn = (ToggleButton) view.findViewById(R.id.PlayPauseBtn);
+        playPauseBtn = (ToggleButton) graphView.findViewById(R.id.PlayPauseBtn);
         playPauseBtn.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -232,7 +246,7 @@ public class GraphFragment extends Fragment {
                 if (playPauseBtn.isChecked()) {
                     playPauseBtn.setBackgroundResource(R.drawable.ic_pause_circle_filled_black_24dp);
                     playPauseBtn.setChecked(true);
-                  //  Log.i(TAG,"Play Button Clicked");
+                    //  Log.i(TAG,"Play Button Clicked");
                     if (graphFragInterface.getGraphConfig().getState() != GRAPH_STATE_PLAY) {
                         graphFragInterface.getGraphConfig().setState(GRAPH_STATE_PLAY);
                         mChart.clearValues();
@@ -247,7 +261,7 @@ public class GraphFragment extends Fragment {
                 {
                     playPauseBtn.setBackgroundResource(R.drawable.black_record);
                     playPauseBtn.setChecked(false);
-               //     Log.i(TAG,"Pause Button Clicked");
+                    //     Log.i(TAG,"Pause Button Clicked");
                     if (graphFragInterface.getGraphConfig().getState() != GRAPH_STATE_PAUSE) {
                         graphFragInterface.getGraphConfig().setState(GRAPH_STATE_PAUSE);
                         saveBtn.setEnabled(true);
@@ -257,7 +271,7 @@ public class GraphFragment extends Fragment {
             }
         });
 
-        stopBtn = (ImageButton) view.findViewById(R.id.GraphStopBtn);
+        stopBtn = (ImageButton) graphView.findViewById(R.id.GraphStopBtn);
         stopBtn.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -276,64 +290,70 @@ public class GraphFragment extends Fragment {
 
         if (!graphIsOff)
         {
-            ArrayList<Boolean> visibleDataSets = graphFragInterface.getGraphConfig().getDataPoints();
-            Sensor sensor = graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1);
+            Thread thread = new Thread() {
+                @Override
+                public void run() {
+                    ArrayList<Boolean> visibleDataSets = graphFragInterface.getGraphConfig().getDataPoints();
+                    Sensor sensor = graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1);
 
-            ArrayList<String> dataSetNames = sensor.getGraphSettings().getDataPoints();
+                    ArrayList<String> dataSetNames = sensor.getGraphSettings().getDataPoints();
 
-            String dataSet1Units = selectedSensor.getGraphSettings().getDataSet1Units().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition1());
-            String dataSet2Units = null;
+                    String dataSet1Units = selectedSensor.getGraphSettings().getDataSet1Units().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition1());
+                    String dataSet2Units = null;
 
-            if (selectedSensor.getGraphSettings().sensorHasUniqueDataSetUnits())
-                dataSet2Units = selectedSensor.getGraphSettings().getDataSet2Units().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition2());
+                    if (selectedSensor.getGraphSettings().sensorHasUniqueDataSetUnits())
+                        dataSet2Units = selectedSensor.getGraphSettings().getDataSet2Units().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition2());
 
-            if (visibleDataSets.get(0) && dataSetNames.size() > 0) {
-                dataSetName1 = dataSetNames.get(0) + "-" + dataSet1Units;
-            }
-            else if (visibleDataSets.get(1) && dataSetNames.size() > 1) {
-                if (selectedSensor.getGraphSettings().sensorHasUniqueDataSetUnits()) {
-                    dataSetName1 = dataSetNames.get(1) + "-" + dataSet2Units;
+                    if (visibleDataSets.get(0) && dataSetNames.size() > 0) {
+                        dataSetName1 = dataSetNames.get(0) + "-" + dataSet1Units;
+                    }
+                    else if (visibleDataSets.get(1) && dataSetNames.size() > 1) {
+                        if (selectedSensor.getGraphSettings().sensorHasUniqueDataSetUnits()) {
+                            dataSetName1 = dataSetNames.get(1) + "-" + dataSet2Units;
+                        }
+                        else {
+                            dataSetName1 = dataSetNames.get(1) + "-" + dataSet1Units;
+                        }
+                    }
+                    else if (dataSetNames.size() > 2)
+                        dataSetName1 = dataSetNames.get(2) + "-" + dataSet1Units;
+
+                    if (visibleDataSets.get(1) && dataSetNames.size() > 1)
+                        if (selectedSensor.getGraphSettings().sensorHasUniqueDataSetUnits()) {
+                            dataSetName2 = dataSetNames.get(1) + "-" + dataSet2Units;
+                        }
+                        else
+                        {
+                            dataSetName2 = dataSetNames.get(1) + "-" + dataSet1Units;
+                        }
+                    else if (dataSetNames.size() > 2)
+                        dataSetName2 = dataSetNames.get(2) + "-" + dataSet1Units;
+
+                    if (dataSetNames.size() > 2)
+                        dataSetName3 = dataSetNames.get(2) + "-" + dataSet1Units;
                 }
-                else {
-                    dataSetName1 = dataSetNames.get(1) + "-" + dataSet1Units;
-                }
-            }
-            else if (dataSetNames.size() > 2)
-                dataSetName1 = dataSetNames.get(2) + "-" + dataSet1Units;
-
-            if (visibleDataSets.get(1) && dataSetNames.size() > 1)
-                if (selectedSensor.getGraphSettings().sensorHasUniqueDataSetUnits()) {
-                    dataSetName2 = dataSetNames.get(1) + "-" + dataSet2Units;
-                }
-                else
-                {
-                    dataSetName2 = dataSetNames.get(1) + "-" + dataSet1Units;
-                }
-            else if (dataSetNames.size() > 2)
-                dataSetName2 = dataSetNames.get(2) + "-" + dataSet1Units;
-
-            if (dataSetNames.size() > 2)
-            dataSetName3 = dataSetNames.get(2) + "-" + dataSet1Units;
+            };
+            thread.start();
         }
-        else
-        {
+        else {
             saveBtn.setVisibility(View.INVISIBLE);
-            settingsBtn.setVisibility(View.INVISIBLE);
+//            settingsBtn.setVisibility(View.INVISIBLE);
             zeroBtn.setVisibility(View.INVISIBLE);
             stopBtn.setVisibility(View.INVISIBLE);
             playPauseBtn.setVisibility(View.INVISIBLE);
         }
 
         graphFragInterface.getGraphConfig().setState(GRAPH_STATE_STOP);
-        return view;
+        return graphView;
     }
 
     @Override
     public void onResume() {
         super.onResume();
         // Zero out the x axis every time graph screen is shown
-        if (!graphIsOff)
+        if (!graphIsOff) {
             selectedSensor.zeroX();
+        }
     }
 
     private void addEntry(float yValue, float xValue) {
@@ -622,42 +642,48 @@ public class GraphFragment extends Fragment {
         }
     }
 
-    public void addGraphEntry(SensorReading sensorReading, int numberDataPoints) {
+    public void addGraphEntry(final SensorReading sensorReading, final int numberDataPoints) {
 
-        if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_PAUSE ) {
-            return;
-        }
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_PAUSE ) {
+                    return;
+                }
 
-        switch(numberDataPoints)
-        {
-            case 1:
-                if (graphFragInterface.getGraphConfig().getDataPoints().get(0))
-                    addEntry(sensorReading.getGraphData().get(0), sensorReading.getSensorReadingTime());
-                break;
-            case 2:
-                if (graphFragInterface.getGraphConfig().getDataPoints().get(0) && graphFragInterface.getGraphConfig().getDataPoints().get(1))
-                    addEntry(sensorReading.getGraphData().get(0), sensorReading.getGraphData().get(1), sensorReading.getSensorReadingTime());
-                else if (graphFragInterface.getGraphConfig().getDataPoints().get(0))
-                    addEntry(sensorReading.getGraphData().get(0), sensorReading.getSensorReadingTime());
-                else if (graphFragInterface.getGraphConfig().getDataPoints().get(1))
-                    addEntry(sensorReading.getGraphData().get(1), sensorReading.getSensorReadingTime());
-                break;
-            case 3:
-                if (graphFragInterface.getGraphConfig().getDataPoints().get(0) && graphFragInterface.getGraphConfig().getDataPoints().get(1) && graphFragInterface.getGraphConfig().getDataPoints().get(2))
-                    addEntry(sensorReading.getGraphData().get(0), sensorReading.getGraphData().get(1), sensorReading.getGraphData().get(2), sensorReading.getSensorReadingTime());
-                else if (!graphFragInterface.getGraphConfig().getDataPoints().get(0) && graphFragInterface.getGraphConfig().getDataPoints().get(1) && graphFragInterface.getGraphConfig().getDataPoints().get(2))
-                    addEntry(sensorReading.getGraphData().get(1), sensorReading.getGraphData().get(2), sensorReading.getSensorReadingTime());
-                else if (graphFragInterface.getGraphConfig().getDataPoints().get(0) && !graphFragInterface.getGraphConfig().getDataPoints().get(1) && graphFragInterface.getGraphConfig().getDataPoints().get(2))
-                    addEntry(sensorReading.getGraphData().get(0), sensorReading.getGraphData().get(2), sensorReading.getSensorReadingTime());
-                else if (!graphFragInterface.getGraphConfig().getDataPoints().get(0) && !graphFragInterface.getGraphConfig().getDataPoints().get(1) && graphFragInterface.getGraphConfig().getDataPoints().get(2))
-                    addEntry(sensorReading.getGraphData().get(2), sensorReading.getSensorReadingTime());
-                else if (graphFragInterface.getGraphConfig().getDataPoints().get(0) && graphFragInterface.getGraphConfig().getDataPoints().get(1) && !graphFragInterface.getGraphConfig().getDataPoints().get(2))
-                    addEntry(sensorReading.getGraphData().get(0), sensorReading.getGraphData().get(1), sensorReading.getSensorReadingTime());
-                else if (!graphFragInterface.getGraphConfig().getDataPoints().get(0) && graphFragInterface.getGraphConfig().getDataPoints().get(1) && !graphFragInterface.getGraphConfig().getDataPoints().get(2))
-                    addEntry(sensorReading.getGraphData().get(1), sensorReading.getSensorReadingTime());
-                else if (graphFragInterface.getGraphConfig().getDataPoints().get(0) && !graphFragInterface.getGraphConfig().getDataPoints().get(1) && !graphFragInterface.getGraphConfig().getDataPoints().get(2))
-                    addEntry(sensorReading.getGraphData().get(0), sensorReading.getSensorReadingTime());
-                break;
-        }
+                switch(numberDataPoints)
+                {
+                    case 1:
+                        if (graphFragInterface.getGraphConfig().getDataPoints().get(0))
+                            addEntry(sensorReading.getGraphData().get(0), sensorReading.getSensorReadingTime());
+                        break;
+                    case 2:
+                        if (graphFragInterface.getGraphConfig().getDataPoints().get(0) && graphFragInterface.getGraphConfig().getDataPoints().get(1))
+                            addEntry(sensorReading.getGraphData().get(0), sensorReading.getGraphData().get(1), sensorReading.getSensorReadingTime());
+                        else if (graphFragInterface.getGraphConfig().getDataPoints().get(0))
+                            addEntry(sensorReading.getGraphData().get(0), sensorReading.getSensorReadingTime());
+                        else if (graphFragInterface.getGraphConfig().getDataPoints().get(1))
+                            addEntry(sensorReading.getGraphData().get(1), sensorReading.getSensorReadingTime());
+                        break;
+                    case 3:
+                        if (graphFragInterface.getGraphConfig().getDataPoints().get(0) && graphFragInterface.getGraphConfig().getDataPoints().get(1) && graphFragInterface.getGraphConfig().getDataPoints().get(2))
+                            addEntry(sensorReading.getGraphData().get(0), sensorReading.getGraphData().get(1), sensorReading.getGraphData().get(2), sensorReading.getSensorReadingTime());
+                        else if (!graphFragInterface.getGraphConfig().getDataPoints().get(0) && graphFragInterface.getGraphConfig().getDataPoints().get(1) && graphFragInterface.getGraphConfig().getDataPoints().get(2))
+                            addEntry(sensorReading.getGraphData().get(1), sensorReading.getGraphData().get(2), sensorReading.getSensorReadingTime());
+                        else if (graphFragInterface.getGraphConfig().getDataPoints().get(0) && !graphFragInterface.getGraphConfig().getDataPoints().get(1) && graphFragInterface.getGraphConfig().getDataPoints().get(2))
+                            addEntry(sensorReading.getGraphData().get(0), sensorReading.getGraphData().get(2), sensorReading.getSensorReadingTime());
+                        else if (!graphFragInterface.getGraphConfig().getDataPoints().get(0) && !graphFragInterface.getGraphConfig().getDataPoints().get(1) && graphFragInterface.getGraphConfig().getDataPoints().get(2))
+                            addEntry(sensorReading.getGraphData().get(2), sensorReading.getSensorReadingTime());
+                        else if (graphFragInterface.getGraphConfig().getDataPoints().get(0) && graphFragInterface.getGraphConfig().getDataPoints().get(1) && !graphFragInterface.getGraphConfig().getDataPoints().get(2))
+                            addEntry(sensorReading.getGraphData().get(0), sensorReading.getGraphData().get(1), sensorReading.getSensorReadingTime());
+                        else if (!graphFragInterface.getGraphConfig().getDataPoints().get(0) && graphFragInterface.getGraphConfig().getDataPoints().get(1) && !graphFragInterface.getGraphConfig().getDataPoints().get(2))
+                            addEntry(sensorReading.getGraphData().get(1), sensorReading.getSensorReadingTime());
+                        else if (graphFragInterface.getGraphConfig().getDataPoints().get(0) && !graphFragInterface.getGraphConfig().getDataPoints().get(1) && !graphFragInterface.getGraphConfig().getDataPoints().get(2))
+                            addEntry(sensorReading.getGraphData().get(0), sensorReading.getSensorReadingTime());
+                        break;
+                }
+            }
+        };
+        thread.start();
     }
 }
