@@ -62,6 +62,7 @@ public class GraphSettingsFragment extends Fragment {
     private ArrayList<Boolean> dataPoints;
     private int selectedUnitPosition1;
     private int selectedUnitPosition2;
+    ListView unitNameListView2;
     // Container Activity must implement this interface
 
     // Container Activity must implement this interface
@@ -115,23 +116,30 @@ public class GraphSettingsFragment extends Fragment {
                     return;
                 }
 
+                if (graphSettingsFragInterface.getGraphConfig().getSelectedSensor() == sensorSelected)
+                    return;
+
                 graphSettingsFragInterface.getGraphConfig().setSelectedSensor(sensorSelected);
                 reinitializeDataListView();
                 reinitializeUnit1ListView();
 
-                ListView unitNameListView2 = (ListView) view.findViewById(R.id.Unitlist2);
                 TextView unitNameTextView2 = (TextView) view.findViewById(R.id.SelectedUnitText2);
                 TextView unitNameTextView1 = (TextView) view.findViewById(R.id.SelectedUnitText1);
                 String dataName1Text = graphSettingsFragInterface.getSensor(graphSettingsFragInterface.getGraphConfig().getSelectedSensor() + 1).getSensorName() + " Units";
                 unitNameTextView1.setText(dataName1Text);
 
                 GraphSettings graphSettings = graphSettingsFragInterface.getSensor(graphSettingsFragInterface.getGraphConfig().getSelectedSensor() + 1).getGraphSettings();
+                graphSettingsFragInterface.getGraphConfig().setSelectedUnitsPosition1(0);
+                selectedUnitPosition1 = 0;
+
                 if (graphSettings.sensorHasUniqueDataSetUnits()) {
                     reinitializeUnit2ListView();
                     unitNameListView2.setVisibility(View.VISIBLE);
                     unitNameTextView2.setVisibility(View.VISIBLE);
                     String dataName2Text = dataPointNames.get(1) + " Units";
                     unitNameTextView2.setText(dataName2Text);
+                    graphSettingsFragInterface.getGraphConfig().setSelectedUnitsPosition2(0);
+                    selectedUnitPosition2 = 0;
                 }
                 else
                 {
@@ -169,7 +177,7 @@ public class GraphSettingsFragment extends Fragment {
         ListView unitNameListView1 = (ListView) view.findViewById(R.id.Unitlist1);
         unitNameListView1.setAdapter(unitList1Adapter);
 
-        ListView unitNameListView2 = (ListView) view.findViewById(R.id.Unitlist2);
+        unitNameListView2 = (ListView) view.findViewById(R.id.Unitlist2);
         TextView unitNameTextView2 = (TextView) view.findViewById(R.id.SelectedUnitText2);
         TextView unitNameTextView1 = (TextView) view.findViewById(R.id.SelectedUnitText1);
 
@@ -301,14 +309,17 @@ public class GraphSettingsFragment extends Fragment {
     private void reinitializeUnit2ListView()
     {
         GraphSettings graphSettings = graphSettingsFragInterface.getSensor(graphSettingsFragInterface.getGraphConfig().getSelectedSensor() + 1).getGraphSettings();
-        if(unitList2Adapter != null) {
+        if(unitList2Adapter == null) {
+            unitList2Adapter = new UnitList2Adapter();
+            unitNameListView2.setAdapter(unitList2Adapter);
+        }
             unitList2Adapter.removeAllItems();
             unitNames2 = graphSettings.getDataSet2Units();
             if (unitNames2.size() > 0) {
                 for (int i = 0; i < unitNames2.size(); i++)
                     unitList2Adapter.addItem(unitNames2.get(i));
             }
-        }
+
     }
 
     @Override
