@@ -51,6 +51,7 @@ public class GraphFragment extends Fragment {
         ArrayList<SavedGraphData> getSavedGraphDataList();
         GraphConfig getGraphConfig();
         Sensor getSensor(int sensorNumber);
+        SensorConfig getSensorConfig(int sensorNumber);
     }
 
     GraphFragInterface graphFragInterface;
@@ -100,10 +101,11 @@ public class GraphFragment extends Fragment {
         mChart.setBackgroundColor(Color.WHITE);
 
         selectedSensor = graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1);
+        SensorConfig selectedSensorConfig = graphFragInterface.getSensorConfig(graphFragInterface.getGraphConfig().getSelectedSensor() + 1);
         if (selectedSensor != null) {
             noSensorConnected = false;
            // Log.i(TAG, "Selected Sensor is not null");
-            if (selectedSensor.getSensorRate() == SensorConst.RATE_OFF || selectedSensor.getSensorRate() == SensorConst.RATE_INFO) {
+            if (selectedSensorConfig.getFreq() == SensorConst.RATE_OFF || selectedSensorConfig.getFreq() == SensorConst.RATE_INFO) {
                 selectedSensorIsOff = true;
             }
             else {
