@@ -90,12 +90,20 @@ public class GraphSettingsFragment extends Fragment {
         ArrayList<String> connectedSensors = new ArrayList<String>();
         if (graphSettingsFragInterface.getSensor(1) != null)
             connectedSensors.add(graphSettingsFragInterface.getSensor(1).getSensorName() + " Sensor");
+        else
+            connectedSensors.add("Sensor 1 Disconnected");
         if (graphSettingsFragInterface.getSensor(2) != null)
             connectedSensors.add(graphSettingsFragInterface.getSensor(2).getSensorName() + " Sensor");
+        else
+            connectedSensors.add("Sensor 2 Disconnected");
         if (graphSettingsFragInterface.getSensor(3) != null)
             connectedSensors.add(graphSettingsFragInterface.getSensor(3).getSensorName() + " Sensor");
+        else
+            connectedSensors.add("Sensor 3 Disconnected");
         if (graphSettingsFragInterface.getSensor(4) != null)
             connectedSensors.add(graphSettingsFragInterface.getSensor(4).getSensorName() + " Sensor");
+        else
+            connectedSensors.add("Sensor 4 Disconnected");
 
         ArrayAdapter<String> connectedSensorNames = new ArrayAdapter<String>(this.getContext(), android.R.layout.simple_spinner_item, connectedSensors);
 
