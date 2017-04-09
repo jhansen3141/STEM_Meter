@@ -90,6 +90,14 @@ public class BaseUnit {
         return  sensorList.get(sNum-1);
     }
 
+    public void resetSensors() {
+        for( Sensor sensor : sensorList) {
+            if(sensor != null) {
+                sensor = null;
+            }
+        }
+    }
+
     public class BaseUnitBattery {
 
         private float fVoltage;

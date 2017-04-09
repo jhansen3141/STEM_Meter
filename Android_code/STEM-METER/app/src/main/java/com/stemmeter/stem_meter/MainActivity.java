@@ -215,7 +215,7 @@ public class MainActivity extends AppCompatActivity
                 } else {
                     final AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setTitle("Functionality limited");
-                    builder.setMessage("Since location access has not been granted, this app will not be able to discover beacons when in the background.");
+                    builder.setMessage("Access to location is needd to store graphs.");
                     builder.setPositiveButton(android.R.string.ok, null);
                     builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
                         @Override
@@ -333,6 +333,10 @@ public class MainActivity extends AppCompatActivity
                                 Toast.makeText(getApplicationContext(), "STEM-Meter Disconnected", Toast.LENGTH_LONG).show();
                             }
                         });
+
+                        if(baseUnit != null) {
+                            baseUnit.resetSensors();
+                        }
                     }
                 }
 
