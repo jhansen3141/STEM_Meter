@@ -308,9 +308,21 @@ public abstract class DataSet<T extends Entry> extends BaseDataSet<T> {
         while (low < high) {
             int m = (low + high) / 2;
 
-            final float d1 = mValues.get(m).getX() - xValue,
-                    d2 = mValues.get(m + 1).getX() - xValue,
-                    ad1 = Math.abs(d1), ad2 = Math.abs(d2);
+           final float d1, d2;
+
+            if( (m+1) >  mValues.size()) {
+                Log.e("MainActivity","GRAPH ERROR SIZE");
+                d1 = mValues.get(m-1).getX() - xValue;
+                d2 = mValues.get(m).getX() - xValue;
+
+           }
+           else {
+                d1 = mValues.get(m).getX() - xValue;
+                d2 = mValues.get(m + 1).getX() - xValue;
+
+           }
+
+            final float ad1 = Math.abs(d1), ad2 = Math.abs(d2);
 
             if (ad2 < ad1) {
                 // [m + 1] is closer to xValue
