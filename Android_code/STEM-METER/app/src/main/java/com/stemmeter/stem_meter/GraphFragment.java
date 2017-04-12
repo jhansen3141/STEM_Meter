@@ -292,50 +292,47 @@ public class GraphFragment extends Fragment {
 
         if (!graphIsOff)
         {
-            Thread thread = new Thread() {
-                @Override
-                public void run() {
-                    ArrayList<Boolean> visibleDataSets = graphFragInterface.getGraphConfig().getDataPoints();
-                    Sensor sensor = graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1);
+            ArrayList<Boolean> visibleDataSets = graphFragInterface.getGraphConfig().getDataPoints();
+            Sensor sensor = graphFragInterface.getSensor(graphFragInterface.getGraphConfig().getSelectedSensor() + 1);
 
-                    ArrayList<String> dataSetNames = sensor.getGraphSettings().getDataPoints();
+            ArrayList<String> dataSetNames = sensor.getGraphSettings().getDataPoints();
 
-                    String dataSet1Units = selectedSensor.getGraphSettings().getDataSet1Units().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition1());
-                    String dataSet2Units = null;
+            String dataSet1Units = selectedSensor.getGraphSettings().getDataSet1Units().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition1());
+            String dataSet2Units = null;
 
-                    if (selectedSensor.getGraphSettings().sensorHasUniqueDataSetUnits())
-                        dataSet2Units = selectedSensor.getGraphSettings().getDataSet2Units().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition2());
+            if (selectedSensor.getGraphSettings().sensorHasUniqueDataSetUnits())
+                dataSet2Units = selectedSensor.getGraphSettings().getDataSet2Units().get(graphFragInterface.getGraphConfig().getSelectedUnitsPosition2());
 
-                    if (visibleDataSets.get(0) && dataSetNames.size() > 0) {
-                        dataSetName1 = dataSetNames.get(0) + "-" + dataSet1Units;
-                    }
-                    else if (visibleDataSets.get(1) && dataSetNames.size() > 1) {
-                        if (selectedSensor.getGraphSettings().sensorHasUniqueDataSetUnits()) {
-                            dataSetName1 = dataSetNames.get(1) + "-" + dataSet2Units;
-                        }
-                        else {
-                            dataSetName1 = dataSetNames.get(1) + "-" + dataSet1Units;
-                        }
-                    }
-                    else if (dataSetNames.size() > 2)
-                        dataSetName1 = dataSetNames.get(2) + "-" + dataSet1Units;
-
-                    if (visibleDataSets.get(1) && dataSetNames.size() > 1)
-                        if (selectedSensor.getGraphSettings().sensorHasUniqueDataSetUnits()) {
-                            dataSetName2 = dataSetNames.get(1) + "-" + dataSet2Units;
-                        }
-                        else
-                        {
-                            dataSetName2 = dataSetNames.get(1) + "-" + dataSet1Units;
-                        }
-                    else if (dataSetNames.size() > 2)
-                        dataSetName2 = dataSetNames.get(2) + "-" + dataSet1Units;
-
-                    if (dataSetNames.size() > 2)
-                        dataSetName3 = dataSetNames.get(2) + "-" + dataSet1Units;
+            if (visibleDataSets.get(0) && dataSetNames.size() > 0) {
+                dataSetName1 = dataSetNames.get(0) + "-" + dataSet1Units;
+            }
+            else if (visibleDataSets.get(1) && dataSetNames.size() > 1) {
+                if (selectedSensor.getGraphSettings().sensorHasUniqueDataSetUnits()) {
+                    dataSetName1 = dataSetNames.get(1) + "-" + dataSet2Units;
                 }
-            };
-            thread.start();
+                else {
+                    dataSetName1 = dataSetNames.get(1) + "-" + dataSet1Units;
+                }
+            }
+            else if (dataSetNames.size() > 2)
+                dataSetName1 = dataSetNames.get(2) + "-" + dataSet1Units;
+
+            if (visibleDataSets.get(1) && dataSetNames.size() > 1)
+                if (selectedSensor.getGraphSettings().sensorHasUniqueDataSetUnits()) {
+                    dataSetName2 = dataSetNames.get(1) + "-" + dataSet2Units;
+                }
+                else
+                {
+                    dataSetName2 = dataSetNames.get(1) + "-" + dataSet1Units;
+                }
+            else if (dataSetNames.size() > 2) {
+                dataSetName2 = dataSetNames.get(2) + "-" + dataSet1Units;
+            }
+
+            if (dataSetNames.size() > 2) {
+                dataSetName3 = dataSetNames.get(2) + "-" + dataSet1Units;
+            }
+
         }
         else {
             saveBtn.setVisibility(View.INVISIBLE);
@@ -646,13 +643,13 @@ public class GraphFragment extends Fragment {
 
     public void addGraphEntry(final SensorReading sensorReading, final int numberDataPoints) {
 
-        Thread thread = new Thread() {
+        if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_PAUSE ) {
+            return;
+        }
+        // Have to run all graph entry ops on UI thread. MPAndroid chart not thread safe
+        getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (graphFragInterface.getGraphConfig().getState() == GRAPH_STATE_PAUSE ) {
-                    return;
-                }
-
                 switch(numberDataPoints)
                 {
                     case 1:
@@ -685,7 +682,6 @@ public class GraphFragment extends Fragment {
                         break;
                 }
             }
-        };
-        thread.start();
+        });
     }
 }

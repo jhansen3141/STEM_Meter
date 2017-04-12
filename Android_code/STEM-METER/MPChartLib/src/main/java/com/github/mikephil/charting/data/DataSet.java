@@ -310,7 +310,7 @@ public abstract class DataSet<T extends Entry> extends BaseDataSet<T> {
 
            final float d1, d2;
 
-            if( (m+1) >  mValues.size()) {
+            if( (m+1) >=  mValues.size()) {
                 Log.e("MainActivity","GRAPH ERROR SIZE");
                 d1 = mValues.get(m-1).getX() - xValue;
                 d2 = mValues.get(m).getX() - xValue;
