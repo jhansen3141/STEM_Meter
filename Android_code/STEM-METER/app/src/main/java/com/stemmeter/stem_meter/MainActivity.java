@@ -231,6 +231,8 @@ public class MainActivity extends AppCompatActivity
 
     public void BoardConnect(BluetoothDevice device) {
         printConnectionStat("Connecting to STEM-Meter...");
+        // Stop scanning
+        scanLeDevice(false);
         boardDevice = device;
         mainMenu.findItem(R.id.connection_icon).setIcon(R.drawable.ble_connecting);
         mBluetoothGatt = boardDevice.connectGatt(getApplicationContext(), true, mGattCallback);
@@ -268,13 +270,11 @@ public class MainActivity extends AppCompatActivity
                     if(mConnectionState == BluetoothProfile.STATE_DISCONNECTED) {
                         printConnectionStat("Disconnected");
                     }
-                    //Log.i(TAG, "Stopped Scanning");
                 }
             }, SensorConst.SCAN_TIME_MS);
 
             mScanning = true;
             mBluetoothAdapter.startLeScan(mLeScanCallback);
-           // Log.i(TAG, "Scanning...");
 
         } else {
             mScanning = false;

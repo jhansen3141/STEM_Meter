@@ -38,7 +38,7 @@ public class GraphConfig {
         dataPoints.add(true);
         state = 0;
         this.selectedSensor = 0;
-        this.visibleDataNum = 10;
+        this.visibleDataNum = 30;
     }
 
     public int getSelectedSensor() {
