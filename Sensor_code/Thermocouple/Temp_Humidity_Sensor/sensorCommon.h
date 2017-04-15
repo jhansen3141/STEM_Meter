@@ -30,6 +30,7 @@ typedef enum sensorType {
 	LIGHT_OPT3002,
 	MAG_MAG3110,
 	TEMP_SI7021,
+	TEMP_
 }sensorType_t;
 
 #define TRUE 1

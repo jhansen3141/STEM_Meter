@@ -5,89 +5,75 @@
 #include <stdlib.h>
 #include <util/delay.h>
 #include <string.h>
+#include <stdio.h>
 #include "sensor.h"
 #include "sensorCommon.h"
-#include "i2c.h"
 #include "uart.h"
+#include "spi.h"
 
-static void Si7021_Write(uint8_t reg, uint8_t data);
-static void Si7021_Read(uint8_t address, uint8_t reg, uint8_t *data);
+#define THERM_ENABLE() PORTC &= ~(1<<4)
+#define THERM_DISABLE() PORTC |= (1<<4)
+#define DUMMY_BYTE 0
 
 void initBoard(void) {
 	DDRC |= (1<<0); // LED as output
-	DDRD &= ~(1<<2); // UART Re-send line as input
-	
-	I2CInit();
+	DDRC |= (1<<4); // Therm CS as output
+	DDRD &= ~(1<<2); // UART Re-send line as input	
 	UARTInit();
+	SPIInit();
 	OCR1A = TIMER_ONE_HZ_NUM;
 	TCCR1B = 0; // turn timer off
 	TCNT1 = 0; // reset count	
 }
 
 void initSensor(void) {
-	// reset the sensor
-	Si7021_Write(RESET_CMD,0);
 	_delay_ms(20);
 	moduleLED(OFF);
 }
 
-static void Si7021_Write(uint8_t reg, uint8_t data) {
-	I2CStart();
-	I2CWrite(SENSOR_I2C_ADDRESS);
-	I2CWrite(reg);
-	I2CWrite(data);
-	I2CStop();
-}
+void readTherm(MAX31855_Data *therm) {
 
-static void Si7021_Read(uint8_t address, uint8_t cmd, uint8_t *data) {
+	THERM_ENABLE(); // CS low
+	_delay_us(1);
+	therm->byte3 = spiRead(DUMMY_BYTE);
+	therm->byte2 = spiRead(DUMMY_BYTE);
+	therm->byte1 = spiRead(DUMMY_BYTE);
+	therm->byte0 = spiRead(DUMMY_BYTE);
+	_delay_us(1);
+	THERM_DISABLE(); //CS high
 
-	I2CStart();
-	I2CWrite((address << 1) & 0xFE);
-	I2CWrite(cmd);
-	I2CStart();
-	I2CWrite((address << 1) | 0x01);
-	_delay_us(10);
-	
-	data[0] = I2CReadACK();
+	therm->rawData = ((therm->byte3<<24) | (therm->byte2<<16) | (therm->byte1<<8) | (therm->byte0));
+	therm->fault = (therm->byte2 & 0x01);
 
-	data[1] = I2CReadNACK();
-	I2CStop();
+	int32_t temp = therm->rawData;
+	temp >>= 18;
+	temp &= 0x3FFF;
+	therm->tempC = ((float)temp * 0.25f);
 }
 
 void readSensor(sensorData_t *data) {
-	PORTC &= ~(1<<0);
-	uint8_t RDSensorData[2];
+	MAX31855_Data thermData;
+	char tempStr[5];
 	uint8_t rawData[4];
-	char tempStr[10];
-	int16_t temp, humidity;
-	float fTemp, fHumidity;
 	
+	PORTC &= ~(1<<0);
+	
+	memset(tempStr,0,5);
 	memset(data->sensorDataRaw,0,RAW_DATA_SIZE);
 	memset(data->sensorDataStr,0,STR_DATA_SIZE);
 	
-	memset(RDSensorData,0,2);
-	Si7021_Read(SENSOR_I2C_ADDRESS,MSR_HUMD_HOLD,RDSensorData);
-	humidity = ( ( (int16_t)RDSensorData[0]<<8 ) | RDSensorData[1] );
-	rawData[0] = RDSensorData[0];
-	rawData[1] = RDSensorData[1];
-
-	memset(RDSensorData,0,2);
-	Si7021_Read(SENSOR_I2C_ADDRESS,RD_TEMP_PAST_MSR,RDSensorData);
-	temp = ( ( (int16_t)RDSensorData[0]<<8 ) | RDSensorData[1] );
-	rawData[2] = RDSensorData[0];
-	rawData[3] = RDSensorData[1];
+	readTherm(&thermData);
 	
-	fHumidity = ((125.0f*(float)humidity) / 65536.0f) - 6.0f;
-	fTemp = ((175.72f*(float)temp) / 65536.0f) - 46.85f;
+	rawData[0] = thermData.byte0;
+	rawData[1] = thermData.byte1;
+	rawData[2] = thermData.byte2;
+	rawData[3] = thermData.byte3;
 	
 	// copy the raw data into the struct
 	memcpy(data->sensorDataRaw,rawData,RAW_DATA_LOCAL_SIZE);
 
-	sprintf(tempStr,"%.2f,",fTemp);
-	strcat(data->sensorDataStr,tempStr);
-	
-	sprintf(tempStr,"%.2f\n",fHumidity);
-	strcat(data->sensorDataStr,tempStr);
+	sprintf(tempStr,"%.2f\n",thermData.tempC);
+	strcpy(data->sensorDataStr,tempStr);
 	
 	PORTC |= (1<<0);
 	

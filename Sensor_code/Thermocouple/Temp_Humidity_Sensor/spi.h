@@ -10,7 +10,8 @@
 #define SPI_H_
 
 
-
+void SPIInit();
+uint8_t spiRead(uint8_t data);
 
 
 #endif /* SPI_H_ */

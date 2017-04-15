@@ -13,19 +13,19 @@
 #include "sensorCommon.h"
 
 #define SENSOR_NUMBER TEMP_SI7021
-#define NUMBER_DATA_POINTS	(2)
-#define SENSOR_STRING "Temp,Humidity"
+#define NUMBER_DATA_POINTS	(1)
+#define SENSOR_STRING "Temp"
 #define SENSOR_STR_LEN	(15)
 
-// Sensor Specific Register Addresses
-#define SENSOR_I2C_ADDRESS 0x40
-
-#define MSR_HUMD_HOLD		0xE5
-#define MSR_HUMD_NO_HOLD	0xF5
-#define MSR_TEMP_HOLD		0xE3
-#define MSR_TEMP_NO_HOLD	0xF3
-#define RD_TEMP_PAST_MSR	0xE0
-#define RESET_CMD			0xFE
+typedef struct {
+	float tempC;
+	uint32_t rawData;
+	uint32_t byte0;
+	uint32_t byte1;
+	uint32_t byte2;
+	uint32_t byte3;
+	uint8_t fault;
+}MAX31855_Data;
 
 
 void initBoard(void);
