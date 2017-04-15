@@ -211,7 +211,4 @@ public class ConnectFragment extends ListFragment {
             return convertView;
         }
     }
-
-
-
 }
